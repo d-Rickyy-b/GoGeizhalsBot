@@ -10,7 +10,7 @@ import (
 
 type Webhook struct {
 	Enabled bool   `json:"enabled"`
-	Url     string `json:"url"`
+	URL     string `json:"url"`
 	Listen  string `json:"listen"`
 }
 
