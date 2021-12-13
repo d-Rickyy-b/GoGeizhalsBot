@@ -85,7 +85,7 @@ func viewPriceagentsHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	}
 	_, err = cb.Message.EditText(b, "Welche Preisagenten möchtest du einsehen?", &gotgbot.EditMessageTextOpts{ReplyMarkup: markup})
 	if err != nil {
-		return fmt.Errorf("failed to edit start message text: %w", err)
+		return fmt.Errorf("viewPriceagents: failed to edit message text: %w", err)
 	}
 	return nil
 }
@@ -114,7 +114,7 @@ func showWishlistPriceagents(b *gotgbot.Bot, ctx *ext.Context) error {
 	}
 	_, err = cb.Message.EditText(b, "Das sind deine Preisagenten für deine Wunschlisten:", &gotgbot.EditMessageTextOpts{ReplyMarkup: markup})
 	if err != nil {
-		return fmt.Errorf("failed to edit start message text: %w", err)
+		return fmt.Errorf("showWishlist: failed to edit message text: %w", err)
 	}
 	return nil
 }
@@ -142,7 +142,7 @@ func showProductPriceagents(b *gotgbot.Bot, ctx *ext.Context) error {
 	}
 	_, err := cb.Message.EditText(b, "Das sind deine Preisagenten für deine Produkte:", &gotgbot.EditMessageTextOpts{ReplyMarkup: markup})
 	if err != nil {
-		return fmt.Errorf("failed to edit start message text: %w", err)
+		return fmt.Errorf("showProduct: failed to edit message text: %w", err)
 	}
 	return nil
 }
@@ -158,7 +158,7 @@ func newPriceagentHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 
 	_, err := cb.Message.EditText(b, "Bitte sende mir eine URL zu einem Produkt oder einer Wunschliste!", &gotgbot.EditMessageTextOpts{ReplyMarkup: gotgbot.InlineKeyboardMarkup{InlineKeyboard: [][]gotgbot.InlineKeyboardButton{}}})
 	if err != nil {
-		return fmt.Errorf("failed to edit start message text: %w", err)
+		return fmt.Errorf("newPriceagent: failed to edit message text: %w", err)
 	}
 
 	// Set user's State
@@ -184,7 +184,7 @@ func mainMenuHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 
 	_, err := cb.Message.EditText(b, "Was möchtest du tun?", &gotgbot.EditMessageTextOpts{ReplyMarkup: markup})
 	if err != nil {
-		return fmt.Errorf("failed to edit start message text: %w", err)
+		return fmt.Errorf("mainMenu: failed to edit message text: %w", err)
 	}
 	return nil
 }
@@ -213,7 +213,7 @@ func showPriceagentDetail(b *gotgbot.Bot, ctx *ext.Context) error {
 	}
 	_, err := cb.Message.EditText(b, editedText, &gotgbot.EditMessageTextOpts{ReplyMarkup: markup, ParseMode: "HTML"})
 	if err != nil {
-		return fmt.Errorf("failed to edit start message text: %w", err)
+		return fmt.Errorf("showPriceagent: failed to edit message text: %w", err)
 	}
 	return nil
 }
@@ -229,7 +229,7 @@ func deletePriceagentHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	editText := fmt.Sprintf("Preisagent für %s wurde gelöscht!", bold("Sony WF-1000XM4 schwarz"))
 	_, err := cb.Message.EditText(b, editText, &gotgbot.EditMessageTextOpts{ReplyMarkup: gotgbot.InlineKeyboardMarkup{InlineKeyboard: [][]gotgbot.InlineKeyboardButton{}}})
 	if err != nil {
-		return fmt.Errorf("failed to edit start message text: %w", err)
+		return fmt.Errorf("deletePriceagent: failed to edit message text: %w", err)
 	}
 	return nil
 }
