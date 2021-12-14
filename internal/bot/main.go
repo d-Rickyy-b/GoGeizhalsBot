@@ -173,6 +173,7 @@ func mainMenuHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	return nil
 }
 
+// showPriceagentDetail displays the menu for a single, specific price agent.
 func showPriceagentDetail(b *gotgbot.Bot, ctx *ext.Context) error {
 	cb := ctx.Update.CallbackQuery
 
@@ -210,6 +211,7 @@ func showPriceagentDetail(b *gotgbot.Bot, ctx *ext.Context) error {
 	return nil
 }
 
+// deletePriceagentHandler handles all the inline "delete" buttons for priceagents
 func deletePriceagentHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	cb := ctx.Update.CallbackQuery
 
