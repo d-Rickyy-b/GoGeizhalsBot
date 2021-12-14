@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
+	"strconv"
+	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -20,26 +22,48 @@ func IsValidURL(url string) bool {
 	return wishlistURLPattern.MatchString(url) || productURLPattern.MatchString(url)
 }
 
+// parsePrice parses a price
+func parsePrice(priceString string) float32 {
+	priceString = strings.ReplaceAll(priceString, ",", ".")
+	priceString = strings.ReplaceAll(priceString, "€ ", "")
+	price, err := strconv.ParseFloat(priceString, 32)
+	if err != nil {
+		log.Printf("Can't parse price: '%s' - %s", priceString, err)
+		return 0
+	}
+	return float32(price)
+}
+
 // DownloadEntity retrieves the metadata (name, price) for a given entity hosted on Geizhals.
 func DownloadEntity(url string) (Entity, error) {
 	matchWishlist := wishlistURLPattern.MatchString(url)
 	matchProduct := productURLPattern.MatchString(url)
 
-	var err error
-	var e Entity
-	switch {
-	case matchProduct:
-		e, err = downloadProduct(url)
-	case matchWishlist:
-		e, err = downloadWishlist(url)
-	default:
-		return Entity{}, fmt.Errorf("invalid URL")
+	// First we download the html content of the given URL
+	doc, downloadErr := downloadHTML(url)
+	if downloadErr != nil {
+		return Entity{}, downloadErr
 	}
 
-	if err != nil {
-		log.Fatal(err)
+	// Then we need to parse products/wishlists differently
+	var parseErr error
+	var entity Entity
+	switch {
+	case matchProduct:
+		entity, parseErr = parseProduct(doc)
+	case matchWishlist:
+		entity, parseErr = parseWishlist(doc)
+	default:
+		log.Printf("Invalid URL '%s'\n", url)
+		return Entity{}, fmt.Errorf("invalid URL")
 	}
-	return e, nil
+	if parseErr != nil {
+		return Entity{}, parseErr
+	}
+
+	// Eventually set the correct url
+	entity.URL = url
+	return entity, nil
 }
 
 // InitProxies initializes the proxy list.
@@ -68,66 +92,74 @@ func getNextProxy() *url.URL {
 	return proxy
 }
 
-// downloadWishlist downloads and parses the wishlist metadata for a given Geizhals wishlist URL.
-func downloadWishlist(wishlistURL string) (Entity, error) {
+func downloadHTML(entityURL string) (*goquery.Document, error) {
 	proxyURL := getNextProxy()
 	if proxyURL != nil {
 		http.DefaultTransport = &http.Transport{Proxy: http.ProxyURL(proxyURL)}
 		log.Println("Using proxy: ", proxyURL)
 	}
 
-	resp, err := http.Get(wishlistURL)
-	if err != nil {
-		log.Println(err)
-		return Entity{}, fmt.Errorf("invalid URL")
+	resp, getErr := http.Get(entityURL)
+	if getErr != nil {
+		log.Println(getErr)
+		return nil, fmt.Errorf("error while downloading content from Geizhals: %w", getErr)
 	}
 	// Cleanup when this function ends
 	defer resp.Body.Close()
-	// Read & parse response data
 
-	doc, err := goquery.NewDocumentFromReader(resp.Body)
-	if err != nil {
-		log.Fatal(err)
+	if resp.StatusCode != http.StatusOK {
+		log.Printf("Received status code %d - returning...\n", resp.StatusCode)
+		return nil, fmt.Errorf("error for http request")
 	}
 
-	// TODO: Add correct selectors for parsing data
-	// Print content of <title></title>
-	doc.Find("title").Each(func(i int, s *goquery.Selection) {
-		fmt.Printf("Title of the page: %s\n", s.Text())
-	})
+	// Read & parse response data
+	doc, err := goquery.NewDocumentFromReader(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("error while parsing body: %w", err)
+	}
 
-	wishlist := Entity{}
+	return doc, nil
+}
+
+func parseWishlist(doc *goquery.Document) (Entity, error) {
+	// Parse name from html
+	nameSelection := doc.Find("div.wishlist h1.wishlist__headline > span")
+	name := nameSelection.Text()
+	name = strings.TrimSpace(name)
+
+	// Parse price from html
+	priceSelection := doc.Find("div.wishlist_sum_area span.gh_price span.gh_price > span.gh_price")
+	priceString := priceSelection.Text()
+	price := parsePrice(priceString)
+
+	wishlist := Entity{
+		Price: price,
+		Name:  name,
+		Type:  Wishlist,
+	}
 	return wishlist, nil
 }
 
-// downloadProduct downloads and parses the product metadata for a given Geizhals product URL.
-func downloadProduct(productURL string) (Entity, error) {
-	proxyURL := getNextProxy()
-	if proxyURL != nil {
-		http.DefaultTransport = &http.Transport{Proxy: http.ProxyURL(proxyURL)}
-		log.Println("Using proxy: ", proxyURL)
+func parseProduct(doc *goquery.Document) (Entity, error) {
+	nameSelection := doc.Find("div.variant__header h1[itemprop='name']")
+	name := nameSelection.Text()
+	name = strings.TrimSpace(name)
+
+	// Parse price from html
+	priceSelection := doc.Find("div#offer__price-0 span.gh_price")
+	priceString := priceSelection.Text()
+	price := parsePrice(priceString)
+
+	product := Entity{
+		Price: price,
+		Name:  name,
+		Type:  Wishlist,
 	}
 
-	resp, err := http.Get(productURL)
-	if err != nil {
-		print(err)
-		return Entity{}, fmt.Errorf("invalid URL")
-	}
-	// Cleanup when this function ends
-	defer resp.Body.Close()
-	// Read & parse response data
-
-	doc, err := goquery.NewDocumentFromReader(resp.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// TODO: Add correct selectors for parsing data
-	// Print content of <title></title>
-	doc.Find("title").Each(func(i int, s *goquery.Selection) {
-		fmt.Printf("Title of the page: %s\n", s.Text())
-	})
-
-	product := Entity{}
 	return product, nil
+}
+
+// UpdateEntity returns an updated Entity struct from a given input Entity
+func UpdateEntity(entity Entity) (Entity, error) {
+	return DownloadEntity(entity.URL)
 }
