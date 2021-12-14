@@ -290,6 +290,7 @@ func Start() {
 	dispatcher := updater.Dispatcher
 	dispatcher.AddHandler(handlers.NewCommand("start", startHandler))
 
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m05_delete"), deletePriceagentHandler))
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_"), showPriceagentDetail))
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m03_"), showPriceagentDetail))
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal("m02_showWishlistPriceagents"), showWishlistPriceagents))
