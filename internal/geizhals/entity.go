@@ -3,7 +3,7 @@ package geizhals
 import "fmt"
 
 type Entity struct {
-	Price float64    `json:"price"`
+	Price float32    `json:"price"`
 	Name  string     `json:"name"`
 	URL   string     `json:"url"`
 	Type  EntityType `json:"type"`
