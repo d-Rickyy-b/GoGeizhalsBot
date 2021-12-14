@@ -1,13 +1,14 @@
 package bot
 
 import (
-	"GoGeizhalsBot/internal/geizhals"
 	"fmt"
 	"html"
+	"strings"
 )
 
 // createLink generates a clickable html link given a display name and a url
 func createLink(url, name string) string {
+	name = strings.TrimSpace(name)
 	return fmt.Sprintf("<a href=\"%s\">%s</a>", url, html.EscapeString(name))
 }
 
@@ -18,6 +19,7 @@ func createPrice(price float64) string {
 
 // bold encapsulates a string in a html <b> tag
 func bold(text string) string {
+	text = strings.TrimSpace(text)
 	return fmt.Sprintf("<b>%s</b>", text)
 }
 
