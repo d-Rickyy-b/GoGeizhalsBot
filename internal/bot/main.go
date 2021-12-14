@@ -100,18 +100,10 @@ func showWishlistPriceagents(b *gotgbot.Bot, ctx *ext.Context) error {
 		return fmt.Errorf("failed to answer start callback query: %w", err)
 	}
 
-	// TODO generate keyboard from subscribed entities
+	// TODO replace priceagents with actual subscribed priceagents
+	// TODO add case for zero price agents
 
-	markup := gotgbot.InlineKeyboardMarkup{
-		InlineKeyboard: [][]gotgbot.InlineKeyboardButton{{
-			{Text: "Wishlist1", CallbackData: "m04_id"},
-			{Text: "Wishlist2", CallbackData: "m04_id2"},
-		},
-			{
-				{Text: "↩️ Zurück", CallbackData: "m01_myPriceagents"},
-			},
-		},
-	}
+	markup := generateEntityKeyboard(priceagents, "m04", 2)
 	_, err = cb.Message.EditText(b, "Das sind deine Preisagenten für deine Wunschlisten:", &gotgbot.EditMessageTextOpts{ReplyMarkup: markup})
 	if err != nil {
 		return fmt.Errorf("showWishlist: failed to edit message text: %w", err)
@@ -128,18 +120,10 @@ func showProductPriceagents(b *gotgbot.Bot, ctx *ext.Context) error {
 		return fmt.Errorf("failed to answer start callback query: %w", err)
 	}
 
-	// TODO generate keyboard from subscribed entities
+	// TODO replace priceagents with actual subscribed priceagents
+	// TODO add case for zero price agents
 
-	markup := gotgbot.InlineKeyboardMarkup{
-		InlineKeyboard: [][]gotgbot.InlineKeyboardButton{{
-			{Text: "Produkt1", CallbackData: "m03_id"},
-			{Text: "Produkt2", CallbackData: "m03_id2"},
-		},
-			{
-				{Text: "↩️ Zurück", CallbackData: "m01_myPriceagents"},
-			},
-		},
-	}
+	markup := generateEntityKeyboard(priceagents, "m03", 2)
 	_, err := cb.Message.EditText(b, "Das sind deine Preisagenten für deine Produkte:", &gotgbot.EditMessageTextOpts{ReplyMarkup: markup})
 	if err != nil {
 		return fmt.Errorf("showProduct: failed to edit message text: %w", err)
@@ -203,12 +187,20 @@ func showPriceagentDetail(b *gotgbot.Bot, ctx *ext.Context) error {
 		return fmt.Errorf("failed to answer start callback query: %w", err)
 	}
 
-	linkName := createLink("https://geizhals.de/sony-wf-1000xm4-schwarz-wf1000xm4b-ce7-a2540991.html", "Sony WF-1000XM4 schwarz ")
-	editedText := fmt.Sprintf("%s kostet aktuell %s", linkName, bold(createPrice(229)))
+	// TODO get specific priceagent for user
+	priceagent := getWishlistPriceagent()
+	linkName := createLink(priceagent.Entity.URL, priceagent.Entity.Name)
+	editedText := fmt.Sprintf("%s kostet aktuell %s", linkName, bold(createPrice(priceagent.Entity.Price)))
 	markup := gotgbot.InlineKeyboardMarkup{
 		InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
-			{{Text: "⏰ Preiswecker", CallbackData: "m05_alert_123"}, {Text: "📊 Preisverlauf", CallbackData: "m05_history_123"}},
-			{{Text: "❌ Löschen", CallbackData: "m05_delete_123"}, {Text: "↩️ Zurück", CallbackData: backCallbackData}},
+			{
+				{Text: "⏰ Preiswecker", CallbackData: fmt.Sprintf("m05_alert_%s", priceagent.ID)},
+				{Text: "📊 Preisverlauf", CallbackData: fmt.Sprintf("m05_history_%s", priceagent.ID)},
+			},
+			{
+				{Text: "❌ Löschen", CallbackData: fmt.Sprintf("m05_delete_%s", priceagent.ID)},
+				{Text: "↩️ Zurück", CallbackData: backCallbackData},
+			},
 		},
 	}
 	_, err := cb.Message.EditText(b, editedText, &gotgbot.EditMessageTextOpts{ReplyMarkup: markup, ParseMode: "HTML"})
@@ -260,6 +252,7 @@ func textHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 
 // Start is the main function to start the bot.
 func Start() {
+	temp()
 	var configFile = flag.String("config", "config.json", "Path to config file")
 	flag.Parse()
 	c, _ := config.ReadConfig(*configFile)
