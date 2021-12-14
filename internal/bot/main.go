@@ -227,7 +227,7 @@ func deletePriceagentHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 
 	// TODO: Delete Priceagent from DB
 	editText := fmt.Sprintf("Preisagent für %s wurde gelöscht!", bold("Sony WF-1000XM4 schwarz"))
-	_, err := cb.Message.EditText(b, editText, &gotgbot.EditMessageTextOpts{ReplyMarkup: gotgbot.InlineKeyboardMarkup{InlineKeyboard: [][]gotgbot.InlineKeyboardButton{}}})
+	_, err := cb.Message.EditText(b, editText, &gotgbot.EditMessageTextOpts{ReplyMarkup: gotgbot.InlineKeyboardMarkup{}, ParseMode: "HTML"})
 	if err != nil {
 		return fmt.Errorf("deletePriceagent: failed to edit message text: %w", err)
 	}
