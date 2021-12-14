@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"html"
 	"strings"
+
+	"github.com/PaulSonOfLars/gotgbot/v2"
 )
 
 // createLink generates a clickable html link given a display name and a url
