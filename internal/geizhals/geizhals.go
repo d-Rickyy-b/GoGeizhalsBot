@@ -10,8 +10,9 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-var wishlistURLPattern = regexp.MustCompile(`^https?://geizhals\.(de|at|eu)/\?cat=WL-([0-9]+)$`)
-var productURLPattern = regexp.MustCompile(`^https?://geizhals\.(de|at|eu)/[0-9a-zA-Z\-]*a([0-9]+).html$`)
+var wishlistURLPattern = regexp.MustCompile(`^((?:https?://)?geizhals\.(?:de|at|eu)/\?cat=WL-([0-9]+))$`)
+var productURLPattern = regexp.MustCompile(`^((?:https?://)?geizhals\.(?:de|at|eu)/[0-9a-zA-Z\-]*a([0-9]+).html)\?.*$`)
+
 var proxies []*url.URL
 
 // IsValidURL checks if the given URL is a valid Geizhals URL.
