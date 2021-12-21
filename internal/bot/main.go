@@ -42,7 +42,6 @@ func UpdatePricesJob(updateFrequency time.Duration) {
 		}
 
 		// check for price updates
-		log.Println("Hello from update")
 		lastCheck = time.Now()
 	}
 }
@@ -262,7 +261,6 @@ func textHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 
 // Start is the main function to start the bot.
 func Start() {
-	temp()
 	var configFile = flag.String("config", "config.json", "Path to config file")
 	flag.Parse()
 	c, _ := config.ReadConfig(*configFile)
