@@ -2,6 +2,7 @@ package bot
 
 import (
 	"GoGeizhalsBot/internal/bot/models"
+	"GoGeizhalsBot/internal/bot/userstate"
 	"GoGeizhalsBot/internal/config"
 	"GoGeizhalsBot/internal/geizhals"
 	"flag"
@@ -48,6 +49,10 @@ func UpdatePricesJob(updateFrequency time.Duration) {
 
 // startHandler is a message handler for the /start command.
 func startHandler(b *gotgbot.Bot, ctx *ext.Context) error {
+	// Reset user's state to idle
+	userID := ctx.EffectiveUser.Id
+	userstate.UserStates[userID] = userstate.UserState{State: userstate.Idle}
+
 	_, err := ctx.EffectiveMessage.Reply(b, "Was möchtest du tun?", &gotgbot.SendMessageOpts{
 		ReplyMarkup: gotgbot.InlineKeyboardMarkup{
 			InlineKeyboard: [][]gotgbot.InlineKeyboardButton{{
@@ -147,6 +152,8 @@ func newPriceagentHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	}
 
 	// Set user's State
+	userID := ctx.EffectiveUser.Id
+	userstate.UserStates[userID] = userstate.UserState{State: userstate.CreatePriceagent}
 
 	return nil
 }
