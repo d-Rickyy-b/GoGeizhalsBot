@@ -75,13 +75,10 @@ func viewPriceagentsHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 		return fmt.Errorf("failed to answer start callback query: %w", err)
 	}
 
-	// TODO generate keyboard from subscribed entities
-	// Du hast noch keinen Preisagenten angelegt!
-
 	markup := gotgbot.InlineKeyboardMarkup{
 		InlineKeyboard: [][]gotgbot.InlineKeyboardButton{{
-			{Text: "Wunschlisten", CallbackData: "m02_showWishlistPriceagents"},
-			{Text: "Produkte", CallbackData: "m02_showProductPriceagents"},
+			{Text: "📋 Wunschlisten", CallbackData: "m02_WishlistPriceagents"},
+			{Text: "📦 Produkte", CallbackData: "m02_ProductPriceagents"},
 		},
 			{
 				{Text: "↩️ Zurück", CallbackData: "m00_start"},
