@@ -27,7 +27,7 @@ func bold(text string) string {
 }
 
 // generateEntityKeyboard generates a gotgbot keyboard from a given list of entities
-func generateEntityKeyboard(priceagents []PriceAgent, menuID string, numColumns int) gotgbot.InlineKeyboardMarkup {
+func generateEntityKeyboard(priceagents []models.PriceAgent, menuID string, numColumns int) gotgbot.InlineKeyboardMarkup {
 	var keyboard [][]gotgbot.InlineKeyboardButton
 
 	var row []gotgbot.InlineKeyboardButton //nolint:prealloc
@@ -47,8 +47,18 @@ func generateEntityKeyboard(priceagents []PriceAgent, menuID string, numColumns 
 		keyboard = append(keyboard, row)
 	}
 
-	// Add back button at the bottom row
-	keyboard = append(keyboard, []gotgbot.InlineKeyboardButton{{Text: "↩️ Zurück", CallbackData: "m01_myPriceagents"}})
+	if len(priceagents) == 0 {
+		keyboard = [][]gotgbot.InlineKeyboardButton{
+			{
+				{Text: "🆕 Neuer Preisagent", CallbackData: "m01_newPriceagent"},
+				{Text: "↩️ Zurück", CallbackData: "m01_myPriceagents"},
+			},
+		}
+	} else {
+		// Add back button at the bottom row
+		keyboard = append(keyboard, []gotgbot.InlineKeyboardButton{{Text: "↩️ Zurück", CallbackData: "m01_myPriceagents"}})
+	}
+
 	markup := gotgbot.InlineKeyboardMarkup{InlineKeyboard: keyboard}
 	return markup
 }
