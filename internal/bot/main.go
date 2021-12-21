@@ -1,6 +1,7 @@
 package bot
 
 import (
+	"GoGeizhalsBot/internal/bot/models"
 	"GoGeizhalsBot/internal/config"
 	"GoGeizhalsBot/internal/geizhals"
 	"flag"

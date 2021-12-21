@@ -1,4 +1,4 @@
-package bot
+package models
 
 import "GoGeizhalsBot/internal/geizhals"
 
