@@ -153,7 +153,7 @@ func parseProduct(doc *goquery.Document) (Entity, error) {
 	product := Entity{
 		Price: price,
 		Name:  name,
-		Type:  Wishlist,
+		Type:  Product,
 	}
 
 	return product, nil
