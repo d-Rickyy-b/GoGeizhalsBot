@@ -23,15 +23,15 @@ func IsValidURL(url string) bool {
 }
 
 // parsePrice parses a price
-func parsePrice(priceString string) float32 {
+func parsePrice(priceString string) float64 {
 	priceString = strings.ReplaceAll(priceString, ",", ".")
 	priceString = strings.ReplaceAll(priceString, "€ ", "")
-	price, err := strconv.ParseFloat(priceString, 32)
+	price, err := strconv.ParseFloat(priceString, 64)
 	if err != nil {
 		log.Printf("Can't parse price: '%s' - %s", priceString, err)
 		return 0
 	}
-	return float32(price)
+	return price
 }
 
 // DownloadEntity retrieves the metadata (name, price) for a given entity hosted on Geizhals.

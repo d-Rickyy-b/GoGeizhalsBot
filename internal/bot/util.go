@@ -16,7 +16,7 @@ func createLink(url, name string) string {
 }
 
 // createPrice formats a given float to a formatted pricetag string
-func createPrice(price float32) string {
+func createPrice(price float64) string {
 	return fmt.Sprintf("%.2f €", price)
 }
 
@@ -35,7 +35,7 @@ func generateEntityKeyboard(priceagents []models.PriceAgent, menuID string, numC
 	for _, priceagent := range priceagents {
 		row = append(row, gotgbot.InlineKeyboardButton{
 			Text:         priceagent.Name,
-			CallbackData: fmt.Sprintf("%s_%s", menuID, priceagent.ID),
+			CallbackData: fmt.Sprintf("%s_%d", menuID, priceagent.ID),
 		})
 		colCounter++
 		if colCounter%numColumns == 0 {
