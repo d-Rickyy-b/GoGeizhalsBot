@@ -4,6 +4,7 @@ import (
 	"GoGeizhalsBot/internal/bot/models"
 	"fmt"
 	"html"
+	"strconv"
 	"strings"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
@@ -61,4 +62,18 @@ func generateEntityKeyboard(priceagents []models.PriceAgent, menuID string, numC
 
 	markup := gotgbot.InlineKeyboardMarkup{InlineKeyboard: keyboard}
 	return markup
+}
+
+func parseIDFromCallbackData(callbackData string, prefix string) (int64, error) {
+	priceagentIDString := strings.TrimPrefix(callbackData, prefix)
+	results := strings.Split(priceagentIDString, "_")
+
+	// get last element from results
+	priceagentIDString = results[len(results)-1]
+
+	priceagentID, parseErr := strconv.Atoi(priceagentIDString)
+	if parseErr != nil {
+		return 0, parseErr
+	}
+	return int64(priceagentID), nil
 }
