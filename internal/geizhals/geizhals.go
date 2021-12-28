@@ -38,6 +38,9 @@ func parsePrice(priceString string) float64 {
 func DownloadEntity(url string) (Entity, error) {
 	matchWishlist := wishlistURLPattern.MatchString(url)
 	matchProduct := productURLPattern.MatchString(url)
+	if !matchWishlist && !matchProduct {
+		return Entity{}, fmt.Errorf("invalid URL: %s", url)
+	}
 
 	// First we download the html content of the given URL
 	doc, downloadErr := downloadHTML(url)
