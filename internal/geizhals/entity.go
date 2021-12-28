@@ -17,6 +17,6 @@ func (e Entity) String() string {
 type EntityType int
 
 const (
-	Product  EntityType = 0
-	Wishlist EntityType = 1
+	Product  EntityType = 1
+	Wishlist EntityType = 2
 )
