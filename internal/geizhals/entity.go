@@ -1,13 +1,18 @@
 package geizhals
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 type Entity struct {
-	Price float32    `json:"price"`
-	Name  string     `json:"name"`
-	URL   string     `json:"url"`
-	Type  EntityType `json:"type"`
-	html  []byte
+	ID        int64 `json:"id"`
+	ChangedAt time.Time
+	Price     float64    `json:"price"`
+	Name      string     `json:"name"`
+	URL       string     `json:"url"`
+	Type      EntityType `json:"type"`
+	html      []byte
 }
 
 func (e Entity) String() string {
