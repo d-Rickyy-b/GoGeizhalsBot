@@ -46,12 +46,18 @@ func DownloadEntity(url string) (Entity, error) {
 	}
 
 	// Then we need to parse products/wishlists differently
-	var parseErr error
-	var entity Entity
+	var (
+		parseErr error
+		entity   Entity
+		matches  [][]string
+	)
+
 	switch {
 	case matchProduct:
+		matches = productURLPattern.FindAllStringSubmatch(url, -1)
 		entity, parseErr = parseProduct(doc)
 	case matchWishlist:
+		matches = wishlistURLPattern.FindAllStringSubmatch(url, -1)
 		entity, parseErr = parseWishlist(doc)
 	default:
 		log.Printf("Invalid URL '%s'\n", url)
@@ -61,8 +67,15 @@ func DownloadEntity(url string) (Entity, error) {
 		return Entity{}, parseErr
 	}
 
+	entityIDString := matches[0][2]
+	entityID, err := strconv.Atoi(entityIDString)
+	if err != nil {
+		return Entity{}, fmt.Errorf("couldn't parse entity ID: %s", entityIDString)
+	}
+
 	// Eventually set the correct url
 	entity.URL = url
+	entity.ID = int64(entityID)
 	return entity, nil
 }
 
