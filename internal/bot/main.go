@@ -464,6 +464,7 @@ func Start() {
 		log.Fatalln("Something wrong:", createBotErr)
 	}
 
+	// TODO support webhook (updater.StartWebhook()) depending on config
 	updater := ext.NewUpdater(&ext.UpdaterOpts{
 		ErrorLog: nil,
 		DispatcherOpts: ext.DispatcherOpts{
