@@ -84,6 +84,7 @@ func DownloadEntity(url string) (Entity, error) {
 
 // InitProxies initializes the proxy list.
 func InitProxies(p []string) {
+	// TODO scramble proxies
 	for _, proxy := range p {
 		parsedProxy, parseErr := url.Parse(proxy)
 		if parseErr != nil {
@@ -109,6 +110,7 @@ func getNextProxy() *url.URL {
 }
 
 func downloadHTML(entityURL string) (*goquery.Document, error) {
+	// TODO try (at max.) three different proxies if there's a connection error
 	proxyURL := getNextProxy()
 	if proxyURL != nil {
 		http.DefaultTransport = &http.Transport{Proxy: http.ProxyURL(proxyURL)}
@@ -137,6 +139,7 @@ func downloadHTML(entityURL string) (*goquery.Document, error) {
 	return doc, nil
 }
 
+// parseWishlist parses the geizhals wishlist page and returns an Entity struct.
 func parseWishlist(doc *goquery.Document) (Entity, error) {
 	// Parse name from html
 	nameSelection := doc.Find("div.wishlist h1.wishlist__headline > span")
@@ -156,7 +159,9 @@ func parseWishlist(doc *goquery.Document) (Entity, error) {
 	return wishlist, nil
 }
 
+// parseProduct parses the geizhals product page and returns an Entity struct.
 func parseProduct(doc *goquery.Document) (Entity, error) {
+	// parse name from html
 	nameSelection := doc.Find("div.variant__header h1[itemprop='name']")
 	name := nameSelection.Text()
 	name = strings.TrimSpace(name)
