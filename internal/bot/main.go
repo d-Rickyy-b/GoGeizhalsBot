@@ -4,12 +4,12 @@ import (
 	"GoGeizhalsBot/internal/bot/models"
 	"GoGeizhalsBot/internal/bot/userstate"
 	"GoGeizhalsBot/internal/config"
+	"GoGeizhalsBot/internal/database"
 	"GoGeizhalsBot/internal/geizhals"
 	"flag"
 	"fmt"
 	"log"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers/filters/message"
@@ -208,11 +208,17 @@ func showProductPriceagents(b *gotgbot.Bot, ctx *ext.Context) error {
 		return fmt.Errorf("showProductPriceagents: failed to answer callback query: %w", err)
 	}
 
-	// TODO replace priceagents with actual subscribed priceagents
-	// TODO add case for zero price agents
+	productPriceagents, _ := database.GetProductPriceagentsForUser(ctx.EffectiveUser.Id)
 
-	markup := generateEntityKeyboard(priceagents, "m03", 2)
-	_, err := cb.Message.EditText(b, "Das sind deine Preisagenten für deine Produkte:", &gotgbot.EditMessageTextOpts{ReplyMarkup: markup})
+	var messageText string
+	if len(productPriceagents) == 0 {
+		messageText = "Du hast noch keine Preisagenten für Produkte angelegt!"
+	} else {
+		messageText = "Das sind deine Preisagenten für deine Produkte:"
+	}
+
+	markup := generateEntityKeyboard(productPriceagents, "m03_00_", 2)
+	_, err := cb.Message.EditText(b, messageText, &gotgbot.EditMessageTextOpts{ReplyMarkup: markup})
 	if err != nil {
 		return fmt.Errorf("showProduct: failed to edit message text: %w", err)
 	}
@@ -269,6 +275,16 @@ func mainMenuHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 func showPriceagentDetail(b *gotgbot.Bot, ctx *ext.Context) error {
 	cb := ctx.Update.CallbackQuery
 
+	priceagentID, parseErr := parseIDFromCallbackData(cb.Data, "m03_00_")
+	if parseErr != nil {
+		return fmt.Errorf("showPriceagentDetail: failed to parse priceagentID from callback data: %w", parseErr)
+	}
+
+	priceagent, dbErr := database.GetPriceagentForUserByID(ctx.EffectiveUser.Id, priceagentID)
+	if dbErr != nil {
+		return fmt.Errorf("showPriceagentDetail: failed to get priceagent from database: %w", dbErr)
+	}
+
 	var backCallbackData string
 	switch {
 	case priceagent.Entity.Type == geizhals.Wishlist:
@@ -283,7 +299,6 @@ func showPriceagentDetail(b *gotgbot.Bot, ctx *ext.Context) error {
 		return fmt.Errorf("showPriceagentDetail: failed to answer callback query: %w", err)
 	}
 
-	priceagent := getWishlistPriceagent()
 	linkName := createLink(priceagent.Entity.URL, priceagent.Entity.Name)
 	editedText := fmt.Sprintf("%s kostet aktuell %s", linkName, bold(createPrice(priceagent.Entity.Price)))
 	markup := gotgbot.InlineKeyboardMarkup{
