@@ -102,8 +102,14 @@ func showWishlistPriceagents(b *gotgbot.Bot, ctx *ext.Context) error {
 		return fmt.Errorf("failed to answer start callback query: %w", err)
 	}
 
-	// TODO replace priceagents with actual subscribed priceagents
-	// TODO add case for zero price agents
+	priceagents, _ := database.GetWishlistPriceagentsForUser(ctx.EffectiveUser.Id)
+
+	var messageText string
+	if len(priceagents) == 0 {
+		messageText = "Du hast noch keine Preisagenten für Wunschlisten angelegt!"
+	} else {
+		messageText = "Das sind deine Preisagenten für deine Wunschlisten:"
+	}
 
 	markup := generateEntityKeyboard(priceagents, "m03_00_", 2)
 	_, err = cb.Message.EditText(b, messageText, &gotgbot.EditMessageTextOpts{ReplyMarkup: markup})
