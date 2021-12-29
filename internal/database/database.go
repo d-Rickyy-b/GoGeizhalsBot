@@ -5,106 +5,187 @@ import (
 	"GoGeizhalsBot/internal/geizhals"
 	"fmt"
 	"log"
+
+	"gorm.io/gorm/logger"
+
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
-var globalPriceagents = make(map[int64][]models.PriceAgent)
+var db *gorm.DB
 
-func CreatePriceAgentForUser(priceAgent models.PriceAgent, userID int64) {
-	log.Println("Add priceagent!")
-	if priceagents, ok := globalPriceagents[userID]; ok {
-		globalPriceagents[userID] = append(priceagents, priceAgent)
-		return
+func InitDB() {
+	var err error
+	db, err = gorm.Open(sqlite.Open("test.db"), &gorm.Config{Logger: logger.Default.LogMode(logger.Silent)})
+	if err != nil {
+		panic("failed to connect database")
 	}
-	globalPriceagents[userID] = []models.PriceAgent{priceAgent}
+	db.Raw("PRAGMA foreign_keys = ON;")
+
+	// Migrate the schema
+	migrateError := db.AutoMigrate(&models.User{}, &models.NotificationSettings{}, &models.PriceAgent{},
+		&geizhals.Entity{}, &models.HistoricPrice{})
+	if migrateError != nil {
+		panic("failed to migrate database")
+	}
+
+	log.Println("All fine")
 }
 
-func DeletePriceAgentForUser(priceAgent models.PriceAgent, userID int64) {
+func CreatePriceAgentForUser(priceAgent *models.PriceAgent) error {
+	log.Println("Add priceagent to database!")
+
+	if priceAgent.UserID == 0 {
+		return fmt.Errorf("UserID mustn't be 0")
+	}
+
+	tx := db.Create(priceAgent)
+	if tx.Error != nil {
+		log.Println(tx.Error)
+		return tx.Error
+	}
+	return nil
+}
+
+func CreateUser(user models.User) error {
+	tx := db.Create(&user)
+	return tx.Error
+}
+
+func DeletePriceAgentForUser(priceAgent models.PriceAgent) error {
 	log.Println("Delete priceagent!")
-	if priceagents, ok := globalPriceagents[userID]; ok {
-		for i, priceagent := range priceagents {
-			if priceagent.ID == priceAgent.ID {
-				globalPriceagents[userID] = append(priceagents[:i], priceagents[i+1:]...)
-				return
-			}
-		}
-	}
-}
 
-func ReplacePriceAgentForUser(priceAgent models.PriceAgent, userID int64) {
-	log.Println("Replace priceagent!")
-	if priceagents, ok := globalPriceagents[userID]; ok {
-		for i, priceagent := range priceagents {
-			if priceagent.ID == priceAgent.ID {
-				priceagents[i] = priceAgent
-				globalPriceagents[userID] = priceagents
-				return
-			}
-		}
+	if priceAgent.UserID == 0 {
+		return fmt.Errorf("UserID mustn't be 0")
 	}
-}
 
-func GetPriceAgentsForUser(userID int64) ([]models.PriceAgent, error) {
-	if priceagents, ok := globalPriceagents[userID]; ok {
-		return priceagents, nil
+	// First remove notification settings, then delete priceagent
+	// TODO this should be done in a transaction
+	tx := db.Model(&models.NotificationSettings{}).Delete(priceAgent.NotificationSettings)
+	if tx.Error != nil {
+		log.Println(tx.Error)
+		return tx.Error
 	}
-	return []models.PriceAgent{}, fmt.Errorf("no priceagents found for user")
+
+	tx = db.Delete(&priceAgent)
+	if tx.Error != nil {
+		log.Println(tx.Error)
+		return tx.Error
+	}
+	return nil
 }
 
 func GetProductPriceagentsForUser(userID int64) ([]models.PriceAgent, error) {
-	pa, err := GetPriceAgentsForUser(userID)
-	if err != nil {
-		log.Println(err)
-		return []models.PriceAgent{}, err
+	var priceagents []models.PriceAgent
+	var query = &models.PriceAgent{UserID: userID}
+
+	// tx := db.Debug().Joins("JOIN entities on price_agents.entity_id = entities.id").Where(query).Where("entities.type = 1").Find(&priceagents)
+	// tx := db.Debug().Model(&models.PriceAgent{}).Where(query).Joins("JOIN entities on price_agents.entity_id = entities.id").Where(&geizhals.Entity{Type: geizhals.Product}).Find(&priceagents)
+	tx := db.Joins("JOIN entities on price_agents.entity_id = entities.id").Where(query).Where("entities.type = ?", geizhals.Product).Find(&priceagents)
+	if tx.Error != nil {
+		log.Println(tx.Error)
+		return []models.PriceAgent{}, tx.Error
 	}
 
-	var productPriceagents []models.PriceAgent
-	for _, pa := range pa {
-		if pa.Entity.Type == geizhals.Product {
-			productPriceagents = append(productPriceagents, pa)
-		}
-	}
-	return productPriceagents, nil
+	return priceagents, nil
 }
 
 func GetWishlistPriceagentsForUser(userID int64) ([]models.PriceAgent, error) {
-	pa, err := GetPriceAgentsForUser(userID)
-	if err != nil {
-		log.Println(err)
-		return []models.PriceAgent{}, err
+	var priceagents []models.PriceAgent
+
+	var query = &models.PriceAgent{UserID: userID}
+	tx := db.Joins("JOIN entities on price_agents.entity_id = entities.id").Where(query).Where("entities.type = ?", geizhals.Wishlist).Find(&priceagents)
+	if tx.Error != nil {
+		log.Println(tx.Error)
+		return []models.PriceAgent{}, tx.Error
 	}
 
-	var wishlistPriceagents []models.PriceAgent
-	for _, pa := range pa {
-		if pa.Entity.Type == geizhals.Wishlist {
-			wishlistPriceagents = append(wishlistPriceagents, pa)
-		}
-	}
-	return wishlistPriceagents, nil
+	return priceagents, nil
 }
 
-func GetPriceagentForUserByID(userID int64, priceagentID string) (models.PriceAgent, error) {
-	priceagents, err := GetPriceAgentsForUser(userID)
-	if err != nil {
-		log.Println(err)
-		return models.PriceAgent{}, err
+func GetPriceagentForUserByID(userID int64, priceagentID int64) (models.PriceAgent, error) {
+	var priceagent models.PriceAgent
+	tx := db.Preload("Entity").Preload("NotificationSettings").Where("user_id = ?", userID).Where("id = ?", priceagentID).First(&priceagent)
+	if tx.Error != nil {
+		log.Println(tx.Error)
+		return models.PriceAgent{}, tx.Error
 	}
-
-	for _, pa := range priceagents {
-		if pa.ID == priceagentID {
-			return pa, nil
-		}
-	}
-	return models.PriceAgent{}, fmt.Errorf("no priceagent found for user")
+	return priceagent, nil
 }
 
-func UpdateNotificationSettings(userID int64, priceagentID string, notifSettings models.NotificationSettings) error {
-	priceagent, err := GetPriceagentForUserByID(userID, priceagentID)
-	if err != nil {
-		log.Println(err)
-		return err
+func UpdateNotificationSettings(userID int64, priceagentID int64, notifSettings models.NotificationSettings) error {
+	var priceagent models.PriceAgent
+	tx := db.Preload("NotificationSettings").Where("user_id = ?", userID).Where("id = ?", priceagentID).First(&priceagent)
+	if tx.Error != nil {
+		log.Println(tx.Error)
+		return tx.Error
 	}
 
-	priceagent.NotificationSettings = notifSettings
-	ReplacePriceAgentForUser(priceagent, userID)
+	var notifSettingsMap = map[string]interface{}{
+		"notify_always":     notifSettings.NotifyAlways,
+		"notify_above":      notifSettings.NotifyAbove,
+		"notify_below":      notifSettings.NotifyBelow,
+		"notify_price_rise": notifSettings.NotifyPriceRise,
+		"notify_price_drop": notifSettings.NotifyPriceDrop,
+		"above_price":       notifSettings.AbovePrice,
+		"below_price":       notifSettings.BelowPrice,
+	}
+	notifSettings.ID = priceagent.NotificationSettings.ID
+	tx = db.Model(&models.NotificationSettings{}).Where("id = ?", notifSettings.ID).Updates(notifSettingsMap)
+	if tx.Error != nil {
+		log.Println(tx.Error)
+		return tx.Error
+	}
+	return nil
+}
+
+func GetAllEntities() ([]geizhals.Entity, error) {
+	var entities []geizhals.Entity
+	tx := db.Find(&entities)
+	if tx.Error != nil {
+		log.Println(tx.Error)
+		return []geizhals.Entity{}, tx.Error
+	}
+	return entities, nil
+}
+
+// GetPriceAgentsForEntity returns all priceagents for a given entity
+func GetPriceAgentsForEntity(entityID int64) ([]models.PriceAgent, error) {
+	var priceagents []models.PriceAgent
+	tx := db.Preload("Entity").Preload("User").Preload("NotificationSettings").Where("entity_id = ?", entityID).Find(&priceagents)
+	if tx.Error != nil {
+		log.Println(tx.Error)
+		return []models.PriceAgent{}, tx.Error
+	}
+	return priceagents, nil
+}
+
+func UpdateEntity(entity geizhals.Entity) {
+	tx := db.Model(&geizhals.Entity{}).Where("id = ?", entity.ID).Updates(entity)
+	if tx.Error != nil {
+		log.Println(tx.Error)
+		return
+	}
+}
+
+func AddHistoricPrice(price models.HistoricPrice) error {
+	// Only add price if the last price is different
+	var lastHistoricPrice models.HistoricPrice
+	lookupTx := db.Model(&models.HistoricPrice{}).Where("entity_id = ?", price.EntityID).Order("created_at desc").First(&lastHistoricPrice)
+	if lookupTx.Error != nil {
+		log.Println(lookupTx.Error)
+		return lookupTx.Error
+	}
+	if lastHistoricPrice.Price == price.Price {
+		log.Println("Price is the same as last price, not adding")
+		return nil
+	}
+
+	// If prices differ, add it to the database
+	tx := db.Create(&price)
+	if tx.Error != nil {
+		log.Println(tx.Error)
+		return tx.Error
+	}
 	return nil
 }
