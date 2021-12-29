@@ -20,3 +20,6 @@
 # Bot config files
 config.json
 proxies.txt
+
+# Local sqlite database files
+*.db
