@@ -475,7 +475,7 @@ func Start() {
 	if err != nil {
 		panic("failed to start polling: " + err.Error())
 	}
-	fmt.Printf("%s has been started...\n", b.User.Username)
+	fmt.Printf("Bot has been started as @%s...\n", bot.User.Username)
 
 	updater.Idle()
 }
