@@ -205,7 +205,7 @@ func showProductPriceagents(b *gotgbot.Bot, ctx *ext.Context) error {
 	cb := ctx.Update.CallbackQuery
 
 	if _, err := cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{}); err != nil {
-		return fmt.Errorf("failed to answer start callback query: %w", err)
+		return fmt.Errorf("showProductPriceagents: failed to answer callback query: %w", err)
 	}
 
 	// TODO replace priceagents with actual subscribed priceagents
@@ -227,6 +227,8 @@ func newPriceagentHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	if _, err := cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{}); err != nil {
 		return fmt.Errorf("failed to answer start callback query: %w", err)
 	}
+
+	// TODO check if user has capacities for a new priceagent
 
 	_, err := cb.Message.EditText(b, "Bitte sende mir eine URL zu einem Produkt oder einer Wunschliste!", &gotgbot.EditMessageTextOpts{ReplyMarkup: gotgbot.InlineKeyboardMarkup{InlineKeyboard: [][]gotgbot.InlineKeyboardButton{}}})
 	if err != nil {
@@ -278,10 +280,9 @@ func showPriceagentDetail(b *gotgbot.Bot, ctx *ext.Context) error {
 	}
 
 	if _, err := cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{}); err != nil {
-		return fmt.Errorf("failed to answer start callback query: %w", err)
+		return fmt.Errorf("showPriceagentDetail: failed to answer callback query: %w", err)
 	}
 
-	// TODO get specific priceagent for user
 	priceagent := getWishlistPriceagent()
 	linkName := createLink(priceagent.Entity.URL, priceagent.Entity.Name)
 	editedText := fmt.Sprintf("%s kostet aktuell %s", linkName, bold(createPrice(priceagent.Entity.Price)))
