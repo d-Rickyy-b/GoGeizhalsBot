@@ -22,14 +22,14 @@ import (
 
 // UpdatePricesJob is a job that updates prices of all price agents at a given interval.
 func UpdatePricesJob(updateFrequency time.Duration) {
+	// Initialize lastCheck time to now-2*updateFrequency to ensure that the first update is done immediately.
+	lastCheck := time.Now().Add(-2 * updateFrequency)
+
 	// Align method execution at certain intervals - e.g. every 5 minutes at :05, :10, :15, etc. similar to cron.
 	delta := time.Now().Unix() % int64(updateFrequency.Seconds())
 	initialDelay := updateFrequency - (time.Second * time.Duration(delta))
-	log.Println("Sleeping for:", initialDelay)
+	log.Println("Initial Delay:", initialDelay)
 	time.Sleep(initialDelay)
-
-	// Store lastCheck time
-	lastCheck := time.Now()
 
 	for {
 		// calculate difference between now and lastCheck,
