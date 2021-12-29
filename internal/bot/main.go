@@ -218,6 +218,55 @@ func showPriceagentDetail(b *gotgbot.Bot, ctx *ext.Context) error {
 	return nil
 }
 
+// changePriceagentSettingsHandler handles the callbacks for the buttons to change the notification
+// settings of a price agent.
+func changePriceagentSettingsHandler(b *gotgbot.Bot, ctx *ext.Context) error {
+	cb := ctx.Update.CallbackQuery
+
+	priceagentID, parseErr := parseIDFromCallbackData(cb.Data, "m04_00_")
+	if parseErr != nil {
+		return fmt.Errorf("changePriceagentSettingsHandler: failed to parse priceagentID from callback data: %w", parseErr)
+	}
+
+	priceagent, dbErr := database.GetPriceagentForUserByID(ctx.EffectiveUser.Id, priceagentID)
+	if dbErr != nil {
+		return fmt.Errorf("setNotifPriceagentHandler: failed to get priceagent from database: %w", dbErr)
+	}
+
+	if _, err := cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{}); err != nil {
+		return fmt.Errorf("changePriceagentSettingsHandler: failed to answer callback query: %w", err)
+	}
+
+	var currentSetting string
+	switch {
+	case priceagent.NotificationSettings.NotifyBelow:
+		currentSetting = bold(fmt.Sprintf("Unter %.2f €", priceagent.NotificationSettings.BelowPrice))
+	case priceagent.NotificationSettings.NotifyAlways:
+		currentSetting = bold("Immer")
+	default:
+		currentSetting = bold("Unbekannt")
+	}
+
+	linkName := createLink(priceagent.Entity.URL, priceagent.Entity.Name)
+	editedText := fmt.Sprintf("Wann möchtest du für %s alarmiert werden?\nAktuelle Einstellung: %s\n\nAktueller Preis: %s", linkName, currentSetting, bold(createPrice(priceagent.Entity.Price)))
+	markup := gotgbot.InlineKeyboardMarkup{
+		InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
+			{
+				{Text: "📉 Unter x€", CallbackData: fmt.Sprintf("m04_02_%d", priceagent.ID)},
+				{Text: "🔔 Immer", CallbackData: fmt.Sprintf("m04_01_%d", priceagent.ID)},
+			},
+			{
+				{Text: "↩️ Zurück", CallbackData: fmt.Sprintf("m03_00_%d", priceagent.ID)},
+			},
+		},
+	}
+	_, err := cb.Message.EditText(b, editedText, &gotgbot.EditMessageTextOpts{ReplyMarkup: markup, ParseMode: "HTML"})
+	if err != nil {
+		return fmt.Errorf("showPriceagent: failed to edit message text: %w", err)
+	}
+	return nil
+}
+
 // deletePriceagentHandler handles all the inline "delete" buttons for priceagents
 func deletePriceagentHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	cb := ctx.Update.CallbackQuery
