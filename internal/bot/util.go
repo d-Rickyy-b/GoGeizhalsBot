@@ -51,13 +51,13 @@ func generateEntityKeyboard(priceagents []models.PriceAgent, menuID string, numC
 	if len(priceagents) == 0 {
 		keyboard = [][]gotgbot.InlineKeyboardButton{
 			{
-				{Text: "🆕 Neuer Preisagent", CallbackData: "m01_newPriceagent"},
-				{Text: "↩️ Zurück", CallbackData: "m01_myPriceagents"},
+				{Text: "🆕 Neuer Preisagent", CallbackData: "m01_00"},
+				{Text: "↩️ Zurück", CallbackData: "m01_01"},
 			},
 		}
 	} else {
 		// Add back button at the bottom row
-		keyboard = append(keyboard, []gotgbot.InlineKeyboardButton{{Text: "↩️ Zurück", CallbackData: "m01_myPriceagents"}})
+		keyboard = append(keyboard, []gotgbot.InlineKeyboardButton{{Text: "↩️ Zurück", CallbackData: "m01_01"}})
 	}
 
 	markup := gotgbot.InlineKeyboardMarkup{InlineKeyboard: keyboard}
