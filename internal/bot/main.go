@@ -20,6 +20,85 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers/filters/callbackquery"
 )
 
+var bot *gotgbot.Bot
+
+// updateEntityPrices fetches the current price of all entities and updates the database
+func updateEntityPrices() {
+	allEntities, fetchEntitiesErr := database.GetAllEntities()
+	if fetchEntitiesErr != nil {
+		log.Println("Error fetching entites:", fetchEntitiesErr)
+		return
+	}
+
+	// Iterate over all price agents.
+	// For each price agent, update prices and store updated prices in the entity in the database.
+	// Also update price history with the new prices.
+	for _, entity := range allEntities {
+		log.Println("Updating prices for:", entity.Name)
+
+		// If there are two price agents with the same entity, we currently fetch it twice
+		updatedEntity, updateErr := geizhals.UpdateEntity(entity)
+		if updateErr != nil {
+			log.Println("Error updating entity:", updateErr)
+			continue
+		}
+
+		if updatedEntity.Price == entity.Price {
+			log.Println("Entity price has not changed, skipping update")
+			continue
+		}
+
+		entityPrice := models.HistoricPrice{
+			Price:    updatedEntity.Price,
+			EntityID: updatedEntity.ID,
+			Entity:   updatedEntity,
+		}
+
+		database.AddHistoricPrice(entityPrice)
+		database.UpdateEntity(updatedEntity)
+
+		// TODO notify users
+		// fetch all priceagents for this entity
+		priceAgents, fetchPriceAgentsErr := database.GetPriceAgentsForEntity(updatedEntity.ID)
+		if fetchPriceAgentsErr != nil {
+			log.Println("Error fetching price agents for entity:", fetchPriceAgentsErr)
+			continue
+		}
+
+		for _, priceAgent := range priceAgents {
+			notifyUsers(priceAgent, entity, updatedEntity)
+		}
+	}
+}
+
+// notifyUsers sends a notification to the users of the price agent if the settings allow it
+func notifyUsers(priceAgent models.PriceAgent, oldEntity, updatedEntity geizhals.Entity) {
+	settings := priceAgent.NotificationSettings
+	user := priceAgent.User
+	var notificationText string
+	if settings.NotifyAlways {
+		notificationText = "Hi, gibt ein Update!"
+	} else if settings.NotifyBelow && updatedEntity.Price < settings.BelowPrice {
+		notificationText = "Hi, preis unter Grenze!"
+	} else if settings.NotifyAbove && updatedEntity.Price > settings.AbovePrice {
+		notificationText = "Hi, preis über Grenze!"
+	} else if settings.NotifyPriceDrop && updatedEntity.Price < oldEntity.Price {
+		notificationText = "Hi, preis gefallen!"
+	} else if settings.NotifyPriceRise && updatedEntity.Price > oldEntity.Price {
+		notificationText = "Hi, preis gestiegen!"
+	} else {
+		log.Println("No notification settings for price agent")
+		return
+	}
+
+	// TODO implement message queueing to avoid hitting telegram api limits (30 msgs/sec)
+	_, sendErr := bot.SendMessage(user.ID, notificationText, &gotgbot.SendMessageOpts{})
+	if sendErr != nil {
+		log.Println("Error sending message:", sendErr)
+		return
+	}
+}
+
 // UpdatePricesJob is a job that updates prices of all price agents at a given interval.
 func UpdatePricesJob(updateFrequency time.Duration) {
 	// Initialize lastCheck time to now-2*updateFrequency to ensure that the first update is done immediately.
@@ -42,6 +121,7 @@ func UpdatePricesJob(updateFrequency time.Duration) {
 		}
 
 		// check for price updates
+		updateEntityPrices()
 		lastCheck = time.Now()
 	}
 }
@@ -344,14 +424,15 @@ func Start() {
 	flag.Parse()
 	c, _ := config.ReadConfig(*configFile)
 
-	b, err := gotgbot.NewBot(c.Token, &gotgbot.BotOpts{
+	var createBotErr error
+	bot, createBotErr = gotgbot.NewBot(c.Token, &gotgbot.BotOpts{
 		Client:      http.Client{},
 		GetTimeout:  gotgbot.DefaultGetTimeout,
 		PostTimeout: gotgbot.DefaultPostTimeout,
 	})
-	if err != nil {
+	if createBotErr != nil {
 		log.Println(c)
-		log.Fatalln("Something wrong:", err)
+		log.Fatalln("Something wrong:", createBotErr)
 	}
 
 	updater := ext.NewUpdater(&ext.UpdaterOpts{
@@ -389,7 +470,8 @@ func Start() {
 
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.All, fallbackCallbackHandler))
 
-	err = updater.StartPolling(b, &ext.PollingOpts{DropPendingUpdates: false})
+	// Store users if not already in database
+	err := updater.StartPolling(bot, &ext.PollingOpts{DropPendingUpdates: false})
 	if err != nil {
 		panic("failed to start polling: " + err.Error())
 	}
