@@ -405,14 +405,22 @@ func fallbackCallbackHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	return nil
 }
 
-// textHandler handles all the text messages. It checks if the message contains a valid URL and if so, it creates a new pricehandler
-func textHandler(b *gotgbot.Bot, ctx *ext.Context) error {
-	log.Printf("User sent '%s'\n", ctx.EffectiveMessage.Text)
-
-	// Check if text is a link to geizhals
-	if !geizhals.IsValidURL(ctx.EffectiveMessage.Text) {
-		log.Println("Message is not a valid geizhals URL!")
+func newUserHandler(_ *gotgbot.Bot, ctx *ext.Context) error {
+	// Create user in databse if they don't exist already
+	if !ctx.EffectiveSender.IsUser() {
+		return nil
 	}
+
+	user := models.User{
+		ID:        ctx.EffectiveSender.User.Id,
+		Username:  ctx.EffectiveSender.User.Username,
+		FirstName: ctx.EffectiveSender.User.FirstName,
+		LastName:  ctx.EffectiveSender.User.LastName,
+		LangCode:  ctx.EffectiveSender.User.LanguageCode,
+	}
+	database.CreateUserWithCache(user)
+	return nil
+}
 
 	// Parse link and request price
 	return nil
@@ -471,6 +479,9 @@ func Start() {
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.All, fallbackCallbackHandler))
 
 	// Store users if not already in database
+	dispatcher.AddHandlerToGroup(handlers.NewCallback(callbackquery.All, newUserHandler), -1)
+	dispatcher.AddHandlerToGroup(handlers.NewMessage(message.Text, newUserHandler), -1)
+
 	err := updater.StartPolling(bot, &ext.PollingOpts{DropPendingUpdates: false})
 	if err != nil {
 		panic("failed to start polling: " + err.Error())
