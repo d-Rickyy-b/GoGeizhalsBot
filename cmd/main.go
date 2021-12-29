@@ -9,6 +9,7 @@ import (
 )
 
 func main() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	go bot.UpdatePricesJob(time.Minute * 2)
 
 	proxies := config.LoadProxies("proxies.txt")
