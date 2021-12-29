@@ -275,9 +275,33 @@ func deletePriceagentHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 		return fmt.Errorf("failed to answer start callback query: %w", err)
 	}
 
-	// TODO: Delete Priceagent from DB
-	editText := fmt.Sprintf("Preisagent für %s wurde gelöscht!", bold("Sony WF-1000XM4 schwarz"))
-	_, err := cb.Message.EditText(b, editText, &gotgbot.EditMessageTextOpts{ReplyMarkup: gotgbot.InlineKeyboardMarkup{}, ParseMode: "HTML"})
+	// Get Priceagent from DB
+	priceagentID, parseErr := parseIDFromCallbackData(cb.Data, "m04_99_")
+	if parseErr != nil {
+		return fmt.Errorf("deletePriceagentHandler: failed to parse priceagentID from callback data: %w", parseErr)
+	}
+
+	priceagent, dbErr := database.GetPriceagentForUserByID(ctx.EffectiveUser.Id, priceagentID)
+	if dbErr != nil {
+		ctx.EffectiveMessage.Reply(b, "Der Preisagent existiert nicht mehr, vielleicht wurde er schon gelöscht?", &gotgbot.SendMessageOpts{})
+		return fmt.Errorf("deletePriceagentHandler: failed to get priceagent from database: %w", dbErr)
+	}
+
+	deleteErr := database.DeletePriceAgentForUser(priceagent)
+	if deleteErr != nil {
+		ctx.EffectiveMessage.Reply(b, "Der Preisagent konnte nicht gelöscht werden!", &gotgbot.SendMessageOpts{})
+		return fmt.Errorf("deletePriceagentHandler: failed to delete priceagent from database: %w", deleteErr)
+	}
+
+	editText := fmt.Sprintf("Preisagent für %s wurde gelöscht!", bold(priceagent.Entity.Name))
+	undoKeyboardMarkup := gotgbot.InlineKeyboardMarkup{
+		InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
+			{
+				{Text: "↩️ Rückgängig", CallbackData: fmt.Sprintf("m04_98_%d", priceagentID)},
+			},
+		},
+	}
+	_, err := cb.Message.EditText(b, editText, &gotgbot.EditMessageTextOpts{ReplyMarkup: undoKeyboardMarkup, ParseMode: "HTML"})
 	if err != nil {
 		return fmt.Errorf("deletePriceagent: failed to edit message text: %w", err)
 	}
