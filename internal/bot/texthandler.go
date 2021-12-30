@@ -67,7 +67,7 @@ func textChangeNotificationSettingsHandler(b *gotgbot.Bot, ctx *ext.Context) err
 
 	markup := gotgbot.InlineKeyboardMarkup{InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
 		{
-			{Text: "Zum Preisalarm!", CallbackData: fmt.Sprintf("m03_00_%d", state.Priceagent.ID)},
+			{Text: "Zum Preisagenten!", CallbackData: fmt.Sprintf("m03_00_%d", state.Priceagent.ID)},
 		},
 	}}
 	b.SendMessage(ctx.EffectiveChat.Id, "Preisagent wurde bearbeitet!", &gotgbot.SendMessageOpts{ReplyMarkup: markup})
