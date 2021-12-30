@@ -61,7 +61,7 @@ func textChangeNotificationSettingsHandler(b *gotgbot.Bot, ctx *ext.Context) err
 	dbErr := database.UpdateNotificationSettings(userID, state.Priceagent.ID, newNotifSettings)
 	if dbErr != nil {
 		log.Printf("UpdateNotificationSettings: %s\n", dbErr)
-		ctx.EffectiveMessage.Reply(b, "Es ist ein Fehler aufgetreten!", &gotgbot.SendMessageOpts{})
+		ctx.EffectiveMessage.Reply(b, "Es ist ein Fehler beim Speichern der Einstellungen aufgetreten!", &gotgbot.SendMessageOpts{})
 		return dbErr
 	}
 
