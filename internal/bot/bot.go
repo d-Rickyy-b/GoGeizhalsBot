@@ -87,7 +87,7 @@ func notifyUsers(priceAgent models.PriceAgent, oldEntity, updatedEntity geizhals
 	} else if settings.NotifyPriceRise && updatedEntity.Price > oldEntity.Price {
 		notificationText = "Hi, preis gestiegen!"
 	} else {
-		log.Println("No notification settings for price agent")
+		log.Println("Price changes don't match the notification settings for user")
 		return
 	}
 
