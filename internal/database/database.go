@@ -18,7 +18,7 @@ func InitDB() {
 	var err error
 	db, err = gorm.Open(sqlite.Open("test.db"), &gorm.Config{Logger: logger.Default.LogMode(logger.Silent)})
 	if err != nil {
-		panic("failed to connect database")
+		panic(fmt.Errorf("failed to connect database: %w", err))
 	}
 	db.Raw("PRAGMA foreign_keys = ON;")
 
