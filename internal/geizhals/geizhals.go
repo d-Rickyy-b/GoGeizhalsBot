@@ -112,12 +112,13 @@ func getNextProxy() *url.URL {
 func downloadHTML(entityURL string) (*goquery.Document, error) {
 	// TODO try (at max.) three different proxies if there's a connection error
 	proxyURL := getNextProxy()
+	httpClient := &http.Client{}
 	if proxyURL != nil {
-		http.DefaultTransport = &http.Transport{Proxy: http.ProxyURL(proxyURL)}
+		httpClient.Transport = &http.Transport{Proxy: http.ProxyURL(proxyURL)}
 		log.Println("Using proxy: ", proxyURL)
 	}
 
-	resp, getErr := http.Get(entityURL)
+	resp, getErr := httpClient.Get(entityURL)
 	if getErr != nil {
 		log.Println(getErr)
 		return nil, fmt.Errorf("error while downloading content from Geizhals: %w", getErr)
