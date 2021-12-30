@@ -173,8 +173,8 @@ func AddHistoricPrice(price models.HistoricPrice) error {
 	var lastHistoricPrice models.HistoricPrice
 	lookupTx := db.Model(&models.HistoricPrice{}).Where("entity_id = ?", price.EntityID).Order("created_at desc").First(&lastHistoricPrice)
 	if lookupTx.Error != nil {
+		// For the first time, there is no entry in the database, so First will return an error
 		log.Println(lookupTx.Error)
-		return lookupTx.Error
 	}
 	if lastHistoricPrice.Price == price.Price {
 		log.Println("Price is the same as last price, not adding")
