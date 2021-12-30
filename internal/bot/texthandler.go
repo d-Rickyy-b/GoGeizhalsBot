@@ -44,11 +44,17 @@ func textHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 // textChangeNotificationSettingsHandler handles the text message when the user wants to change the notification settings of a price agent
 func textChangeNotificationSettingsHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	userID := ctx.EffectiveUser.Id
+	var outOfRangePostfix string
+
 	price, parseErr := parsePrice(ctx.EffectiveMessage.Text)
 	if parseErr != nil {
 		log.Printf("parsePrice: %s\n", parseErr)
-		ctx.EffectiveMessage.Reply(b, "Bitte sende mir einen Preis in der Form: '3,99' oder '3.99'!", &gotgbot.SendMessageOpts{})
-		return nil
+		if errors.Is(parseErr, ErrOutOfRange) {
+			outOfRangePostfix = fmt.Sprintf("Der Preis liegt außerhalb des gültigen Bereichs und wurde daher auf %.2f € gesetzt.", price)
+		} else {
+			ctx.EffectiveMessage.Reply(b, "Bitte sende mir einen Preis in der Form: '3,99' oder '3.99'!", &gotgbot.SendMessageOpts{})
+			return nil
+		}
 	}
 
 	newNotifSettings := models.NotificationSettings{
@@ -70,7 +76,9 @@ func textChangeNotificationSettingsHandler(b *gotgbot.Bot, ctx *ext.Context) err
 			{Text: "Zum Preisagenten!", CallbackData: fmt.Sprintf("m03_00_%d", state.Priceagent.ID)},
 		},
 	}}
-	b.SendMessage(ctx.EffectiveChat.Id, "Preisagent wurde bearbeitet!", &gotgbot.SendMessageOpts{ReplyMarkup: markup})
+
+	messageText := fmt.Sprintf("Preisagent wurde bearbeitet! %s", outOfRangePostfix)
+	b.SendMessage(ctx.EffectiveChat.Id, messageText, &gotgbot.SendMessageOpts{ReplyMarkup: markup})
 	return nil
 }
 

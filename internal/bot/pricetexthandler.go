@@ -1,11 +1,14 @@
 package bot
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
 )
+
+var ErrOutOfRange = errors.New("price is out of range")
 
 // parsePrice tries to parse a price as float from a given string.
 func parsePrice(messageText string) (float64, error) {
@@ -22,5 +25,14 @@ func parsePrice(messageText string) (float64, error) {
 		return 0, fmt.Errorf("could not parse price from message text: %s", messageText)
 	}
 
+	// check if price is in range
+	var upperBound = 1000000.00
+	var lowerBound = 0.01
+
+	if price < lowerBound {
+		return lowerBound, ErrOutOfRange
+	} else if price > upperBound {
+		return upperBound, ErrOutOfRange
+	}
 	return price, nil
 }
