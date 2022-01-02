@@ -34,3 +34,16 @@ type NotificationSettings struct {
 	AbovePrice      float64 `json:"abovePrice"`
 	BelowPrice      float64 `json:"belowPrice"`
 }
+
+func (ns NotificationSettings) String() string {
+	var humanReadableSettings string
+	switch {
+	case ns.NotifyBelow:
+		humanReadableSettings = fmt.Sprintf("Unter %.2f €", ns.BelowPrice)
+	case ns.NotifyAlways:
+		humanReadableSettings = "Immer"
+	default:
+		humanReadableSettings = "Unbekannt"
+	}
+	return humanReadableSettings
+}
