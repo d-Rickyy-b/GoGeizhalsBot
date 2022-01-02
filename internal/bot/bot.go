@@ -85,10 +85,12 @@ func notifyUsers(priceAgent models.PriceAgent, oldEntity, updatedEntity geizhals
 	}
 
 	var notificationText string
+	entityLink := createLink(updatedEntity.URL, updatedEntity.Name)
+	entityPrice := bold(createPrice(updatedEntity.Price))
 	if settings.NotifyAlways {
-		notificationText = fmt.Sprintf("Der Preis von %s hat sich geändert: %s\n\n%s", createLink(updatedEntity.URL, updatedEntity.Name), bold(createPrice(updatedEntity.Price)), change)
+		notificationText = fmt.Sprintf("Der Preis von %s hat sich geändert: %s\n\n%s", entityLink, entityPrice, change)
 	} else if settings.NotifyBelow && updatedEntity.Price < settings.BelowPrice {
-		notificationText = fmt.Sprintf("Der Preis von %s hat sich geändert: %s\n\n%s", createLink(updatedEntity.URL, updatedEntity.Name), bold(createPrice(updatedEntity.Price)), change)
+		notificationText = fmt.Sprintf("Der Preis von %s hat sich geändert: %s\n\n%s", entityLink, entityPrice, change)
 	} else if settings.NotifyAbove && updatedEntity.Price > settings.AbovePrice {
 		notificationText = "Hi, preis über Grenze!"
 	} else if settings.NotifyPriceDrop && updatedEntity.Price < oldEntity.Price {
