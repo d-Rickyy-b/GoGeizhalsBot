@@ -26,7 +26,11 @@ func textHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	)
 
 	if state, ok = userstate.UserStates[userID]; !ok {
-		return fmt.Errorf("user %d not found in userstates", userID)
+		state = userstate.UserState{
+			State:      userstate.Idle,
+			Priceagent: models.PriceAgent{},
+		}
+		userstate.UserStates[userID] = state
 	}
 	ctx.Data["state"] = state
 
