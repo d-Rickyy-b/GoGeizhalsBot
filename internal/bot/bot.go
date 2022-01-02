@@ -239,14 +239,21 @@ func showProductPriceagents(b *gotgbot.Bot, ctx *ext.Context) error {
 // newPriceagentHandler is a callback handler for the m01_00 callback.
 func newPriceagentHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	log.Println("newPriceagentHandler")
+	var maxNumberOfPriceagents int64 = 10
 	cb := ctx.Update.CallbackQuery
 
 	if _, err := cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{}); err != nil {
 		return fmt.Errorf("failed to answer start callback query: %w", err)
 	}
 
-	// TODO check if user has capacities for a new priceagent
-
+	// check if user has capacities for a new priceagent
+	if database.GetPriceAgentCountForUser(ctx.EffectiveUser.Id) >= maxNumberOfPriceagents {
+		_, err := cb.Message.EditText(b, "Du hast bereits 10 Preisagenten angelegt. Bitte lösche einen Preisagenten, bevor du einen neuen anlegst.", &gotgbot.EditMessageTextOpts{})
+		if err != nil {
+			return fmt.Errorf("newPriceagentHandler: failed to edit message text: %w", err)
+		}
+		return nil
+	}
 	_, err := cb.Message.EditText(b, "Bitte sende mir eine URL zu einem Produkt oder einer Wunschliste!", &gotgbot.EditMessageTextOpts{ReplyMarkup: gotgbot.InlineKeyboardMarkup{InlineKeyboard: [][]gotgbot.InlineKeyboardButton{}}})
 	if err != nil {
 		return fmt.Errorf("newPriceagent: failed to edit message text: %w", err)

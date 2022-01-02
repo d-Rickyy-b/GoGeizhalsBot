@@ -47,6 +47,12 @@ func CreatePriceAgentForUser(priceAgent *models.PriceAgent) error {
 	return nil
 }
 
+func GetPriceAgentCountForUser(userID int64) int64 {
+	var count int64
+	db.Model(&models.PriceAgent{}).Where("user_id = ?", userID).Count(&count)
+	return count
+}
+
 func CreateUser(user models.User) error {
 	tx := db.Create(&user)
 	return tx.Error
