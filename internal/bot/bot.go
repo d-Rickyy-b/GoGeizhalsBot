@@ -357,18 +357,8 @@ func changePriceagentSettingsHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 		return fmt.Errorf("changePriceagentSettingsHandler: failed to answer callback query: %w", err)
 	}
 
-	var currentSetting string
-	switch {
-	case priceagent.NotificationSettings.NotifyBelow:
-		currentSetting = bold(fmt.Sprintf("Unter %.2f €", priceagent.NotificationSettings.BelowPrice))
-	case priceagent.NotificationSettings.NotifyAlways:
-		currentSetting = bold("Immer")
-	default:
-		currentSetting = bold("Unbekannt")
-	}
-
 	linkName := createLink(priceagent.Entity.URL, priceagent.Entity.Name)
-	editedText := fmt.Sprintf("Wann möchtest du für %s alarmiert werden?\nAktuelle Einstellung: %s\n\nAktueller Preis: %s", linkName, currentSetting, bold(createPrice(priceagent.Entity.Price)))
+	editedText := fmt.Sprintf("Wann möchtest du für %s alarmiert werden?\nAktuelle Einstellung: %s\n\nAktueller Preis: %s", linkName, bold(priceagent.NotificationSettings.String()), bold(createPrice(priceagent.Entity.Price)))
 	markup := gotgbot.InlineKeyboardMarkup{
 		InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
 			{
