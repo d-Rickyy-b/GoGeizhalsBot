@@ -455,6 +455,38 @@ func cbqNotImplementedHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	return nil
 }
 
+// addMessageHandlers adds all the message handlers to the dispatcher. This tells our bot how to handle updates.
+func addMessageHandlers(dispatcher *ext.Dispatcher) {
+	// Text commands
+	dispatcher.AddHandler(handlers.NewCommand("start", startHandler))
+	dispatcher.AddHandler(handlers.NewCommand("version", versionHandler))
+
+	// Callback Queries (inline keyboards)
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_10_"), cbqNotImplementedHandler)) // priceHistory
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_98_"), cbqNotImplementedHandler)) // undo delete
+
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_99_"), deletePriceagentHandler))
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_02_"), setNotificationBelowHandler))
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_01_"), setNotificationAlwaysHandler))
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_00_"), changePriceagentSettingsHandler))
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m03_00_"), showPriceagentDetail))
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal("m02_00"), showWishlistPriceagents))
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal("m02_01"), showProductPriceagents))
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal("m01_01"), viewPriceagentsHandler))
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal("m01_00"), newPriceagentHandler))
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal("m00_00"), mainMenuHandler))
+
+	// Fallback handler for callback queries
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.All, fallbackCallbackHandler))
+
+	// Any kind of text
+	dispatcher.AddHandler(handlers.NewMessage(message.Text, textHandler))
+
+	// Store users if not already in database
+	dispatcher.AddHandlerToGroup(handlers.NewCallback(callbackquery.All, newUserHandler), -1)
+	dispatcher.AddHandlerToGroup(handlers.NewMessage(message.Text, newUserHandler), -1)
+}
+
 // Start is the main function to start the bot.
 func Start() {
 	var configFile = flag.String("config", "config.json", "Path to config file")
@@ -487,30 +519,8 @@ func Start() {
 	})
 
 	dispatcher := updater.Dispatcher
-	dispatcher.AddHandler(handlers.NewCommand("start", startHandler))
-	dispatcher.AddHandler(handlers.NewCommand("version", versionHandler))
+	addMessageHandlers(dispatcher)
 
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_10_"), cbqNotImplementedHandler)) // priceHistory
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_98_"), cbqNotImplementedHandler)) // undo delete
-
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_99_"), deletePriceagentHandler))
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_02_"), setNotificationBelowHandler))
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_01_"), setNotificationAlwaysHandler))
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_00_"), changePriceagentSettingsHandler))
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m03_00_"), showPriceagentDetail))
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal("m02_00"), showWishlistPriceagents))
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal("m02_01"), showProductPriceagents))
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal("m01_01"), viewPriceagentsHandler))
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal("m01_00"), newPriceagentHandler))
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal("m00_00"), mainMenuHandler))
-
-	dispatcher.AddHandler(handlers.NewMessage(message.Text, textHandler))
-
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.All, fallbackCallbackHandler))
-
-	// Store users if not already in database
-	dispatcher.AddHandlerToGroup(handlers.NewCallback(callbackquery.All, newUserHandler), -1)
-	dispatcher.AddHandlerToGroup(handlers.NewMessage(message.Text, newUserHandler), -1)
 
 	err := updater.StartPolling(bot, &ext.PollingOpts{DropPendingUpdates: false})
 	if err != nil {
