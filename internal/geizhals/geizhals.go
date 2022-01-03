@@ -15,8 +15,6 @@ import (
 var wishlistURLPattern = regexp.MustCompile(`^((?:https?://)?geizhals\.(?:de|at|eu)/\?cat=WL-(\d+))$`)
 var productURLPattern = regexp.MustCompile(`^((?:https?://)?geizhals\.(?:de|at|eu)/[0-9a-zA-Z\-]*a(\d+).html)\??.*$`)
 
-var proxies []*url.URL
-
 // IsValidURL checks if the given URL is a valid Geizhals URL.
 func IsValidURL(url string) bool {
 	return wishlistURLPattern.MatchString(url) || productURLPattern.MatchString(url)
@@ -82,31 +80,11 @@ func DownloadEntity(url string) (Entity, error) {
 	return entity, nil
 }
 
-// InitProxies initializes the proxy list.
-func InitProxies(p []string) {
-	// TODO scramble proxies
-	for _, proxy := range p {
-		parsedProxy, parseErr := url.Parse(proxy)
-		if parseErr != nil {
-			log.Println("Can't parse proxy!", parseErr)
 			continue
 		}
-		proxies = append(proxies, parsedProxy)
 	}
-}
-
-// getNextProxy returns the next proxy from the list. Proxies are cycled so that
-// a maximum time between first and second use of the same proxy passes.
-func getNextProxy() *url.URL {
-	if len(proxies) == 0 {
-		return nil
 	}
 
-	// Get next proxy, dequeue and enqueue again for round-robin
-	proxy := proxies[0]
-	proxies = proxies[1:]
-	proxies = append(proxies, proxy)
-	return proxy
 }
 
 func downloadHTML(entityURL string) (*goquery.Document, error) {
