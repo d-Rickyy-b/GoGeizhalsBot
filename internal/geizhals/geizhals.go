@@ -20,7 +20,7 @@ func IsValidURL(url string) bool {
 	return wishlistURLPattern.MatchString(url) || productURLPattern.MatchString(url)
 }
 
-// parsePrice parses a price
+// parsePrice parses a price from a given string, returns 0 if no price could be found.
 func parsePrice(priceString string) float64 {
 	priceString = strings.ReplaceAll(priceString, ",", ".")
 	priceString = strings.ReplaceAll(priceString, "€ ", "")
