@@ -6,7 +6,6 @@ import (
 	"GoGeizhalsBot/internal/config"
 	"GoGeizhalsBot/internal/database"
 	"GoGeizhalsBot/internal/geizhals"
-	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -488,19 +487,15 @@ func addMessageHandlers(dispatcher *ext.Dispatcher) {
 }
 
 // Start is the main function to start the bot.
-func Start() {
-	var configFile = flag.String("config", "config.json", "Path to config file")
-	flag.Parse()
-	c, _ := config.ReadConfig(*configFile)
-
+func Start(botConfig config.Config) {
 	var createBotErr error
-	bot, createBotErr = gotgbot.NewBot(c.Token, &gotgbot.BotOpts{
+	bot, createBotErr = gotgbot.NewBot(botConfig.BotToken, &gotgbot.BotOpts{
 		Client:      http.Client{},
 		GetTimeout:  gotgbot.DefaultGetTimeout,
 		PostTimeout: gotgbot.DefaultPostTimeout,
 	})
 	if createBotErr != nil {
-		log.Println(c)
+		log.Println(botConfig)
 		log.Fatalln("Something wrong:", createBotErr)
 	}
 
@@ -518,10 +513,8 @@ func Start() {
 		},
 	})
 
-	dispatcher := updater.Dispatcher
-	addMessageHandlers(dispatcher)
-
-
+	addMessageHandlers(updater.Dispatcher)
+	log.Println("Start polling...")
 	err := updater.StartPolling(bot, &ext.PollingOpts{DropPendingUpdates: false})
 	if err != nil {
 		panic("failed to start polling: " + err.Error())

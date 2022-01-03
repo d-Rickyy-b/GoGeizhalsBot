@@ -19,6 +19,7 @@
 
 # Bot config files
 config.json
+config.yml
 proxies.txt
 
 # Local sqlite database files
