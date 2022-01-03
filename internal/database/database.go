@@ -155,6 +155,20 @@ func GetAllEntities() ([]geizhals.Entity, error) {
 	return entities, nil
 }
 
+// HasUserPriceAgentForEntity checks if a user already has a priceagent for a given entity
+func HasUserPriceAgentForEntity(userID int64, entityID int64) (bool, error) {
+	var priceagent models.PriceAgent
+	var query = &models.PriceAgent{UserID: userID, EntityID: entityID}
+	tx := db.Where(query).Limit(1).Find(&priceagent)
+	exists := tx.RowsAffected > 0
+	if tx.Error != nil {
+		log.Println(tx.Error)
+		return exists, tx.Error
+	}
+
+	return exists, nil
+}
+
 // GetPriceAgentsForEntity returns all priceagents for a given entity
 func GetPriceAgentsForEntity(entityID int64) ([]models.PriceAgent, error) {
 	var priceagents []models.PriceAgent
