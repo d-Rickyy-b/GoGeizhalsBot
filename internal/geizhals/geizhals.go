@@ -49,16 +49,28 @@ func DownloadEntity(url string) (Entity, error) {
 	var statusCode int
 	var downloadErr error
 
+	// execute function downloadHTML() maximum 3 times to avoid 429 Too Many Requests
+	for retries := 0; retries < 3; retries++ {
+		// First we download the html content of the given URL
+		doc, statusCode, downloadErr = downloadHTML(url)
+		if downloadErr == nil {
+			break
+		}
 
+		if statusCode == http.StatusTooManyRequests {
+			log.Println("Too many requests, trying again!")
 			continue
 		}
+		return Entity{}, downloadErr
 	}
+	if downloadErr != nil {
+		return Entity{}, downloadErr
 	}
 
 	return parseEntity(url, entityType, doc)
 }
 
-func downloadHTML(entityURL string) (*goquery.Document, error) {
+func downloadHTML(entityURL string) (*goquery.Document, int, error) {
 	// TODO try (at max.) three different proxies if there's a connection error
 	proxyURL := getNextProxy()
 	httpClient := &http.Client{}
@@ -70,20 +82,25 @@ func downloadHTML(entityURL string) (*goquery.Document, error) {
 	resp, getErr := httpClient.Get(entityURL)
 	if getErr != nil {
 		log.Println(getErr)
-		return nil, fmt.Errorf("error while downloading content from Geizhals: %w", getErr)
+		return nil, resp.StatusCode, fmt.Errorf("error while downloading content from Geizhals: %w", getErr)
 	}
 	// Cleanup when this function ends
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		log.Printf("Received status code %d - returning...\n", resp.StatusCode)
-		return nil, fmt.Errorf("error for http request")
+		return nil, resp.StatusCode, fmt.Errorf("error for http request")
 	}
 
 	// Read & parse response data
 	doc, err := goquery.NewDocumentFromReader(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("error while parsing body: %w", err)
+		return nil, resp.StatusCode, fmt.Errorf("error while parsing body: %w", err)
+	}
+
+	return doc, resp.StatusCode, nil
+}
+
 // parseEntity calls either parseWishlist or parseProduct depending on the entityType.
 func parseEntity(url string, entityType EntityType, doc *goquery.Document) (Entity, error) {
 	// Then we need to parse products/wishlists differently
