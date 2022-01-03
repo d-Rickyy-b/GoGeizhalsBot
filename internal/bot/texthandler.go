@@ -9,8 +9,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/mattn/go-sqlite3"
-
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
 )
@@ -97,6 +95,19 @@ func textNewPriceagentHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 		return nil
 	}
 
+	// Check if the user already has a priceagent for this entity
+	hasPriceAgent, checkErr := database.HasUserPriceAgentForEntity(ctx.EffectiveUser.Id, entity.ID)
+	if checkErr != nil {
+		log.Printf("textNewPriceagentHandler: %s\n", checkErr)
+		ctx.EffectiveMessage.Reply(b, "Es ist ein Fehler aufgetreten! Bitte probiere es später erneut!", &gotgbot.SendMessageOpts{})
+		return checkErr
+	}
+
+	if hasPriceAgent {
+		ctx.EffectiveMessage.Reply(b, "Du hast bereits einen Preisagenten für dieses Produkt! Sende mir eine andere URL oder nutze /start, um zurück ins Menü zu gelangen.", &gotgbot.SendMessageOpts{})
+		return nil
+	}
+
 	newPriceagent := models.PriceAgent{
 		//ID:     entity.ID,
 		Name:   entity.Name,
@@ -109,12 +120,6 @@ func textNewPriceagentHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 
 	createErr := database.CreatePriceAgentForUser(&newPriceagent)
 	if createErr != nil {
-		// TODO check if user already has price agent for this entity
-		if errors.Is(createErr, sqlite3.ErrConstraintUnique) {
-			log.Printf("Priceagent already exists: %s\n", createErr)
-			ctx.EffectiveMessage.Reply(b, "Ein Preisagent für diese/s Produkt/Wunschliste existiert bereits!", &gotgbot.SendMessageOpts{})
-			return createErr
-		}
 		log.Printf("CreatePriceAgentForUser: %s\n", createErr)
 		ctx.EffectiveMessage.Reply(b, "Es ist ein Fehler aufgetreten!", &gotgbot.SendMessageOpts{})
 		return createErr
