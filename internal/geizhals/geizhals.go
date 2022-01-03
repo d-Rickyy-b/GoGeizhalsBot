@@ -34,57 +34,28 @@ func parsePrice(priceString string) float64 {
 
 // DownloadEntity retrieves the metadata (name, price) for a given entity hosted on Geizhals.
 func DownloadEntity(url string) (Entity, error) {
-	matchWishlist := wishlistURLPattern.MatchString(url)
-	matchProduct := productURLPattern.MatchString(url)
-	if !matchWishlist && !matchProduct {
+	var entityType EntityType
+
+	switch {
+	case wishlistURLPattern.MatchString(url):
+		entityType = Wishlist
+	case productURLPattern.MatchString(url):
+		entityType = Product
+	default:
 		return Entity{}, fmt.Errorf("invalid URL: %s", url)
 	}
 
-	// First we download the html content of the given URL
-	doc, downloadErr := downloadHTML(url)
-	if downloadErr != nil {
-		return Entity{}, downloadErr
-	}
+	var doc *goquery.Document
+	var statusCode int
+	var downloadErr error
 
-	// Then we need to parse products/wishlists differently
-	var (
-		parseErr error
-		entity   Entity
-		matches  [][]string
-	)
-
-	switch {
-	case matchProduct:
-		matches = productURLPattern.FindAllStringSubmatch(url, -1)
-		entity, parseErr = parseProduct(doc)
-	case matchWishlist:
-		matches = wishlistURLPattern.FindAllStringSubmatch(url, -1)
-		entity, parseErr = parseWishlist(doc)
-	default:
-		log.Printf("Invalid URL '%s'\n", url)
-		return Entity{}, fmt.Errorf("invalid URL")
-	}
-	if parseErr != nil {
-		return Entity{}, parseErr
-	}
-
-	entityIDString := matches[0][2]
-	entityID, err := strconv.Atoi(entityIDString)
-	if err != nil {
-		return Entity{}, fmt.Errorf("couldn't parse entity ID: %s", entityIDString)
-	}
-
-	// Eventually set the correct url
-	entity.URL = url
-	entity.ID = int64(entityID)
-	return entity, nil
-}
 
 			continue
 		}
 	}
 	}
 
+	return parseEntity(url, entityType, doc)
 }
 
 func downloadHTML(entityURL string) (*goquery.Document, error) {
@@ -113,9 +84,40 @@ func downloadHTML(entityURL string) (*goquery.Document, error) {
 	doc, err := goquery.NewDocumentFromReader(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("error while parsing body: %w", err)
+// parseEntity calls either parseWishlist or parseProduct depending on the entityType.
+func parseEntity(url string, entityType EntityType, doc *goquery.Document) (Entity, error) {
+	// Then we need to parse products/wishlists differently
+	var (
+		parseErr error
+		entity   Entity
+		matches  [][]string
+	)
+
+	switch entityType {
+	case Product:
+		matches = productURLPattern.FindAllStringSubmatch(url, -1)
+		entity, parseErr = parseProduct(doc)
+	case Wishlist:
+		matches = wishlistURLPattern.FindAllStringSubmatch(url, -1)
+		entity, parseErr = parseWishlist(doc)
+	default:
+		log.Printf("Invalid URL '%s'\n", url)
+		return Entity{}, fmt.Errorf("invalid URL")
+	}
+	if parseErr != nil {
+		return Entity{}, parseErr
 	}
 
-	return doc, nil
+	entityIDString := matches[0][2]
+	entityID, err := strconv.Atoi(entityIDString)
+	if err != nil {
+		return Entity{}, fmt.Errorf("couldn't parse entity ID: %s", entityIDString)
+	}
+
+	// Eventually set the correct url
+	entity.URL = url
+	entity.ID = int64(entityID)
+	return entity, nil
 }
 
 // parseWishlist parses the geizhals wishlist page and returns an Entity struct.
