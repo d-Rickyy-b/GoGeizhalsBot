@@ -14,7 +14,7 @@ type PriceAgent struct {
 	User                 User                 `json:"user" gorm:"foreignkey:UserID"`
 	EntityID             int64                `json:"-" gorm:"index:user_entity_idx,unique"`
 	Entity               geizhals.Entity      `json:"entity" gorm:"foreignkey:EntityID"`
-	NotificationID       int                  `json:"-"`
+	NotificationID       int64                `json:"-"`
 	NotificationSettings NotificationSettings `json:"notificationSettings" gorm:"foreignkey:NotificationID;constraint:OnDelete:CASCADE;"`
 }
 
