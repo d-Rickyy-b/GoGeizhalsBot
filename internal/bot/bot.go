@@ -417,17 +417,6 @@ func deletePriceagentHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	return nil
 }
 
-func fallbackCallbackHandler(b *gotgbot.Bot, ctx *ext.Context) error {
-	cb := ctx.Update.CallbackQuery
-	log.Printf("fallbackCallbackHandler - handled data: %s\n", cb.Data)
-
-	if _, err := cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{}); err != nil {
-		return fmt.Errorf("failed to answer start callback query: %w", err)
-	}
-
-	return nil
-}
-
 func newUserHandler(_ *gotgbot.Bot, ctx *ext.Context) error {
 	// Create user in databse if they don't exist already
 	if !ctx.EffectiveSender.IsUser() {
