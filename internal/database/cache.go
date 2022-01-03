@@ -17,10 +17,13 @@ func GetUserFromCache(userID int64) models.User {
 	return user
 }
 
+// PopulateCaches populates all the caches from the database
 func PopulateCaches() {
+	// Currently, we only cache users
 	populateUserCache()
 }
 
+// populateUserCache loads all users from the database into the cache
 func populateUserCache() {
 	var users []models.User
 	db.Find(&users)
@@ -30,6 +33,7 @@ func populateUserCache() {
 	}
 }
 
+// CreateUserWithCache checks if a user already exists in cache/db and creates a user in the database and cache if it does not exist
 func CreateUserWithCache(user models.User) {
 	if _, ok := userCache[user.ID]; ok {
 		// User already exists in cache
