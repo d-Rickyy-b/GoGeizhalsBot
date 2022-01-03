@@ -443,6 +443,23 @@ func cbqNotImplementedHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	return nil
 }
 
+// setCommands sets all the available commands for the bot on Telegram
+func setCommands() {
+	_, setCommandErr := bot.SetMyCommands([]gotgbot.BotCommand{
+		{Command: "start", Description: "Startmenü des Bots"},
+		{Command: "help", Description: "Zeigt die Hilfe an"},
+		{Command: "show", Description: "Zeigt deine Preisagenten an"},
+		{Command: "new", Description: "Fügt neuen Preisagenten hinzu"},
+		{Command: "version", Description: "Zeigt die Version des Bots an"},
+	}, &gotgbot.SetMyCommandsOpts{
+		Scope:        gotgbot.BotCommandScopeDefault{},
+		LanguageCode: "",
+	})
+	if setCommandErr != nil {
+		log.Fatalln("Something wrong:", setCommandErr)
+	}
+}
+
 // addMessageHandlers adds all the message handlers to the dispatcher. This tells our bot how to handle updates.
 func addMessageHandlers(dispatcher *ext.Dispatcher) {
 	// Text commands
@@ -503,6 +520,8 @@ func Start(botConfig config.Config) {
 	})
 
 	addMessageHandlers(updater.Dispatcher)
+	setCommands()
+
 	log.Println("Start polling...")
 	err := updater.StartPolling(bot, &ext.PollingOpts{DropPendingUpdates: false})
 	if err != nil {
