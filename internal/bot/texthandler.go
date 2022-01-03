@@ -127,7 +127,7 @@ func textNewPriceagentHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 
 	markup := gotgbot.InlineKeyboardMarkup{InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
 		{
-			{Text: "Zum Preisalarm!", CallbackData: fmt.Sprintf("m03_00_%d", newPriceagent.ID)},
+			{Text: "Zum Preisagenten!", CallbackData: fmt.Sprintf("m03_00_%d", newPriceagent.ID)},
 		},
 	}}
 	b.SendMessage(ctx.EffectiveChat.Id, "Preisagent wurde erstellt!", &gotgbot.SendMessageOpts{ReplyMarkup: markup})
