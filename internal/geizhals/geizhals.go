@@ -82,7 +82,7 @@ func downloadHTML(entityURL string) (*goquery.Document, int, error) {
 	resp, getErr := httpClient.Get(entityURL)
 	if getErr != nil {
 		log.Println(getErr)
-		return nil, resp.StatusCode, fmt.Errorf("error while downloading content from Geizhals: %w", getErr)
+		return nil, 0, fmt.Errorf("error while downloading content from Geizhals: %w", getErr)
 	}
 	// Cleanup when this function ends
 	defer resp.Body.Close()
