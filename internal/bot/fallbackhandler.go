@@ -18,3 +18,9 @@ func fallbackCallbackHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 
 	return nil
 }
+
+// fallbackCommandHandler handles messates with unknown commands. It does not reply to the user.
+func fallbackCommandHandler(b *gotgbot.Bot, ctx *ext.Context) error {
+	log.Println(fmt.Sprintf("User sent unimplemented command: %s", ctx.Message.Text))
+	return nil
+}

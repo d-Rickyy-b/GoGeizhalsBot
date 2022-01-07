@@ -484,6 +484,9 @@ func addMessageHandlers(dispatcher *ext.Dispatcher) {
 	// Fallback handler for callback queries
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.All, fallbackCallbackHandler))
 
+	// Unknown commands
+	dispatcher.AddHandler(handlers.NewMessage(message.Command, fallbackCommandHandler))
+
 	// Any kind of text
 	dispatcher.AddHandler(handlers.NewMessage(message.Text, textHandler))
 
