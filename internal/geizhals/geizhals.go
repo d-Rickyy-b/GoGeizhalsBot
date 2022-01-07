@@ -70,8 +70,8 @@ func DownloadEntity(url string) (Entity, error) {
 	return parseEntity(url, entityType, doc)
 }
 
+// downloadHTML downloads the HTML content of the given URL and returns the document and the HTTP status code.
 func downloadHTML(entityURL string) (*goquery.Document, int, error) {
-	// TODO try (at max.) three different proxies if there's a connection error
 	proxyURL := getNextProxy()
 	httpClient := &http.Client{}
 	if proxyURL != nil {
