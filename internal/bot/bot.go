@@ -467,10 +467,10 @@ func addMessageHandlers(dispatcher *ext.Dispatcher) {
 	dispatcher.AddHandler(handlers.NewCommand("version", versionHandler))
 
 	// Callback Queries (inline keyboards)
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_10_"), cbqNotImplementedHandler)) // priceHistory
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_98_"), cbqNotImplementedHandler)) // undo delete
 
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_99_"), deletePriceagentHandler))
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_10_"), priceHistoryHandler))
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_02_"), setNotificationBelowHandler))
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_01_"), setNotificationAlwaysHandler))
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_00_"), changePriceagentSettingsHandler))
