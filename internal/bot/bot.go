@@ -57,7 +57,6 @@ func updateEntityPrices() {
 		database.AddHistoricPrice(entityPrice)
 		database.UpdateEntity(updatedEntity)
 
-		// TODO notify users
 		// fetch all priceagents for this entity
 		priceAgents, fetchPriceAgentsErr := database.GetPriceAgentsForEntity(updatedEntity.ID)
 		if fetchPriceAgentsErr != nil {
