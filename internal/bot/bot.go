@@ -465,6 +465,7 @@ func addMessageHandlers(dispatcher *ext.Dispatcher) {
 	// Text commands
 	dispatcher.AddHandler(handlers.NewCommand("start", startHandler))
 	dispatcher.AddHandler(handlers.NewCommand("version", versionHandler))
+	dispatcher.AddHandler(handlers.NewCommand("help", helpHandler))
 
 	// Callback Queries (inline keyboards)
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_98_"), cbqNotImplementedHandler)) // undo delete
