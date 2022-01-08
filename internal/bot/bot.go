@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers/filters/message"
@@ -509,7 +510,6 @@ func Start(botConfig config.Config) {
 		log.Fatalln("Something wrong:", createBotErr)
 	}
 
-	// TODO support webhook (updater.StartWebhook()) depending on config
 	updater := ext.NewUpdater(&ext.UpdaterOpts{
 		ErrorLog: nil,
 		DispatcherOpts: ext.DispatcherOpts{
@@ -526,10 +526,29 @@ func Start(botConfig config.Config) {
 	addMessageHandlers(updater.Dispatcher)
 	setCommands()
 
-	log.Println("Start polling...")
-	err := updater.StartPolling(bot, &ext.PollingOpts{DropPendingUpdates: false})
-	if err != nil {
-		panic("failed to start polling: " + err.Error())
+	if botConfig.Webhook.Enabled {
+		parsedURL, parseErr := url.Parse(botConfig.Webhook.URL)
+		if parseErr != nil {
+			log.Fatalln("Can't parse webhook url:", parseErr)
+		}
+		log.Println("Starting webhook...")
+		// TODO add support for custom certificates
+		err := updater.StartWebhook(bot, ext.WebhookOpts{
+			Listen:  botConfig.Webhook.ListenIP,
+			Port:    botConfig.Webhook.ListenPort,
+			URLPath: parsedURL.Path,
+		})
+		bot.SetWebhook(botConfig.Webhook.URL, &gotgbot.SetWebhookOpts{})
+		if err != nil {
+			panic("failed to start webhook: " + err.Error())
+		}
+	} else {
+		log.Println("Start polling...")
+		_, _ = bot.DeleteWebhook(nil)
+		err := updater.StartPolling(bot, &ext.PollingOpts{DropPendingUpdates: false})
+		if err != nil {
+			panic("failed to start polling: " + err.Error())
+		}
 	}
 	fmt.Printf("Bot has been started as @%s...\n", bot.User.Username)
 
