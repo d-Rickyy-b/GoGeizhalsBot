@@ -550,7 +550,8 @@ func Start(botConfig config.Config) {
 			panic("failed to start polling: " + err.Error())
 		}
 	}
-	fmt.Printf("Bot has been started as @%s...\n", bot.User.Username)
+
+	log.Printf("Bot has been started as @%s...\n", bot.User.Username)
 
 	updater.Idle()
 }
