@@ -184,5 +184,7 @@ func parseProduct(doc *goquery.Document) (Entity, error) {
 
 // UpdateEntity returns an updated Entity struct from a given input Entity
 func UpdateEntity(entity Entity) (Entity, error) {
-	return DownloadEntity(entity.URL)
+	updatedEntity, downloadErr := DownloadEntity(entity.URL)
+	updatedEntity.ID = entity.ID
+	return updatedEntity, downloadErr
 }
