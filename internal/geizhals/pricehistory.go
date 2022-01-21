@@ -78,8 +78,8 @@ func (entry *PriceEntry) UnmarshalJSON(p []byte) error {
 	return nil
 }
 
-// DownloadPriceHistory downloads the price history for the given entity.
-func DownloadPriceHistory(entity Entity) (PriceHistory, error) {
+// GetPriceHistory returns the price history for the given entity either from cache or by downloading it.
+func GetPriceHistory(entity Entity) (PriceHistory, error) {
 	if entity.Type != Product {
 		return PriceHistory{}, fmt.Errorf("can only fetch pricehistory for products as of now")
 	}
