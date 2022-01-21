@@ -325,7 +325,7 @@ func showPriceagentDetail(b *gotgbot.Bot, ctx *ext.Context) error {
 				{Text: "📊 Preisverlauf", CallbackData: fmt.Sprintf("m04_10_%d", priceagent.ID)},
 			},
 			{
-				{Text: "❌ Löschen", CallbackData: fmt.Sprintf("m04_99_%d", priceagent.ID)},
+				{Text: "❌ Löschen", CallbackData: fmt.Sprintf("m04_98_%d", priceagent.ID)},
 				{Text: "↩️ Zurück", CallbackData: backCallbackData},
 			},
 		},
@@ -376,6 +376,40 @@ func changePriceagentSettingsHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	return nil
 }
 
+func deletePriceagentConfirmationHandler(b *gotgbot.Bot, ctx *ext.Context) error {
+	cb := ctx.Update.CallbackQuery
+
+	priceagentID, parseErr := parseIDFromCallbackData(cb.Data, "m04_98_")
+	if parseErr != nil {
+		return fmt.Errorf("deletePriceagentConfirmationHandler: failed to parse priceagentID from callback data: %w", parseErr)
+	}
+
+	priceagent, dbErr := database.GetPriceagentForUserByID(ctx.EffectiveUser.Id, priceagentID)
+	if dbErr != nil {
+		return fmt.Errorf("deletePriceagentConfirmationHandler: failed to get priceagent from database: %w", dbErr)
+	}
+
+	if _, err := cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{}); err != nil {
+		return fmt.Errorf("deletePriceagentConfirmationHandler: failed to answer callback query: %w", err)
+	}
+
+	linkName := createLink(priceagent.Entity.URL, priceagent.Entity.Name)
+	editedText := fmt.Sprintf("%s\n\nMöchtest du den Preisagenten für %s wirklich löschen?", bold("Löschen bestätigen"), linkName)
+	markup := gotgbot.InlineKeyboardMarkup{
+		InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
+			{
+				{Text: "❌ Löschen", CallbackData: fmt.Sprintf("m04_99_%d", priceagent.ID)},
+				{Text: "↩️ Zurück", CallbackData: fmt.Sprintf("m03_00_%d", priceagent.ID)},
+			},
+		},
+	}
+	_, err := cb.Message.EditText(b, editedText, &gotgbot.EditMessageTextOpts{ReplyMarkup: markup, ParseMode: "HTML"})
+	if err != nil {
+		return fmt.Errorf("deletePriceagentConfirmationHandler: failed to edit message text: %w", err)
+	}
+	return nil
+}
+
 // deletePriceagentHandler handles all the inline "delete" buttons for priceagents
 func deletePriceagentHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	cb := ctx.Update.CallbackQuery
@@ -402,15 +436,9 @@ func deletePriceagentHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 		return fmt.Errorf("deletePriceagentHandler: failed to delete priceagent from database: %w", deleteErr)
 	}
 
-	editText := fmt.Sprintf("Preisagent für %s wurde gelöscht!", bold(priceagent.Entity.Name))
-	undoKeyboardMarkup := gotgbot.InlineKeyboardMarkup{
-		InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
-			{
-				{Text: "↩️ Rückgängig", CallbackData: fmt.Sprintf("m04_98_%d", priceagentID)},
-			},
-		},
-	}
-	_, err := cb.Message.EditText(b, editText, &gotgbot.EditMessageTextOpts{ReplyMarkup: undoKeyboardMarkup, ParseMode: "HTML"})
+	editText := fmt.Sprintf("Preisagent für %s wurde gelöscht!", bold(createLink(priceagent.Entity.URL, priceagent.Entity.Name)))
+
+	_, err := cb.Message.EditText(b, editText, &gotgbot.EditMessageTextOpts{ParseMode: "HTML", DisableWebPagePreview: true})
 	if err != nil {
 		return fmt.Errorf("deletePriceagent: failed to edit message text: %w", err)
 	}
@@ -418,6 +446,7 @@ func deletePriceagentHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 }
 
 func newUserHandler(_ *gotgbot.Bot, ctx *ext.Context) error {
+	prometheus.TotalUserInteractions.Inc()
 	// Create user in databse if they don't exist already
 	if !ctx.EffectiveSender.IsUser() {
 		return nil
@@ -468,8 +497,7 @@ func addMessageHandlers(dispatcher *ext.Dispatcher) {
 	dispatcher.AddHandler(handlers.NewCommand("help", helpHandler))
 
 	// Callback Queries (inline keyboards)
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_98_"), cbqNotImplementedHandler)) // undo delete
-
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_98_"), deletePriceagentConfirmationHandler))
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_99_"), deletePriceagentHandler))
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_10_"), priceHistoryHandler))
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_02_"), setNotificationBelowHandler))

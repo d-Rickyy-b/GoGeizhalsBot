@@ -93,7 +93,7 @@ func setNotificationAlwaysHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 				{Text: "📊 Preisverlauf", CallbackData: fmt.Sprintf("m04_10_%d", priceagent.ID)},
 			},
 			{
-				{Text: "❌ Löschen", CallbackData: fmt.Sprintf("m04_99_%d", priceagent.ID)},
+				{Text: "❌ Löschen", CallbackData: fmt.Sprintf("m04_98_%d", priceagent.ID)},
 				{Text: "↩️ Zurück", CallbackData: backCallbackData},
 			},
 		},
