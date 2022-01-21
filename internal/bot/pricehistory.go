@@ -20,18 +20,19 @@ import (
 
 // renderChart renders a price history chart to the given writer.
 func renderChart(priceagent models.PriceAgent, history geizhals.PriceHistory, since time.Time, w io.Writer) {
-	darkFontColor := drawing.Color{R: 194, G: 194, B: 194, A: 255}
+	darkFontColor := drawing.ColorFromHex("c2c2c2")
 	fontColor := darkFontColor
-	darkChartBackgroundColor := drawing.Color{R: 22, G: 27, B: 43, A: 255}
+
+	darkChartBackgroundColor := drawing.ColorFromHex("161b2b")
 	chartBackgroundColor := darkChartBackgroundColor
 
-	darkRegressionColor := drawing.Color{R: 232, G: 167, B: 26, A: 255}
+	darkRegressionColor := drawing.ColorFromHex("e8a71a")
 	regressionColor := darkRegressionColor
 
-	darkMainSeriesColor := drawing.Color{R: 37, G: 105, B: 209, A: 255}
+	darkMainSeriesColor := drawing.ColorFromHex("2569d1")
 	mainSeriesColor := darkMainSeriesColor
 
-	darkLegendBackgroundColor := drawing.Color{R: 45, G: 54, B: 79, A: 255}
+	darkLegendBackgroundColor := drawing.ColorFromHex("2d364f")
 	legendBackgroundColor := darkLegendBackgroundColor
 
 	mainSeries := chart.TimeSeries{
