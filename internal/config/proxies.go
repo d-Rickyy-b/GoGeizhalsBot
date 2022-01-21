@@ -3,14 +3,15 @@ package config
 import (
 	"bufio"
 	"log"
+	"net/url"
 	"os"
 	"strings"
 )
 
 // LoadProxies tries to load the list of proxies from the given file.
 // If it fails, it returns an empty list.
-func LoadProxies(filename string) []string {
-	var proxyList []string
+func LoadProxies(filename string) []*url.URL {
+	var proxyList []*url.URL
 	file, err := os.Open(filename)
 	if err != nil {
 		log.Println(err)
@@ -26,8 +27,13 @@ func LoadProxies(filename string) []string {
 		if strings.HasPrefix(line, "#") || line == "" {
 			continue
 		}
-		// TODO check for correct syntax
-		proxyList = append(proxyList, line)
+
+		parsedProxy, parseErr := url.Parse(line)
+		if parseErr != nil {
+			log.Printf("Line %s is not a valid proxy url: %s\n", line, parseErr)
+			continue
+		}
+		proxyList = append(proxyList, parsedProxy)
 	}
 
 	if err := scanner.Err(); err != nil {

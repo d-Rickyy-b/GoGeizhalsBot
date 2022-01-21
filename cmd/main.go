@@ -7,6 +7,7 @@ import (
 	"GoGeizhalsBot/internal/geizhals"
 	"flag"
 	"log"
+	"net/url"
 	"time"
 )
 
@@ -25,8 +26,12 @@ func main() {
 		log.Fatal(readConfigErr)
 	}
 	log.Println(botConfig)
-	proxies := config.LoadProxies("proxies.txt")
-	log.Println("Loaded proxies:", len(proxies))
+
+	var proxies []*url.URL
+	if botConfig.Proxy.Enabled {
+		proxies = config.LoadProxies(botConfig.Proxy.ProxyListPath)
+		log.Println("Loaded proxies:", len(proxies))
+	}
 
 	geizhals.InitProxies(proxies)
 	bot.Start(botConfig)
