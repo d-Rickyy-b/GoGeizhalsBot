@@ -3,9 +3,11 @@ package database
 import (
 	"GoGeizhalsBot/internal/bot/models"
 	"log"
+	"sync"
 )
 
 var userCache = make(map[int64]models.User)
+var cacheMutex sync.Mutex
 
 func GetUserFromCache(userID int64) models.User {
 	if cachedUser, ok := userCache[userID]; ok {
@@ -35,6 +37,8 @@ func populateUserCache() {
 
 // CreateUserWithCache checks if a user already exists in cache/db and creates a user in the database and cache if it does not exist
 func CreateUserWithCache(user models.User) {
+	cacheMutex.Lock()
+	defer cacheMutex.Unlock()
 	if _, ok := userCache[user.ID]; ok {
 		// User already exists in cache
 		return
