@@ -7,7 +7,7 @@ import (
 
 type Entity struct {
 	ID        int64 `json:"id"`
-	ChangedAt time.Time
+	UpdatedAt time.Time
 	Price     float64    `json:"price"`
 	Name      string     `json:"name"`
 	URL       string     `json:"url"`
