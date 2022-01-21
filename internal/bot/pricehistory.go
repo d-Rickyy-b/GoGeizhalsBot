@@ -47,19 +47,32 @@ func renderChart(priceagent models.PriceAgent, history geizhals.PriceHistory, si
 	minPrice := 9999999999999.0
 	lastPrice := 0.0
 	for _, entry := range history.Response {
+		// Skip entries before given date
 		if entry.Timestamp.Before(since) {
+			// Still keep track of earlier prices for charts with gaps
+			if entry.Valid {
+				lastPrice = entry.Price
+			}
 			continue
 		}
 
-		mainSeries.XValues = append(mainSeries.XValues, entry.Timestamp)
 		if !entry.Valid {
+			// When an entry isn't valid, use the last valid price
+			if lastPrice == 0.0 {
+				// If there is no last price, fully skip this entry - this can only happen for the first entries
+				continue
+			}
+
+			mainSeries.XValues = append(mainSeries.XValues, entry.Timestamp)
 			mainSeries.YValues = append(mainSeries.YValues, lastPrice)
 			continue
 		} else {
+			mainSeries.XValues = append(mainSeries.XValues, entry.Timestamp)
 			mainSeries.YValues = append(mainSeries.YValues, entry.Price)
 			lastPrice = entry.Price
 		}
 
+		// Calculate current max/min price - only for valid entries
 		if entry.Price > maxPrice {
 			maxPrice = entry.Price
 		}
