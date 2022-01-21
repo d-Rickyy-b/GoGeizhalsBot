@@ -22,6 +22,11 @@ type Config struct {
 		Enabled       bool   `yaml:"enabled"`
 		ProxyListPath string `yaml:"proxy_list_path"`
 	} `yaml:"proxy"`
+	Prometheus struct {
+		Enabled    bool   `yaml:"enabled"`
+		ExportIP   string `yaml:"export_ip"`
+		ExportPort int    `yaml:"export_port"`
+	} `yaml:"prometheus"`
 }
 
 func ReadConfig(configFile string) (Config, error) {
@@ -88,6 +93,17 @@ func validateConfig(config Config) bool {
 	if config.Proxy.Enabled {
 		if config.Proxy.ProxyListPath == "" {
 			log.Fatalln("Proxy list path is not set")
+			return false
+		}
+	}
+
+	if config.Prometheus.Enabled {
+		if config.Prometheus.ExportIP == "" || !IPRegex.MatchString(config.Prometheus.ExportIP) {
+			log.Fatalln("Prometheus export IP is does not match pattern 'x.x.x.x'")
+			return false
+		}
+		if config.Prometheus.ExportPort == 0 {
+			log.Fatalln("Prometheus export port is not set")
 			return false
 		}
 	}
