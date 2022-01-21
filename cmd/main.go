@@ -15,7 +15,7 @@ func main() {
 	flag.Parse()
 
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	go bot.UpdatePricesJob(time.Minute * 2)
+	go bot.UpdatePricesJob(time.Minute * 10)
 
 	database.InitDB()
 	database.PopulateCaches()
