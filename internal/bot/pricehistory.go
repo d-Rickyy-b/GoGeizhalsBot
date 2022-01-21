@@ -90,38 +90,47 @@ func renderChart(priceagent models.PriceAgent, history geizhals.PriceHistory, si
 		},
 	}
 
+	backgroundStyle := chart.Style{
+		FillColor: chartBackgroundColor,
+		FontColor: fontColor,
+	}
+
+	fontStyle := chart.Style{FontColor: fontColor}
+
+	gridMajorStyle := chart.Style{
+		Hidden:      false,
+		StrokeColor: drawing.Color{R: 192, G: 192, B: 192, A: 100},
+		StrokeWidth: 0.5,
+	}
+
+	gridMinorStyle := chart.Style{
+		Hidden:      false,
+		StrokeColor: drawing.Color{R: 192, G: 192, B: 192, A: 64},
+		StrokeWidth: 0.5,
+	}
+
 	graph := chart.Chart{
-		Width:  1280,
-		Height: 720,
-		Background: chart.Style{
-			FillColor: chartBackgroundColor,
-			FontColor: fontColor,
-		},
-		Canvas: chart.Style{
-			FillColor: chartBackgroundColor,
-			FontColor: fontColor,
-		},
+		Width:      1280,
+		Height:     720,
+		Background: backgroundStyle,
+		Canvas:     backgroundStyle,
 		YAxis: chart.YAxis{
 			Name: "Preis",
 			Range: &chart.ContinuousRange{
 				Min: minPrice - (maxPrice)*0.1,
 				Max: maxPrice + (maxPrice)*0.1,
 			},
-			NameStyle: chart.Style{
-				FontColor: fontColor,
-			},
-			Style: chart.Style{
-				FontColor: fontColor,
-			},
+			Style:          fontStyle,
+			NameStyle:      fontStyle,
+			GridMajorStyle: gridMajorStyle,
+			GridMinorStyle: gridMinorStyle,
 		},
 		XAxis: chart.XAxis{
-			Name: "Datum",
-			Style: chart.Style{
-				FontColor: fontColor,
-			},
-			NameStyle: chart.Style{
-				FontColor: fontColor,
-			},
+			Name:           "Datum",
+			Style:          fontStyle,
+			NameStyle:      fontStyle,
+			GridMajorStyle: gridMajorStyle,
+			GridMinorStyle: gridMinorStyle,
 		},
 		Series: []chart.Series{
 			mainSeries,
