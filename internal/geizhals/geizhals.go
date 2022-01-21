@@ -107,15 +107,15 @@ func parseEntity(url string, entityType EntityType, doc *goquery.Document) (Enti
 	var (
 		parseErr error
 		entity   Entity
-		matches  [][]string
+		matches  []string
 	)
 
 	switch entityType {
 	case Product:
-		matches = productURLPattern.FindAllStringSubmatch(url, -1)
+		matches = productURLPattern.FindStringSubmatch(url)
 		entity, parseErr = parseProduct(doc)
 	case Wishlist:
-		matches = wishlistURLPattern.FindAllStringSubmatch(url, -1)
+		matches = wishlistURLPattern.FindStringSubmatch(url)
 		entity, parseErr = parseWishlist(doc)
 	default:
 		log.Printf("Invalid URL '%s'\n", url)
@@ -125,14 +125,18 @@ func parseEntity(url string, entityType EntityType, doc *goquery.Document) (Enti
 		return Entity{}, parseErr
 	}
 
-	entityIDString := matches[0][2]
+	if len(matches) != 3 {
+		return Entity{}, fmt.Errorf("no matches found for URL '%s'", url)
+	}
+	entityIDString := matches[2]
+	cleanedURL := matches[1]
 	entityID, err := strconv.Atoi(entityIDString)
 	if err != nil {
 		return Entity{}, fmt.Errorf("couldn't parse entity ID: %s", entityIDString)
 	}
 
 	// Eventually set the correct url
-	entity.URL = url
+	entity.URL = cleanedURL
 	entity.ID = int64(entityID)
 	return entity, nil
 }
