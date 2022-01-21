@@ -255,7 +255,7 @@ func changePriceagentSettingsHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	}
 
 	linkName := createLink(priceagent.Entity.URL, priceagent.Entity.Name)
-	editedText := fmt.Sprintf("Wann möchtest du für %s alarmiert werden?\nAktuelle Einstellung: %s\n\nAktueller Preis: %s", linkName, bold(priceagent.NotificationSettings.String()), bold(createPrice(priceagent.Entity.Price)))
+	editedText := fmt.Sprintf("%s\n\nWann möchtest du für %s alarmiert werden?\n\nAktuelle Einstellung: %s\nAktueller Preis: %s", bold("Benachrichtigungseinstellungen"), linkName, bold(priceagent.NotificationSettings.String()), bold(createPrice(priceagent.Entity.Price)))
 	markup := gotgbot.InlineKeyboardMarkup{
 		InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
 			{
