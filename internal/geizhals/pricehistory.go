@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"sync"
 	"time"
 )
 
@@ -39,6 +40,7 @@ type PriceEntry struct {
 }
 
 var userCache = make(map[int64]PriceHistory)
+var cacheMutex sync.Mutex
 
 // UnmarshalJSON implements a custom unmarshaller for the price history response.
 // The API response is an array of length 3, containing the timestamp, price and validity.
@@ -83,14 +85,33 @@ func DownloadPriceHistory(entity Entity) (PriceHistory, error) {
 	}
 
 	// Check if we already have the price history in cache
+	history, isCached := getPriceHistoryFromCache(entity)
+	if isCached {
+		return history, nil
+	}
+
+	return downloadPriceHistory(entity)
+}
+
+// getPriceHistoryFromCache returns the price history for the given entity from cache, if it is cached.
+func getPriceHistoryFromCache(entity Entity) (PriceHistory, bool) {
+	cacheMutex.Lock()
+	defer cacheMutex.Unlock()
+
 	if priceHistory, ok := userCache[entity.ID]; ok {
 		// Check if the price history is still valid
 		if time.Since(priceHistory.Meta.DownloadedAt) < 12*time.Hour {
-			return priceHistory, nil
+			log.Println("Using cached price history for", entity.Name)
+			return priceHistory, true
 		}
 		delete(userCache, entity.ID)
 	}
+	return PriceHistory{}, false
+}
 
+// downloadPriceHistory downloads the price history for the given entity.
+func downloadPriceHistory(entity Entity) (PriceHistory, error) {
+	log.Println("Downloading price history for", entity.Name)
 	priceHistoryAPI := "https://geizhals.de/api/gh0/price_history"
 	proxyURL := getNextProxy()
 	httpClient := &http.Client{}
@@ -134,6 +155,8 @@ func DownloadPriceHistory(entity Entity) (PriceHistory, error) {
 	pricehistory.Meta.DownloadedAt = time.Now()
 
 	// Cache the price history
+	cacheMutex.Lock()
+	defer cacheMutex.Unlock()
 	userCache[entity.ID] = pricehistory
 
 	return pricehistory, nil
