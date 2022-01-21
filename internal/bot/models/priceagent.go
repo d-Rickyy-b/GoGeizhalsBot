@@ -41,7 +41,7 @@ func (ns NotificationSettings) String() string {
 	case ns.NotifyBelow:
 		humanReadableSettings = fmt.Sprintf("Unter %.2f €", ns.BelowPrice)
 	case ns.NotifyAlways:
-		humanReadableSettings = "Immer"
+		humanReadableSettings = "Immer alarmieren"
 	default:
 		humanReadableSettings = "Unbekannt"
 	}
