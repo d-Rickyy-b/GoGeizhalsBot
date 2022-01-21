@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/wcharczuk/go-chart/v2/drawing"
@@ -17,6 +18,137 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
 )
+
+// showPriceHistoryHandler handles the inline button calls to the pricehistory button.
+// It renders and sends a pricehistory chart to the user.
+func showPriceHistoryHandler(b *gotgbot.Bot, ctx *ext.Context) error {
+	cb := ctx.Update.CallbackQuery
+
+	priceagent, getPriceagentErr := getPriceagentFromContext(ctx)
+	if getPriceagentErr != nil {
+		return getPriceagentErr
+	}
+
+	if priceagent.Entity.Type != geizhals.Product {
+		cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{Text: "Pricehistory is only available for products at the moment!"})
+		return nil
+	}
+
+	markup := gotgbot.InlineKeyboardMarkup{
+		InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
+			{
+				{Text: "1M", CallbackData: fmt.Sprintf("m04_11_%d", priceagent.ID)},
+				{Text: "🔘 3M", CallbackData: fmt.Sprintf("m04_12_%d", priceagent.ID)},
+				{Text: "6M", CallbackData: fmt.Sprintf("m04_13_%d", priceagent.ID)},
+				{Text: "12M", CallbackData: fmt.Sprintf("m04_14_%d", priceagent.ID)},
+			},
+			{
+				{Text: "↩️ Zurück", CallbackData: fmt.Sprintf("m03_00_%d", priceagent.ID)},
+			},
+		},
+	}
+
+	cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{})
+	b.SendChatAction(ctx.EffectiveChat.Id, "upload_photo")
+	history, err := geizhals.GetPriceHistory(priceagent.Entity)
+	if err != nil {
+		return fmt.Errorf("showPriceagentDetail: failed to download pricehistory: %w", err)
+	}
+
+	buffer := bytes.NewBuffer([]byte{})
+	since := time.Now().AddDate(0, -3, 0)
+	renderChart(priceagent, history, since, buffer)
+
+	bot.DeleteMessage(ctx.EffectiveChat.Id, cb.Message.MessageId)
+
+	editedText := "Für welchen Zeitraum möchtest du die Preishistorie sehen?"
+	_, sendErr := bot.SendPhoto(ctx.EffectiveUser.Id, buffer, &gotgbot.SendPhotoOpts{Caption: editedText, ReplyMarkup: markup})
+	if sendErr != nil {
+		return fmt.Errorf("showPriceagentDetail: failed to send photo: %w", sendErr)
+	}
+	return nil
+}
+
+// updatePriceHistoryHandler handles the inline button calls to the date range buttons below the pricehistory chart.
+// It renders an updated pricehistory chart and sends it to the user.
+func updatePriceHistoryHandler(b *gotgbot.Bot, ctx *ext.Context) error {
+	cb := ctx.Update.CallbackQuery
+
+	priceagent, getPriceagentErr := getPriceagentFromContext(ctx)
+	if getPriceagentErr != nil {
+		return getPriceagentErr
+	}
+
+	if priceagent.Entity.Type != geizhals.Product {
+		cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{Text: "Pricehistory is only available for products at the moment!"})
+		return nil
+	}
+
+	results := strings.Split(cb.Data, "_")
+	dateRange := results[1]
+
+	dateRangeKeyboard := []gotgbot.InlineKeyboardButton{
+		{Text: "1M", CallbackData: fmt.Sprintf("m04_11_%d", priceagent.ID)},
+		{Text: "3M", CallbackData: fmt.Sprintf("m04_12_%d", priceagent.ID)},
+		{Text: "6M", CallbackData: fmt.Sprintf("m04_13_%d", priceagent.ID)},
+		{Text: "12M", CallbackData: fmt.Sprintf("m04_14_%d", priceagent.ID)},
+	}
+
+	var since time.Time
+	switch dateRange {
+	case "11":
+		dateRangeKeyboard[0].Text = "🔘 1M"
+		since = time.Now().AddDate(0, -1, 0)
+	case "12":
+	default:
+		dateRangeKeyboard[1].Text = "🔘 3M"
+		since = time.Now().AddDate(0, -3, 0)
+	case "13":
+		dateRangeKeyboard[2].Text = "🔘 6M"
+		since = time.Now().AddDate(0, -6, 0)
+	case "14":
+		dateRangeKeyboard[3].Text = "🔘 12M"
+		since = time.Now().AddDate(0, -12, 0)
+	}
+
+	markup := gotgbot.InlineKeyboardMarkup{
+		InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
+			dateRangeKeyboard,
+			{{Text: "↩️ Zurück", CallbackData: fmt.Sprintf("m03_00_%d", priceagent.ID)}},
+		},
+	}
+
+	cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{})
+	history, err := geizhals.GetPriceHistory(priceagent.Entity)
+	if err != nil {
+		return fmt.Errorf("showPriceagentDetail: failed to download pricehistory: %w", err)
+	}
+
+	buffer := bytes.NewBuffer([]byte{})
+	renderChart(priceagent, history, since, buffer)
+
+	newPic := gotgbot.InputMediaPhoto{Media: buffer, Caption: "Für welchen Zeitraum möchtest du die Preishistorie sehen?"}
+	_, sendErr := cb.Message.EditMedia(b, newPic, &gotgbot.EditMessageMediaOpts{ReplyMarkup: markup})
+	if sendErr != nil {
+		return fmt.Errorf("showPriceagentDetail: failed to send photo: %w", sendErr)
+	}
+	return nil
+}
+
+// getPriceagentFromContext returns the priceagent from the callbackQuery data.
+func getPriceagentFromContext(ctx *ext.Context) (models.PriceAgent, error) {
+	cb := ctx.CallbackQuery
+	priceagentID, parseErr := parseIDFromCallbackData(cb.Data, "m04_10_")
+	if parseErr != nil {
+		return models.PriceAgent{}, fmt.Errorf("showPriceagentDetail: failed to parse priceagentID from callback data: %w", parseErr)
+	}
+
+	priceagent, dbErr := database.GetPriceagentForUserByID(ctx.EffectiveUser.Id, priceagentID)
+	if dbErr != nil {
+		return models.PriceAgent{}, fmt.Errorf("showPriceagentDetail: failed to get priceagent from database: %w", dbErr)
+	}
+	return priceagent, nil
+}
 
 // renderChart renders a price history chart to the given writer.
 func renderChart(priceagent models.PriceAgent, history geizhals.PriceHistory, since time.Time, w io.Writer) {
@@ -82,6 +214,7 @@ func renderChart(priceagent models.PriceAgent, history geizhals.PriceHistory, si
 	}
 
 	linRegSeries := &chart.LinearRegressionSeries{
+		Name:        "Trend",
 		InnerSeries: mainSeries,
 		Style: chart.Style{
 			StrokeColor:     regressionColor,
@@ -146,42 +279,4 @@ func renderChart(priceagent models.PriceAgent, history geizhals.PriceHistory, si
 	if renderErr != nil {
 		log.Println(renderErr)
 	}
-}
-
-// priceHistoryHandler handles the inline button calls to the pricehistory button.
-// It renders and sends a pricehistory chart to the user.
-func priceHistoryHandler(b *gotgbot.Bot, ctx *ext.Context) error {
-	cb := ctx.Update.CallbackQuery
-
-	priceagentID, parseErr := parseIDFromCallbackData(cb.Data, "m03_00_")
-	if parseErr != nil {
-		return fmt.Errorf("showPriceagentDetail: failed to parse priceagentID from callback data: %w", parseErr)
-	}
-
-	priceagent, dbErr := database.GetPriceagentForUserByID(ctx.EffectiveUser.Id, priceagentID)
-	if dbErr != nil {
-		return fmt.Errorf("showPriceagentDetail: failed to get priceagent from database: %w", dbErr)
-	}
-
-	if priceagent.Entity.Type != geizhals.Product {
-		cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{Text: "Pricehistory is only available for products at the moment!"})
-		return nil
-	}
-
-	cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{})
-	b.SendChatAction(ctx.EffectiveChat.Id, "upload_photo")
-	history, err := geizhals.DownloadPriceHistory(priceagent.Entity)
-	if err != nil {
-		return fmt.Errorf("showPriceagentDetail: failed to download pricehistory: %w", err)
-	}
-
-	// TODO send photo
-	buffer := bytes.NewBuffer([]byte{})
-	renderChart(priceagent, history, time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC), buffer)
-
-	_, sendErr := bot.SendPhoto(ctx.EffectiveUser.Id, buffer, &gotgbot.SendPhotoOpts{})
-	if sendErr != nil {
-		return fmt.Errorf("showPriceagentDetail: failed to send photo: %w", sendErr)
-	}
-	return nil
 }

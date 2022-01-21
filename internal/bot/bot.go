@@ -316,12 +316,14 @@ func showPriceagentDetail(b *gotgbot.Bot, ctx *ext.Context) error {
 		return fmt.Errorf("showPriceagentDetail: failed to answer callback query: %w", err)
 	}
 
+	notificationButtonText := fmt.Sprintf("⏰ %s", priceagent.NotificationSettings.String())
+
 	linkName := createLink(priceagent.Entity.URL, priceagent.Entity.Name)
 	editedText := fmt.Sprintf("%s kostet aktuell %s", linkName, bold(createPrice(priceagent.Entity.Price)))
 	markup := gotgbot.InlineKeyboardMarkup{
 		InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
 			{
-				{Text: "⏰ Benachrichtigung", CallbackData: fmt.Sprintf("m04_00_%d", priceagent.ID)},
+				{Text: notificationButtonText, CallbackData: fmt.Sprintf("m04_00_%d", priceagent.ID)},
 				{Text: "📊 Preisverlauf", CallbackData: fmt.Sprintf("m04_10_%d", priceagent.ID)},
 			},
 			{
@@ -330,10 +332,21 @@ func showPriceagentDetail(b *gotgbot.Bot, ctx *ext.Context) error {
 			},
 		},
 	}
-	_, err := cb.Message.EditText(b, editedText, &gotgbot.EditMessageTextOpts{ReplyMarkup: markup, ParseMode: "HTML"})
-	if err != nil {
-		return fmt.Errorf("showPriceagent: failed to edit message text: %w", err)
+
+	if len(cb.Message.Photo) > 0 {
+		bot.DeleteMessage(ctx.EffectiveChat.Id, cb.Message.MessageId)
+
+		_, err := b.SendMessage(ctx.EffectiveChat.Id, editedText, &gotgbot.SendMessageOpts{ReplyMarkup: markup, ParseMode: "HTML"})
+		if err != nil {
+			return fmt.Errorf("showPriceagent: failed to send new message: %w", err)
+		}
+	} else {
+		_, err := cb.Message.EditText(b, editedText, &gotgbot.EditMessageTextOpts{ReplyMarkup: markup, ParseMode: "HTML"})
+		if err != nil {
+			return fmt.Errorf("showPriceagent: failed to edit message text: %w", err)
+		}
 	}
+
 	return nil
 }
 
@@ -499,7 +512,11 @@ func addMessageHandlers(dispatcher *ext.Dispatcher) {
 	// Callback Queries (inline keyboards)
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_98_"), deletePriceagentConfirmationHandler))
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_99_"), deletePriceagentHandler))
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_10_"), priceHistoryHandler))
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_10_"), showPriceHistoryHandler))
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_11_"), updatePriceHistoryHandler)) // Graph 1M
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_12_"), updatePriceHistoryHandler)) // Graph 3M
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_13_"), updatePriceHistoryHandler)) // Graph 6M
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_14_"), updatePriceHistoryHandler)) // Graph 12M
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_02_"), setNotificationBelowHandler))
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_01_"), setNotificationAlwaysHandler))
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_00_"), changePriceagentSettingsHandler))
