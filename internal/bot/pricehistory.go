@@ -85,6 +85,9 @@ func updatePriceHistoryGraphHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	}
 
 	results := strings.Split(cb.Data, "_")
+	if len(results) < 2 {
+		return fmt.Errorf("updatePriceHistoryGraphHandler: invalid callback data: %s", cb.Data)
+	}
 	dateRange := results[1]
 
 	dateRangeKeyboard := []gotgbot.InlineKeyboardButton{
