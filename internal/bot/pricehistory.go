@@ -90,6 +90,34 @@ func updatePriceHistoryGraphHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	}
 	dateRange := results[1]
 
+	dateRangeKeyboard, since := generateDateRangeKeyboard(priceagent, dateRange)
+
+	markup := gotgbot.InlineKeyboardMarkup{
+		InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
+			dateRangeKeyboard,
+			{{Text: "↩️ Zurück", CallbackData: fmt.Sprintf("m03_00_%d", priceagent.ID)}},
+		},
+	}
+
+	_, _ = cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{})
+	history, err := geizhals.GetPriceHistory(priceagent.Entity)
+	if err != nil {
+		return fmt.Errorf("updatePriceHistoryGraphHandler: failed to download pricehistory: %w", err)
+	}
+
+	buffer := bytes.NewBuffer([]byte{})
+	renderChart(priceagent, history, since, buffer)
+
+	newPic := gotgbot.InputMediaPhoto{Media: buffer, Caption: "Für welchen Zeitraum möchtest du die Preishistorie sehen?"}
+	_, sendErr := cb.Message.EditMedia(b, newPic, &gotgbot.EditMessageMediaOpts{ReplyMarkup: markup})
+	if sendErr != nil {
+		return fmt.Errorf("updatePriceHistoryGraphHandler: failed to send photo: %w", sendErr)
+	}
+	return nil
+}
+
+// generateDateRangeKeyboard generates the keyboard for the date range buttons below the pricehistory chart.
+func generateDateRangeKeyboard(priceagent models.PriceAgent, dateRange string) ([]gotgbot.InlineKeyboardButton, time.Time) {
 	dateRangeKeyboard := []gotgbot.InlineKeyboardButton{
 		{Text: "1M", CallbackData: fmt.Sprintf("m04_11_%d", priceagent.ID)},
 		{Text: "3M", CallbackData: fmt.Sprintf("m04_12_%d", priceagent.ID)},
@@ -113,29 +141,7 @@ func updatePriceHistoryGraphHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 		dateRangeKeyboard[3].Text = "🔘 12M"
 		since = time.Now().AddDate(0, -12, 0)
 	}
-
-	markup := gotgbot.InlineKeyboardMarkup{
-		InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
-			dateRangeKeyboard,
-			{{Text: "↩️ Zurück", CallbackData: fmt.Sprintf("m03_00_%d", priceagent.ID)}},
-		},
-	}
-
-	cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{})
-	history, err := geizhals.GetPriceHistory(priceagent.Entity)
-	if err != nil {
-		return fmt.Errorf("showPriceagentDetail: failed to download pricehistory: %w", err)
-	}
-
-	buffer := bytes.NewBuffer([]byte{})
-	renderChart(priceagent, history, since, buffer)
-
-	newPic := gotgbot.InputMediaPhoto{Media: buffer, Caption: "Für welchen Zeitraum möchtest du die Preishistorie sehen?"}
-	_, sendErr := cb.Message.EditMedia(b, newPic, &gotgbot.EditMessageMediaOpts{ReplyMarkup: markup})
-	if sendErr != nil {
-		return fmt.Errorf("showPriceagentDetail: failed to send photo: %w", sendErr)
-	}
-	return nil
+	return dateRangeKeyboard, since
 }
 
 // getPriceagentFromContext returns the priceagent from the callbackQuery data.
