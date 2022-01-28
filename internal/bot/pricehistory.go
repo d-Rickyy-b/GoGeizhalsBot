@@ -30,7 +30,7 @@ func showPriceHistoryHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	}
 
 	if priceagent.Entity.Type != geizhals.Product {
-		cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{Text: "Pricehistory is only available for products at the moment!"})
+		_, _ = cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{Text: "Pricehistory is only available for products at the moment!"})
 		return nil
 	}
 
@@ -48,8 +48,8 @@ func showPriceHistoryHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 		},
 	}
 
-	cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{})
-	b.SendChatAction(ctx.EffectiveChat.Id, "upload_photo")
+	_, _ = cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{})
+	_, _ = b.SendChatAction(ctx.EffectiveChat.Id, "upload_photo")
 	history, err := geizhals.GetPriceHistory(priceagent.Entity)
 	if err != nil {
 		return fmt.Errorf("showPriceagentDetail: failed to download pricehistory: %w", err)
@@ -59,7 +59,7 @@ func showPriceHistoryHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	since := time.Now().AddDate(0, -3, 0)
 	renderChart(priceagent, history, since, buffer)
 
-	bot.DeleteMessage(ctx.EffectiveChat.Id, cb.Message.MessageId)
+	_, _ = bot.DeleteMessage(ctx.EffectiveChat.Id, cb.Message.MessageId)
 
 	editedText := "Für welchen Zeitraum möchtest du die Preishistorie sehen?"
 	_, sendErr := bot.SendPhoto(ctx.EffectiveUser.Id, buffer, &gotgbot.SendPhotoOpts{Caption: editedText, ReplyMarkup: markup})
@@ -80,7 +80,7 @@ func updatePriceHistoryGraphHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	}
 
 	if priceagent.Entity.Type != geizhals.Product {
-		cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{Text: "Pricehistory is only available for products at the moment!"})
+		_, _ = cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{Text: "Pricehistory is only available for products at the moment!"})
 		return nil
 	}
 
