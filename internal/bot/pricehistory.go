@@ -69,9 +69,9 @@ func showPriceHistoryHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	return nil
 }
 
-// updatePriceHistoryHandler handles the inline button calls to the date range buttons below the pricehistory chart.
+// updatePriceHistoryGraphHandler handles the inline button calls to the date range buttons below the pricehistory chart.
 // It renders an updated pricehistory chart and sends it to the user.
-func updatePriceHistoryHandler(b *gotgbot.Bot, ctx *ext.Context) error {
+func updatePriceHistoryGraphHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	cb := ctx.Update.CallbackQuery
 
 	priceagent, getPriceagentErr := getPriceagentFromContext(ctx)

@@ -398,10 +398,10 @@ func addMessageHandlers(dispatcher *ext.Dispatcher) {
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_98_"), deletePriceagentConfirmationHandler))
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_99_"), deletePriceagentHandler))
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_10_"), showPriceHistoryHandler))
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_11_"), updatePriceHistoryHandler)) // Graph 1M
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_12_"), updatePriceHistoryHandler)) // Graph 3M
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_13_"), updatePriceHistoryHandler)) // Graph 6M
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_14_"), updatePriceHistoryHandler)) // Graph 12M
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_11_"), updatePriceHistoryGraphHandler)) // Graph 1M
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_12_"), updatePriceHistoryGraphHandler)) // Graph 3M
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_13_"), updatePriceHistoryGraphHandler)) // Graph 6M
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_14_"), updatePriceHistoryGraphHandler)) // Graph 12M
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_02_"), setNotificationBelowHandler))
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_01_"), setNotificationAlwaysHandler))
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_00_"), changePriceagentSettingsHandler))
