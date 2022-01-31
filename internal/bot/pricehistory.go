@@ -131,7 +131,6 @@ func generateDateRangeKeyboard(priceagent models.PriceAgent, dateRange string) (
 		dateRangeKeyboard[0].Text = "🔘 1M"
 		since = time.Now().AddDate(0, -1, 0)
 	case "12":
-	default:
 		dateRangeKeyboard[1].Text = "🔘 3M"
 		since = time.Now().AddDate(0, -3, 0)
 	case "13":
@@ -140,6 +139,8 @@ func generateDateRangeKeyboard(priceagent models.PriceAgent, dateRange string) (
 	case "14":
 		dateRangeKeyboard[3].Text = "🔘 12M"
 		since = time.Now().AddDate(0, -12, 0)
+	default:
+		return generateDateRangeKeyboard(priceagent, "12")
 	}
 	return dateRangeKeyboard, since
 }
