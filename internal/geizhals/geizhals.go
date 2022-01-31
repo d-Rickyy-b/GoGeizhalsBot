@@ -14,11 +14,6 @@ import (
 var wishlistURLPattern = regexp.MustCompile(`^((?:https?://)?geizhals\.(?:de|at|eu)/\?cat=WL(-\d+)).*$`)
 var productURLPattern = regexp.MustCompile(`^((?:https?://)?geizhals\.(?:de|at|eu)/[0-9a-zA-Z\-]*a(\d+).html)\??.*$`)
 
-// IsValidURL checks if the given URL is a valid Geizhals URL.
-func IsValidURL(url string) bool {
-	return wishlistURLPattern.MatchString(url) || productURLPattern.MatchString(url)
-}
-
 // parsePrice parses a price from a given string, returns 0 if no price could be found.
 func parsePrice(priceString string) float64 {
 	priceString = strings.ReplaceAll(priceString, ",", ".")
