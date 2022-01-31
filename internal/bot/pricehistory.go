@@ -34,17 +34,11 @@ func showPriceHistoryHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 		return nil
 	}
 
+	dateRangeKeyboard, since := generateDateRangeKeyboard(priceagent, "03")
 	markup := gotgbot.InlineKeyboardMarkup{
 		InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
-			{
-				{Text: "1M", CallbackData: fmt.Sprintf("m04_11_%d", priceagent.ID)},
-				{Text: "🔘 3M", CallbackData: fmt.Sprintf("m04_12_%d", priceagent.ID)},
-				{Text: "6M", CallbackData: fmt.Sprintf("m04_13_%d", priceagent.ID)},
-				{Text: "12M", CallbackData: fmt.Sprintf("m04_14_%d", priceagent.ID)},
-			},
-			{
-				{Text: "↩️ Zurück", CallbackData: fmt.Sprintf("m03_00_%d", priceagent.ID)},
-			},
+			dateRangeKeyboard,
+			{{Text: "↩️ Zurück", CallbackData: fmt.Sprintf("m03_00_%d", priceagent.ID)}},
 		},
 	}
 
@@ -56,7 +50,6 @@ func showPriceHistoryHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	}
 
 	buffer := bytes.NewBuffer([]byte{})
-	since := time.Now().AddDate(0, -3, 0)
 	renderChart(priceagent, history, since, buffer)
 
 	_, _ = bot.DeleteMessage(ctx.EffectiveChat.Id, cb.Message.MessageId)
@@ -119,28 +112,28 @@ func updatePriceHistoryGraphHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 // generateDateRangeKeyboard generates the keyboard for the date range buttons below the pricehistory chart.
 func generateDateRangeKeyboard(priceagent models.PriceAgent, dateRange string) ([]gotgbot.InlineKeyboardButton, time.Time) {
 	dateRangeKeyboard := []gotgbot.InlineKeyboardButton{
-		{Text: "1M", CallbackData: fmt.Sprintf("m04_11_%d", priceagent.ID)},
-		{Text: "3M", CallbackData: fmt.Sprintf("m04_12_%d", priceagent.ID)},
-		{Text: "6M", CallbackData: fmt.Sprintf("m04_13_%d", priceagent.ID)},
-		{Text: "12M", CallbackData: fmt.Sprintf("m04_14_%d", priceagent.ID)},
+		{Text: "1M", CallbackData: fmt.Sprintf("m05_01_%d", priceagent.ID)},
+		{Text: "3M", CallbackData: fmt.Sprintf("m05_03_%d", priceagent.ID)},
+		{Text: "6M", CallbackData: fmt.Sprintf("m05_06_%d", priceagent.ID)},
+		{Text: "12M", CallbackData: fmt.Sprintf("m05_12_%d", priceagent.ID)},
 	}
 
 	var since time.Time
 	switch dateRange {
-	case "11":
+	case "01":
 		dateRangeKeyboard[0].Text = "🔘 1M"
 		since = time.Now().AddDate(0, -1, 0)
-	case "12":
+	case "03":
 		dateRangeKeyboard[1].Text = "🔘 3M"
 		since = time.Now().AddDate(0, -3, 0)
-	case "13":
+	case "06":
 		dateRangeKeyboard[2].Text = "🔘 6M"
 		since = time.Now().AddDate(0, -6, 0)
-	case "14":
+	case "12":
 		dateRangeKeyboard[3].Text = "🔘 12M"
 		since = time.Now().AddDate(0, -12, 0)
 	default:
-		return generateDateRangeKeyboard(priceagent, "12")
+		return generateDateRangeKeyboard(priceagent, "03")
 	}
 	return dateRangeKeyboard, since
 }
@@ -148,7 +141,7 @@ func generateDateRangeKeyboard(priceagent models.PriceAgent, dateRange string) (
 // getPriceagentFromContext returns the priceagent from the callbackQuery data.
 func getPriceagentFromContext(ctx *ext.Context) (models.PriceAgent, error) {
 	cb := ctx.CallbackQuery
-	priceagentID, parseErr := parseIDFromCallbackData(cb.Data, "m04_10_")
+	priceagentID, parseErr := parseIDFromCallbackData(cb.Data, "m05_00_")
 	if parseErr != nil {
 		return models.PriceAgent{}, fmt.Errorf("showPriceagentDetail: failed to parse priceagentID from callback data: %w", parseErr)
 	}

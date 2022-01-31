@@ -209,7 +209,7 @@ func showPriceagentDetail(b *gotgbot.Bot, ctx *ext.Context) error {
 		InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
 			{
 				{Text: notificationButtonText, CallbackData: fmt.Sprintf("m04_00_%d", priceagent.ID)},
-				{Text: "📊 Preisverlauf", CallbackData: fmt.Sprintf("m04_10_%d", priceagent.ID)},
+				{Text: "📊 Preisverlauf", CallbackData: fmt.Sprintf("m05_00_%d", priceagent.ID)},
 			},
 			{
 				{Text: "❌ Löschen", CallbackData: fmt.Sprintf("m04_98_%d", priceagent.ID)},
@@ -397,11 +397,11 @@ func addMessageHandlers(dispatcher *ext.Dispatcher) {
 	// Callback Queries (inline keyboards)
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_98_"), deletePriceagentConfirmationHandler))
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_99_"), deletePriceagentHandler))
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_10_"), showPriceHistoryHandler))
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_11_"), updatePriceHistoryGraphHandler)) // Graph 1M
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_12_"), updatePriceHistoryGraphHandler)) // Graph 3M
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_13_"), updatePriceHistoryGraphHandler)) // Graph 6M
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_14_"), updatePriceHistoryGraphHandler)) // Graph 12M
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m05_00_"), showPriceHistoryHandler))
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m05_01_"), updatePriceHistoryGraphHandler)) // Graph 1M
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m05_03_"), updatePriceHistoryGraphHandler)) // Graph 3M
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m05_06_"), updatePriceHistoryGraphHandler)) // Graph 6M
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m05_12_"), updatePriceHistoryGraphHandler)) // Graph 12M
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_02_"), setNotificationBelowHandler))
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_01_"), setNotificationAlwaysHandler))
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_00_"), changePriceagentSettingsHandler))
