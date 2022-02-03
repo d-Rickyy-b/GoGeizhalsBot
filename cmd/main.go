@@ -25,7 +25,6 @@ func main() {
 	if readConfigErr != nil {
 		log.Fatal(readConfigErr)
 	}
-	log.Println(botConfig)
 
 	var proxies []*url.URL
 	if botConfig.Proxy.Enabled {
