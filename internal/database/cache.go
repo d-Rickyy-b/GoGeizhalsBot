@@ -51,3 +51,10 @@ func CreateUserWithCache(user models.User) {
 	}
 	userCache[user.ID] = user
 }
+
+func DeleteUserWithCache(userID int64) {
+	cacheMutex.Lock()
+	defer cacheMutex.Unlock()
+	DeleteUser(userID)
+	delete(userCache, userID)
+}

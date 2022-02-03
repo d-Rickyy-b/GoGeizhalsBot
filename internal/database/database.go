@@ -188,6 +188,36 @@ func UpdateEntity(entity geizhals.Entity) {
 	}
 }
 
+func DeleteUser(userID int64) {
+	// Delete all priceagents for the user
+
+	_ = db.Transaction(func(tx *gorm.DB) error {
+		// delete all the things
+		var notifSettings []models.NotificationSettings
+		if err := tx.Debug().Model(&models.NotificationSettings{}).Joins("JOIN price_agents on price_agents.notification_id = notification_settings.id").Where("price_agents.user_id = ?", userID).Find(&notifSettings); err.Error != nil { // return any error will rollback
+			return err.Error
+		}
+
+		if len(notifSettings) > 0 {
+			if err := tx.Debug().Delete(notifSettings); err.Error != nil { // return any error will rollback
+				return err.Error
+			}
+		}
+
+		if err := tx.Debug().Model(&models.PriceAgent{}).Where("user_id = ?", userID).Delete(&models.PriceAgent{}); err.Error != nil {
+			// return any error will rollback
+			return err.Error
+		}
+		if err := tx.Debug().Model(&models.User{}).Where("id = ?", userID).Delete(&models.User{}); err.Error != nil {
+			// return any error will rollback
+			return err.Error
+		}
+
+		// return nil will commit the whole transaction
+		return nil
+	})
+}
+
 func AddHistoricPrice(price models.HistoricPrice) error {
 	// Only add price if the last price is different
 	var lastHistoricPrice models.HistoricPrice

@@ -374,6 +374,7 @@ func cbqNotImplementedHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 func setCommands() {
 	_, setCommandErr := bot.SetMyCommands([]gotgbot.BotCommand{
 		{Command: "start", Description: "Startmenü des Bots"},
+		{Command: "stop", Description: "Löscht alle Daten und stoppt den Bot"},
 		{Command: "help", Description: "Zeigt die Hilfe an"},
 		{Command: "show", Description: "Zeigt deine Preisagenten an"},
 		{Command: "new", Description: "Fügt neuen Preisagenten hinzu"},
@@ -391,10 +392,13 @@ func setCommands() {
 func addMessageHandlers(dispatcher *ext.Dispatcher) {
 	// Text commands
 	dispatcher.AddHandler(handlers.NewCommand("start", startHandler))
+	dispatcher.AddHandler(handlers.NewCommand("stop", stopHandler))
 	dispatcher.AddHandler(handlers.NewCommand("version", versionHandler))
 	dispatcher.AddHandler(handlers.NewCommand("help", helpHandler))
 
 	// Callback Queries (inline keyboards)
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal("m06_02"), stopHandlerCancel))
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal("m06_01"), stopHandlerConfirm))
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_98_"), deletePriceagentConfirmationHandler))
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_99_"), deletePriceagentHandler))
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m05_00_"), showPriceHistoryHandler))
