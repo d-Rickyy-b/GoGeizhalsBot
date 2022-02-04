@@ -102,27 +102,19 @@ func notifyUsers(priceAgent models.PriceAgent, oldEntity, updatedEntity geizhals
 
 // UpdatePricesJob is a job that updates prices of all price agents at a given interval.
 func UpdatePricesJob(updateFrequency time.Duration) {
-	// Initialize lastCheck time to now-2*updateFrequency to ensure that the first update is done immediately.
-	lastCheck := time.Now().Add(-2 * updateFrequency)
-
 	// Align method execution at certain intervals - e.g. every 5 minutes at :05, :10, :15, etc. similar to cron.
+	for {
+		sleepDuration := calculateSleep(updateFrequency)
+		log.Println("Sleeping for:", sleepDuration)
+		time.Sleep(sleepDuration)
+
+		updateEntityPrices()
+	}
+}
+
+// calculateSleep calculates the duration to sleep before the next update.
+func calculateSleep(updateFrequency time.Duration) time.Duration {
 	delta := time.Now().Unix() % int64(updateFrequency.Seconds())
 	initialDelay := updateFrequency - (time.Second * time.Duration(delta))
-	log.Println("Initial Delay:", initialDelay)
-	time.Sleep(initialDelay)
-
-	for {
-		// calculate difference between now and lastCheck,
-		passedTime := time.Since(lastCheck)
-		// if it's < updateFrequency, sleep for the remaining time
-		if passedTime < updateFrequency {
-			sleepDuration := updateFrequency - passedTime
-			log.Println("Sleeping for:", sleepDuration)
-			time.Sleep(sleepDuration)
-		}
-
-		// check for price updates
-		updateEntityPrices()
-		lastCheck = time.Now()
-	}
+	return initialDelay
 }
