@@ -85,8 +85,6 @@ func GetProductPriceagentsForUser(userID int64) ([]models.PriceAgent, error) {
 	var priceagents []models.PriceAgent
 	var query = &models.PriceAgent{UserID: userID}
 
-	// tx := db.Debug().Joins("JOIN entities on price_agents.entity_id = entities.id").Where(query).Where("entities.type = 1").Find(&priceagents)
-	// tx := db.Debug().Model(&models.PriceAgent{}).Where(query).Joins("JOIN entities on price_agents.entity_id = entities.id").Where(&geizhals.Entity{Type: geizhals.Product}).Find(&priceagents)
 	tx := db.Joins("JOIN entities on price_agents.entity_id = entities.id").Where(query).Where("entities.type = ?", geizhals.Product).Find(&priceagents)
 	if tx.Error != nil {
 		log.Println(tx.Error)
@@ -188,9 +186,9 @@ func UpdateEntity(entity geizhals.Entity) {
 	}
 }
 
+// DeleteUser deletes a user and their PriceAgents from the database
 func DeleteUser(userID int64) {
-	// Delete all priceagents for the user
-
+	// Start a new transaction
 	_ = db.Transaction(func(tx *gorm.DB) error {
 		// delete all the things
 		var notifSettings []models.NotificationSettings
