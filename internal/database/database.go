@@ -24,7 +24,7 @@ func InitDB() {
 
 	// Migrate the schema
 	migrateError := db.AutoMigrate(&models.User{}, &models.NotificationSettings{}, &models.PriceAgent{},
-		&geizhals.Entity{}, &models.HistoricPrice{})
+		&geizhals.Entity{})
 	if migrateError != nil {
 		panic("failed to migrate database")
 	}
