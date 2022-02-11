@@ -11,8 +11,9 @@ import (
 )
 
 type priceHistoryRequest struct {
-	ID     int64 `json:"id"`
-	Params struct {
+	ID        []int64 `json:"id"`
+	Itemcount []int64 `json:"itemcount"`
+	Params    struct {
 		Days int    `json:"days"`
 		Loc  string `json:"loc"`
 	} `json:"params"`
@@ -80,9 +81,9 @@ func (entry *PriceEntry) UnmarshalJSON(p []byte) error {
 
 // GetPriceHistory returns the price history for the given entity either from cache or by downloading it.
 func GetPriceHistory(entity Entity) (PriceHistory, error) {
-	if entity.Type != Product {
-		return PriceHistory{}, fmt.Errorf("can only fetch pricehistory for products as of now")
-	}
+	//if entity.Type != Product {
+	//	return PriceHistory{}, fmt.Errorf("can only fetch pricehistory for products as of now")
+	//}
 
 	// Check if we already have the price history in cache
 	history, isCached := getPriceHistoryFromCache(entity)
@@ -111,6 +112,28 @@ func getPriceHistoryFromCache(entity Entity) (PriceHistory, bool) {
 
 // downloadPriceHistory downloads the price history for the given entity.
 func downloadPriceHistory(entity Entity) (PriceHistory, error) {
+	var entityIDs []int64
+	var amounts []int64
+
+	switch entity.Type {
+	case Product:
+		entityIDs = append(entityIDs, entity.ID)
+		amounts = append(amounts, 1)
+	case Wishlist:
+		html, _, downloadErr := downloadHTML(entity.URL)
+		if downloadErr != nil {
+			return PriceHistory{}, downloadErr
+		}
+
+		// Fetch Product IDs and Amounts
+		var parseErr error
+		entityIDs, amounts, parseErr = parseWishlistEntityIDsAndAmounts(html)
+		if parseErr != nil {
+			log.Println("Error parsing wishlist entities:", parseErr)
+			return PriceHistory{}, parseErr
+		}
+	}
+
 	log.Println("Downloading price history for", entity.Name)
 	priceHistoryAPI := "https://geizhals.de/api/gh0/price_history"
 	proxyURL := getNextProxy()
@@ -122,7 +145,8 @@ func downloadPriceHistory(entity Entity) (PriceHistory, error) {
 
 	// Currently, this requests only supports geizhals.de (coming from loc = "de").
 	requestBody := priceHistoryRequest{
-		ID: entity.ID,
+		ID:        entityIDs,
+		Itemcount: amounts,
 		Params: struct {
 			Days int    `json:"days"`
 			Loc  string `json:"loc"`

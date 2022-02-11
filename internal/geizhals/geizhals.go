@@ -182,3 +182,34 @@ func UpdateEntity(entity Entity) (Entity, error) {
 	updatedEntity.ID = entity.ID
 	return updatedEntity, downloadErr
 }
+
+// parseWishlistEntityIDsAndAmounts parses the wishlist entity IDs and the amount of the entity in the wishlist
+// from the given HTML document.
+func parseWishlistEntityIDsAndAmounts(doc *goquery.Document) (entityIDs []int64, amounts []int64, parseErr error) {
+	// get wishlist__item and iterate over all of them
+	wishlistItems := doc.Find("div.wishlist__item")
+	wishlistItems.Each(func(i int, selection *goquery.Selection) {
+		// Extract amount and product ID
+		dataID, idExists := selection.Attr("data-id")
+		if !idExists {
+			return
+		}
+		ID, convertErr := strconv.ParseInt(dataID, 10, 0)
+		if convertErr != nil {
+			return
+		}
+
+		value, valueExists := selection.Attr("data-count")
+		if !valueExists {
+			return
+		}
+		amount, err := strconv.ParseInt(value, 10, 0)
+		if err != nil {
+			return
+		}
+
+		entityIDs = append(entityIDs, ID)
+		amounts = append(amounts, amount)
+	})
+	return entityIDs, amounts, parseErr
+}

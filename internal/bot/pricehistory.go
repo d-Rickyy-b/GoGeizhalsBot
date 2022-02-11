@@ -29,11 +29,6 @@ func showPriceHistoryHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 		return getPriceagentErr
 	}
 
-	if priceagent.Entity.Type != geizhals.Product {
-		_, _ = cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{Text: "Pricehistory is only available for products at the moment!"})
-		return nil
-	}
-
 	dateRangeKeyboard, since := generateDateRangeKeyboard(priceagent, "03")
 	markup := gotgbot.InlineKeyboardMarkup{
 		InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
@@ -70,11 +65,6 @@ func updatePriceHistoryGraphHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	priceagent, getPriceagentErr := getPriceagentFromContext(ctx)
 	if getPriceagentErr != nil {
 		return getPriceagentErr
-	}
-
-	if priceagent.Entity.Type != geizhals.Product {
-		_, _ = cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{Text: "Pricehistory is only available for products at the moment!"})
-		return nil
 	}
 
 	results := strings.Split(cb.Data, "_")
