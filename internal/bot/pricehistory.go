@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math"
 	"strings"
 	"time"
 
@@ -169,7 +170,7 @@ func renderChart(priceagent models.PriceAgent, history geizhals.PriceHistory, si
 	}
 
 	maxPrice := 0.0
-	minPrice := 9999999999999.0
+	minPrice := math.MaxFloat64
 	lastPrice := 0.0
 	for _, entry := range history.Response {
 		// Skip entries before given date
@@ -198,12 +199,8 @@ func renderChart(priceagent models.PriceAgent, history geizhals.PriceHistory, si
 		}
 
 		// Calculate current max/min price - only for valid entries
-		if entry.Price > maxPrice {
-			maxPrice = entry.Price
-		}
-		if entry.Price < minPrice {
-			minPrice = entry.Price
-		}
+		maxPrice = math.Max(maxPrice, entry.Price)
+		minPrice = math.Min(minPrice, entry.Price)
 	}
 
 	linRegSeries := &chart.LinearRegressionSeries{
