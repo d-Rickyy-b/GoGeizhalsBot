@@ -15,15 +15,14 @@ var wishlistURLPattern = regexp.MustCompile(`^((?:https?://)?geizhals\.(?:de|at|
 var productURLPattern = regexp.MustCompile(`^((?:https?://)?geizhals\.(?:de|at|eu)/[0-9a-zA-Z\-]*a(\d+).html)\??.*$`)
 
 // parsePrice parses a price from a given string, returns 0 if no price could be found.
-func parsePrice(priceString string) float64 {
+func parsePrice(priceString string) (float64, error) {
 	priceString = strings.ReplaceAll(priceString, ",", ".")
 	priceString = strings.ReplaceAll(priceString, "€ ", "")
 	price, err := strconv.ParseFloat(priceString, 64)
 	if err != nil {
 		log.Printf("Can't parse price: '%s' - %s", priceString, err)
-		return 0
 	}
-	return price
+	return price, err
 }
 
 // DownloadEntity retrieves the metadata (name, price) for a given entity hosted on Geizhals.
@@ -145,7 +144,10 @@ func parseWishlist(doc *goquery.Document) (Entity, error) {
 	// Parse price from html
 	priceSelection := doc.Find("div.wishlist_sum_area span.gh_price span.gh_price > span.gh_price")
 	priceString := priceSelection.Text()
-	price := parsePrice(priceString)
+	price, parseErr := parsePrice(priceString)
+	if parseErr != nil {
+		return Entity{}, parseErr
+	}
 
 	wishlist := Entity{
 		Price: price,
@@ -165,7 +167,10 @@ func parseProduct(doc *goquery.Document) (Entity, error) {
 	// Parse price from html
 	priceSelection := doc.Find("div#offer__price-0 span.gh_price")
 	priceString := priceSelection.Text()
-	price := parsePrice(priceString)
+	price, parseErr := parsePrice(priceString)
+	if parseErr != nil {
+		return Entity{}, parseErr
+	}
 
 	product := Entity{
 		Price: price,
