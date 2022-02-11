@@ -450,9 +450,6 @@ func Start(botConfig config.Config) {
 				fmt.Println("an error occurred while handling update:", err.Error())
 				return ext.DispatcherActionNoop
 			},
-			Panic:       nil,
-			ErrorLog:    nil,
-			MaxRoutines: 0,
 		},
 	})
 
