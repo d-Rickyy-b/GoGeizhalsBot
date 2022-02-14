@@ -376,8 +376,6 @@ func setCommands() {
 		{Command: "start", Description: "Startmenü des Bots"},
 		{Command: "stop", Description: "Löscht alle Daten und stoppt den Bot"},
 		{Command: "help", Description: "Zeigt die Hilfe an"},
-		{Command: "show", Description: "Zeigt deine Preisagenten an"},
-		{Command: "new", Description: "Fügt neuen Preisagenten hinzu"},
 		{Command: "version", Description: "Zeigt die Version des Bots an"},
 	}, &gotgbot.SetMyCommandsOpts{
 		Scope:        gotgbot.BotCommandScopeDefault{},

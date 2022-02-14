@@ -11,8 +11,8 @@ func helpHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 		"\n" +
 		"/start - Startmenü\n" +
 		"/help - Zeigt diese Hilfe\n" +
-		"/show - Zeigt deine Preisagenten an\n" +
-		"/add - Erstellt einen neuen Preisagenten\n"
+		"/stop - Löscht alle deine Daten und beendet den Bot\n" +
+		"/version - Zeigt die aktuelle Version des Bots"
 	_, err := ctx.Message.Reply(b, helpMessage, nil)
 	return err
 }
