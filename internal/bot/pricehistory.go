@@ -38,7 +38,6 @@ func showPriceHistoryHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 		},
 	}
 
-	_, _ = cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{})
 	_, _ = b.SendChatAction(ctx.EffectiveChat.Id, "upload_photo")
 	history, err := geizhals.GetPriceHistory(priceagent.Entity)
 	if err != nil {
