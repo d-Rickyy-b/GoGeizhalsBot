@@ -4,6 +4,7 @@ import (
 	"GoGeizhalsBot/internal/bot/models"
 	"GoGeizhalsBot/internal/database"
 	"GoGeizhalsBot/internal/geizhals"
+	"GoGeizhalsBot/internal/prometheus"
 	"fmt"
 	"log"
 	"time"
@@ -84,6 +85,7 @@ func notifyUsers(priceAgent models.PriceAgent, oldEntity, updatedEntity geizhals
 	}
 
 	log.Println("Sending notification to user:", user.ID)
+	prometheus.PriceagentNotifications.Inc()
 
 	markup := gotgbot.InlineKeyboardMarkup{
 		InlineKeyboard: [][]gotgbot.InlineKeyboardButton{

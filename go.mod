@@ -5,6 +5,7 @@ go 1.16
 require (
 	github.com/PaulSonOfLars/gotgbot/v2 v2.0.0-rc.4
 	github.com/PuerkitoBio/goquery v1.8.0
+	github.com/VictoriaMetrics/metrics v1.18.1
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/glebarez/sqlite v1.3.3
 	github.com/jinzhu/now v1.1.4 // indirect

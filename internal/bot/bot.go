@@ -6,6 +6,7 @@ import (
 	"GoGeizhalsBot/internal/config"
 	"GoGeizhalsBot/internal/database"
 	"GoGeizhalsBot/internal/geizhals"
+	"GoGeizhalsBot/internal/prometheus"
 	"fmt"
 	"log"
 	"net/http"
@@ -480,6 +481,11 @@ func Start(botConfig config.Config) {
 	}
 
 	log.Printf("Bot has been started as @%s...\n", bot.User.Username)
+
+	if botConfig.Prometheus.Enabled {
+		exportAddr := fmt.Sprintf("%s:%d", botConfig.Prometheus.ExportIP, botConfig.Prometheus.ExportPort)
+		prometheus.StartPrometheusExporter(exportAddr)
+	}
 
 	updater.Idle()
 }

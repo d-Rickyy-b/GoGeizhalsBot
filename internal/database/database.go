@@ -53,9 +53,39 @@ func GetPriceAgentCountForUser(userID int64) int64 {
 	return count
 }
 
+func GetPriceAgentCount() int64 {
+	var count int64
+	db.Model(&models.PriceAgent{}).Count(&count)
+	return count
+}
+
+func GetPriceAgentProductCount() int64 {
+	var count int64
+	db.Model(&models.PriceAgent{}).Joins("JOIN entities on price_agents.entity_id = entities.id").Where("entities.type = ?", geizhals.Product).Count(&count)
+	return count
+}
+
+func GetPriceAgentWishlistCount() int64 {
+	var count int64
+	db.Model(&models.PriceAgent{}).Joins("JOIN entities on price_agents.entity_id = entities.id").Where("entities.type = ?", geizhals.Wishlist).Count(&count)
+	return count
+}
+
+func GetUserCount() int64 {
+	var count int64
+	db.Model(&models.User{}).Count(&count)
+	return count
+}
+
 func CreateUser(user models.User) error {
 	tx := db.Create(&user)
 	return tx.Error
+}
+
+func GetAllUsers() []models.User {
+	var users []models.User
+	db.Find(&users)
+	return users
 }
 
 func DeletePriceAgentForUser(priceAgent models.PriceAgent) error {
