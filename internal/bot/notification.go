@@ -24,7 +24,7 @@ func updateEntityPrices() {
 	// For each price agent, update prices and store updated prices in the entity in the database.
 	// Also update price history with the new prices.
 	for _, entity := range allEntities {
-		log.Println("Updating prices for:", entity.Name)
+		log.Println("Updating prices for:", entity.URL)
 
 		// If there are two price agents with the same entity, we currently fetch it twice
 		updatedEntity, updateErr := geizhals.UpdateEntity(entity)
