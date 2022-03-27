@@ -215,25 +215,3 @@ func DeleteUser(userID int64) {
 		return nil
 	})
 }
-
-func AddHistoricPrice(price models.HistoricPrice) error {
-	// Only add price if the last price is different
-	var lastHistoricPrice models.HistoricPrice
-	lookupTx := db.Model(&models.HistoricPrice{}).Where("entity_id = ?", price.EntityID).Order("created_at desc").First(&lastHistoricPrice)
-	if lookupTx.Error != nil {
-		// For the first time, there is no entry in the database, so First will return an error
-		log.Println(lookupTx.Error)
-	}
-	if lastHistoricPrice.Price == price.Price {
-		log.Println("Price is the same as last price, not adding")
-		return nil
-	}
-
-	// If prices differ, add it to the database
-	tx := db.Create(&price)
-	if tx.Error != nil {
-		log.Println(tx.Error)
-		return tx.Error
-	}
-	return nil
-}

@@ -344,7 +344,6 @@ func deletePriceagentHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 }
 
 func newUserHandler(_ *gotgbot.Bot, ctx *ext.Context) error {
-	prometheus.TotalUserInteractions.Inc()
 	// Create user in databse if they don't exist already
 	if !ctx.EffectiveSender.IsUser() {
 		return nil
