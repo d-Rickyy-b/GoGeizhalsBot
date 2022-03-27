@@ -1,6 +1,7 @@
 package geizhals
 
 import (
+	"GoGeizhalsBot/internal/prometheus"
 	"fmt"
 	"log"
 	"net/http"
@@ -72,9 +73,11 @@ func downloadHTML(entityURL string) (*goquery.Document, int, error) {
 		log.Println("Using proxy: ", proxyURL)
 	}
 
+	prometheus.GeizhalsHTTPRequests.Inc()
 	resp, getErr := httpClient.Get(entityURL)
 	if getErr != nil {
 		log.Println(getErr)
+		prometheus.HttpErrors.Inc()
 		return nil, 0, fmt.Errorf("error while downloading content from Geizhals: %w", getErr)
 	}
 	// Cleanup when this function ends
