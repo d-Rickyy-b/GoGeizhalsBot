@@ -490,11 +490,13 @@ func Start(botConfig config.Config) {
 
 		// Periodically update the metrics from the database
 		go func() {
-			prometheus.TotalUniquePriceagentsValue = database.GetPriceAgentCount()
-			prometheus.TotalUniqueUsersValue = database.GetUserCount()
-			prometheus.TotalUniqueWishlistPriceagentsValue = database.GetPriceAgentWishlistCount()
-			prometheus.TotalUniqueProductPriceagentsValue = database.GetPriceAgentProductCount()
-			time.Sleep(time.Second * 60)
+			for {
+				prometheus.TotalUniquePriceagentsValue = database.GetPriceAgentCount()
+				prometheus.TotalUniqueUsersValue = database.GetUserCount()
+				prometheus.TotalUniqueWishlistPriceagentsValue = database.GetPriceAgentWishlistCount()
+				prometheus.TotalUniqueProductPriceagentsValue = database.GetPriceAgentProductCount()
+				time.Sleep(time.Second * 60)
+			}
 		}()
 	}
 
