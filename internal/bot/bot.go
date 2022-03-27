@@ -485,9 +485,6 @@ func Start(botConfig config.Config) {
 	log.Printf("Bot has been started as @%s...\n", bot.User.Username)
 
 	if botConfig.Prometheus.Enabled {
-		exportAddr := fmt.Sprintf("%s:%d", botConfig.Prometheus.ExportIP, botConfig.Prometheus.ExportPort)
-		prometheus.StartPrometheusExporter(exportAddr)
-
 		// Periodically update the metrics from the database
 		go func() {
 			for {
@@ -498,6 +495,10 @@ func Start(botConfig config.Config) {
 				time.Sleep(time.Second * 60)
 			}
 		}()
+
+		exportAddr := fmt.Sprintf("%s:%d", botConfig.Prometheus.ExportIP, botConfig.Prometheus.ExportPort)
+		log.Printf("Starting prometheus exporter on %s...\n", exportAddr)
+		prometheus.StartPrometheusExporter(exportAddr)
 	}
 
 	updater.Idle()
