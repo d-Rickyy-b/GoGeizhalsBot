@@ -6,10 +6,12 @@ import (
 	"GoGeizhalsBot/internal/config"
 	"GoGeizhalsBot/internal/database"
 	"GoGeizhalsBot/internal/geizhals"
+	"GoGeizhalsBot/internal/prometheus"
 	"fmt"
 	"log"
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers/filters/message"
 
@@ -218,6 +220,7 @@ func showPriceagentDetail(b *gotgbot.Bot, ctx *ext.Context) error {
 		},
 	}
 
+	// Check if the initial message contained a photo, if yes, we're coming from the price history graph
 	if len(cb.Message.Photo) > 0 {
 		bot.DeleteMessage(ctx.EffectiveChat.Id, cb.Message.MessageId)
 
@@ -344,6 +347,7 @@ func deletePriceagentHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 }
 
 func newUserHandler(_ *gotgbot.Bot, ctx *ext.Context) error {
+	prometheus.TotalUserInteractions.Inc()
 	// Create user in databse if they don't exist already
 	if !ctx.EffectiveSender.IsUser() {
 		return nil
@@ -479,6 +483,23 @@ func Start(botConfig config.Config) {
 	}
 
 	log.Printf("Bot has been started as @%s...\n", bot.User.Username)
+
+	if botConfig.Prometheus.Enabled {
+		// Periodically update the metrics from the database
+		go func() {
+			for {
+				prometheus.TotalUniquePriceagentsValue = database.GetPriceAgentCount()
+				prometheus.TotalUniqueUsersValue = database.GetUserCount()
+				prometheus.TotalUniqueWishlistPriceagentsValue = database.GetPriceAgentWishlistCount()
+				prometheus.TotalUniqueProductPriceagentsValue = database.GetPriceAgentProductCount()
+				time.Sleep(time.Second * 60)
+			}
+		}()
+
+		exportAddr := fmt.Sprintf("%s:%d", botConfig.Prometheus.ExportIP, botConfig.Prometheus.ExportPort)
+		log.Printf("Starting prometheus exporter on %s...\n", exportAddr)
+		prometheus.StartPrometheusExporter(exportAddr)
+	}
 
 	updater.Idle()
 }

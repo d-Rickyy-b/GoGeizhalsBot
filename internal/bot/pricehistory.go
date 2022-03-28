@@ -4,6 +4,7 @@ import (
 	"GoGeizhalsBot/internal/bot/models"
 	"GoGeizhalsBot/internal/database"
 	"GoGeizhalsBot/internal/geizhals"
+	"GoGeizhalsBot/internal/prometheus"
 	"bytes"
 	"fmt"
 	"io"
@@ -145,6 +146,7 @@ func getPriceagentFromContext(ctx *ext.Context) (models.PriceAgent, error) {
 
 // renderChart renders a price history chart to the given writer.
 func renderChart(priceagent models.PriceAgent, history geizhals.PriceHistory, since time.Time, w io.Writer) {
+	prometheus.GraphsRendered.Inc()
 	darkFontColor := drawing.ColorFromHex("c2c2c2")
 	fontColor := darkFontColor
 
