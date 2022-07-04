@@ -9,11 +9,13 @@ import (
 )
 
 type Config struct {
-	BotToken string `yaml:"bot_token"`
-	Webhook  struct {
+	BotToken      string `yaml:"bot_token"`
+	LangDirectory string `yaml:"lang_path"`
+	Webhook       struct {
 		Enabled     bool   `yaml:"enabled"`
 		ListenIP    string `yaml:"listen_ip"`
 		ListenPort  int    `yaml:"listen_port"`
+		ListenPath  string `yaml:"listen_path"`
 		URL         string `yaml:"url"`
 		CertPath    string `yaml:"cert_path"`
 		CertKeyPath string `yaml:"cert_key_path"`
@@ -22,7 +24,8 @@ type Config struct {
 		Enabled       bool   `yaml:"enabled"`
 		ProxyListPath string `yaml:"proxy_list_path"`
 	} `yaml:"proxy"`
-	Prometheus struct {
+	LogDirectory string `yaml:"log_directory"`
+	Prometheus   struct {
 		Enabled    bool   `yaml:"enabled"`
 		ExportIP   string `yaml:"export_ip"`
 		ExportPort int    `yaml:"export_port"`
