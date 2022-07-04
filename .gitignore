@@ -25,3 +25,4 @@ proxies*.txt
 
 # Local sqlite database files
 *.db
+*.log
