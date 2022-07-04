@@ -462,7 +462,7 @@ func Start(botConfig config.Config) {
 		if parseErr != nil {
 			log.Fatalln("Can't parse webhook url:", parseErr)
 		}
-		log.Println("Starting webhook...")
+		log.Printf("Starting webhook on '%s:%d%s'...\n", botConfig.Webhook.ListenIP, botConfig.Webhook.ListenPort, botConfig.Webhook.ListenPath)
 		// TODO add support for custom certificates
 		err := updater.StartWebhook(bot, ext.WebhookOpts{
 			Listen:  botConfig.Webhook.ListenIP,
