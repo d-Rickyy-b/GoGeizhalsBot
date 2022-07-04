@@ -102,7 +102,7 @@ func validateConfig(config Config) bool {
 
 	if config.Prometheus.Enabled {
 		if config.Prometheus.ExportIP == "" || !IPRegex.MatchString(config.Prometheus.ExportIP) {
-			log.Fatalln("Prometheus export IP is does not match pattern 'x.x.x.x'")
+			log.Fatalln("Prometheus export IP does not match pattern 'x.x.x.x'")
 			return false
 		}
 		if config.Prometheus.ExportPort == 0 {
