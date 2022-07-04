@@ -54,7 +54,7 @@ func textChangeNotificationSettingsHandler(b *gotgbot.Bot, ctx *ext.Context) err
 		if errors.Is(parseErr, ErrOutOfRange) {
 			outOfRangePostfix = fmt.Sprintf("Der Preis liegt außerhalb des gültigen Bereichs und wurde daher auf %.2f € gesetzt.", price)
 		} else {
-			ctx.EffectiveMessage.Reply(b, "Bitte sende mir einen Preis in der Form: '3,99' oder '3.99'!", &gotgbot.SendMessageOpts{})
+			_, _ = ctx.EffectiveMessage.Reply(b, "Bitte sende mir einen Preis in der Form: '3,99' oder '3.99'!", &gotgbot.SendMessageOpts{})
 			return nil
 		}
 	}
@@ -69,7 +69,7 @@ func textChangeNotificationSettingsHandler(b *gotgbot.Bot, ctx *ext.Context) err
 	dbErr := database.UpdateNotificationSettings(userID, state.Priceagent.ID, newNotifSettings)
 	if dbErr != nil {
 		log.Printf("UpdateNotificationSettings: %s\n", dbErr)
-		ctx.EffectiveMessage.Reply(b, "Es ist ein Fehler beim Speichern der Einstellungen aufgetreten!", &gotgbot.SendMessageOpts{})
+		_, _ = ctx.EffectiveMessage.Reply(b, "Es ist ein Fehler beim Speichern der Einstellungen aufgetreten!", &gotgbot.SendMessageOpts{})
 		return dbErr
 	}
 
@@ -80,13 +80,14 @@ func textChangeNotificationSettingsHandler(b *gotgbot.Bot, ctx *ext.Context) err
 	}}
 
 	messageText := fmt.Sprintf("Preisagent wurde bearbeitet! %s", outOfRangePostfix)
-	b.SendMessage(ctx.EffectiveChat.Id, messageText, &gotgbot.SendMessageOpts{ReplyMarkup: markup})
+	_, _ = b.SendMessage(ctx.EffectiveChat.Id, messageText, &gotgbot.SendMessageOpts{ReplyMarkup: markup})
 	return nil
 }
 
 // textNewPriceagentHandler handles text messages that contain a link to a geizhals product or wishlist
 func textNewPriceagentHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	log.Println("User in CreatePriceagent state!")
+	_, _ = b.SendChatAction(ctx.EffectiveChat.Id, "typing")
 
 	entity, downloadErr := geizhals.DownloadEntity(ctx.EffectiveMessage.Text)
 	if downloadErr != nil {
