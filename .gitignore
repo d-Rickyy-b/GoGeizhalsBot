@@ -21,7 +21,7 @@
 config.json
 config.yml
 proxies.txt
-proxies*.txt
+proxies[0-9].txt
 
 # Local sqlite database files
 *.db
