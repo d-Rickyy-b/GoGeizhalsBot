@@ -1,0 +1,20 @@
+bot_token: "123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
+lang_path: "./lang/"
+
+webhook:
+  enabled: true
+  listen_ip: "127.0.0.1"
+  listen_port: 9001
+  listen_path: "/"
+  url: "https://example.com/123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
+  cert_path: ""
+  cert_key_path: ""
+
+proxy:
+  enabled: true
+  proxy_list_path: "proxies.txt"
+
+prometheus:
+  enabled: true
+  export_ip: "127.0.0.1"
+  export_port: 9090
