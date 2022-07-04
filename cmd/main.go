@@ -5,6 +5,7 @@ import (
 	"GoGeizhalsBot/internal/config"
 	"GoGeizhalsBot/internal/database"
 	"GoGeizhalsBot/internal/geizhals"
+	"GoGeizhalsBot/internal/logging"
 	"flag"
 	"log"
 	"net/url"
@@ -25,6 +26,8 @@ func main() {
 	if readConfigErr != nil {
 		log.Fatal(readConfigErr)
 	}
+
+	logging.SetupLogging(botConfig.LogDirectory)
 
 	var proxies []*url.URL
 	if botConfig.Proxy.Enabled {
