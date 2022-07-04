@@ -132,6 +132,5 @@ func textNewPriceagentHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 		},
 	}}
 	b.SendMessage(ctx.EffectiveChat.Id, "Preisagent wurde erstellt!", &gotgbot.SendMessageOpts{ReplyMarkup: markup})
-	// TODO send user to priceagent overview
 	return nil
 }

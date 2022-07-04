@@ -16,7 +16,3 @@ const (
 )
 
 var UserStates = map[int64]UserState{}
-
-func Init() {
-
-}

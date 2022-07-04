@@ -34,8 +34,6 @@ func stopHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 
 func stopHandlerConfirm(b *gotgbot.Bot, ctx *ext.Context) error {
 	cb := ctx.Update.CallbackQuery
-	// TODO Delete all user data from the database
-	//database.DeleteUser(cb.From.Id)
 	database.DeleteUserWithCache(cb.From.Id)
 	_, editErr := cb.Message.EditText(b, "Deine Daten wurden gelöscht!", &gotgbot.EditMessageTextOpts{
 		ParseMode: "HTML",
