@@ -1,0 +1,2 @@
+# List of proxy servers to use for each request to geizhals.de
+http://user:pass@proxy.host:80
