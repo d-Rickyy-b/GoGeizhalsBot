@@ -36,10 +36,10 @@ var (
 
 // var backgroundUpdateChecks = metrics.NewSummary("gogeizhalsbot_total_requests")
 
-func StartPrometheusExporter(addr string) {
+func StartPrometheusExporter(addr string) error {
 	// Expose the registered metrics at `/metrics` path.
 	http.HandleFunc("/metrics", func(w http.ResponseWriter, req *http.Request) {
 		metrics.WritePrometheus(w, true)
 	})
-	http.ListenAndServe(addr, nil)
+	return http.ListenAndServe(addr, nil)
 }

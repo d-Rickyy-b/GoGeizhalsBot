@@ -498,7 +498,10 @@ func Start(botConfig config.Config) {
 
 		exportAddr := fmt.Sprintf("%s:%d", botConfig.Prometheus.ExportIP, botConfig.Prometheus.ExportPort)
 		log.Printf("Starting prometheus exporter on %s...\n", exportAddr)
-		prometheus.StartPrometheusExporter(exportAddr)
+		err := prometheus.StartPrometheusExporter(exportAddr)
+		if err != nil {
+			panic("failed to start prometheus exporter: " + err.Error())
+		}
 	}
 
 	updater.Idle()
