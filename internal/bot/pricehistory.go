@@ -187,7 +187,7 @@ func renderChart(priceagent models.PriceAgent, history geizhals.PriceHistory, si
 		Name: priceagent.Name,
 		Style: chart.Style{
 			StrokeColor: mainSeriesColor,
-			StrokeWidth: 2,
+			StrokeWidth: 3,
 		},
 	}
 
@@ -230,7 +230,7 @@ func renderChart(priceagent models.PriceAgent, history geizhals.PriceHistory, si
 		InnerSeries: mainSeries,
 		Style: chart.Style{
 			StrokeColor:     regressionColor,
-			StrokeWidth:     2,
+			StrokeWidth:     3,
 			StrokeDashArray: []float64{5.0, 5.0},
 		},
 	}
@@ -240,7 +240,7 @@ func renderChart(priceagent models.PriceAgent, history geizhals.PriceHistory, si
 		FontColor: fontColor,
 	}
 
-	fontStyle := chart.Style{FontColor: fontColor}
+	fontStyle := chart.Style{FontColor: fontColor, FontSize: 12}
 
 	gridMajorStyle := chart.Style{
 		Hidden:      false,
@@ -284,7 +284,8 @@ func renderChart(priceagent models.PriceAgent, history geizhals.PriceHistory, si
 	}
 	graph.Elements = []chart.Renderable{chart.Legend(&graph, chart.Style{
 		FillColor: legendBackgroundColor,
-		FontColor: fontColor,
+		FontColor: fontStyle.FontColor,
+		FontSize:  fontStyle.FontSize,
 	})}
 
 	renderErr := graph.Render(chart.PNG, w)
