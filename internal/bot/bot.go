@@ -88,7 +88,7 @@ func showWishlistPriceagents(b *gotgbot.Bot, ctx *ext.Context) error {
 		messageText = "Das sind deine Preisagenten für deine Wunschlisten:"
 	}
 
-	markup := generateEntityKeyboard(priceagents, "m03_00_", 2)
+	markup := generateEntityKeyboard(priceagents, "m03_00", 2)
 	_, err = cb.Message.EditText(b, messageText, &gotgbot.EditMessageTextOpts{ReplyMarkup: markup})
 	if err != nil {
 		return fmt.Errorf("showWishlist: failed to edit message text: %w", err)
@@ -114,7 +114,7 @@ func showProductPriceagents(b *gotgbot.Bot, ctx *ext.Context) error {
 		messageText = "Das sind deine Preisagenten für deine Produkte:"
 	}
 
-	markup := generateEntityKeyboard(productPriceagents, "m03_00_", 2)
+	markup := generateEntityKeyboard(productPriceagents, "m03_00", 2)
 	_, err := cb.Message.EditText(b, messageText, &gotgbot.EditMessageTextOpts{ReplyMarkup: markup})
 	if err != nil {
 		return fmt.Errorf("showProduct: failed to edit message text: %w", err)
