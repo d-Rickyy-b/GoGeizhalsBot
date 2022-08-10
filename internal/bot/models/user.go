@@ -12,6 +12,6 @@ type User struct {
 	FirstName   string       `json:"first_name"`
 	LastName    string       `json:"last_name"`
 	LangCode    string       `json:"language_code"`
-	DarkMode    bool         `json:"dark_mode"`
+	DarkMode    bool         `json:"dark_mode" gorm:"default:1"`
 	PriceAgents []PriceAgent `json:"-"`
 }
