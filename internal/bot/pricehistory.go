@@ -167,20 +167,21 @@ func getPriceagentFromContext(ctx *ext.Context) (models.PriceAgent, error) {
 // renderChart renders a price history chart to the given writer.
 func renderChart(priceagent models.PriceAgent, history geizhals.PriceHistory, since time.Time, w io.Writer, darkmode bool) {
 	prometheus.GraphsRendered.Inc()
-	darkFontColor := drawing.ColorFromHex("c2c2c2")
-	fontColor := darkFontColor
+	var fontColor, chartBackgroundColor, regressionColor, mainSeriesColor, legendBackgroundColor, gridMajorStrokeColor, gridMinorStrokeColor drawing.Color
 
-	darkChartBackgroundColor := drawing.ColorFromHex("161b2b")
-	chartBackgroundColor := darkChartBackgroundColor
+	fontColor = chart.DefaultTextColor
+	chartBackgroundColor = chart.DefaultBackgroundColor
+	regressionColor = drawing.ColorFromHex("e8a71a")
+	mainSeriesColor = drawing.ColorFromHex("2569d1")
+	legendBackgroundColor = chart.DefaultBackgroundColor
+	gridMajorStrokeColor = drawing.Color{R: 192, G: 192, B: 192, A: 100}
+	gridMinorStrokeColor = drawing.Color{R: 192, G: 192, B: 192, A: 64}
 
-	darkRegressionColor := drawing.ColorFromHex("e8a71a")
-	regressionColor := darkRegressionColor
-
-	darkMainSeriesColor := drawing.ColorFromHex("2569d1")
-	mainSeriesColor := darkMainSeriesColor
-
-	darkLegendBackgroundColor := drawing.ColorFromHex("2d364f")
-	legendBackgroundColor := darkLegendBackgroundColor
+	if darkmode {
+		fontColor = drawing.ColorFromHex("c2c2c2")
+		chartBackgroundColor = drawing.ColorFromHex("161b2b")
+		legendBackgroundColor = drawing.ColorFromHex("2d364f")
+	}
 
 	mainSeries := chart.TimeSeries{
 		Name: priceagent.Name,
@@ -243,13 +244,13 @@ func renderChart(priceagent models.PriceAgent, history geizhals.PriceHistory, si
 
 	gridMajorStyle := chart.Style{
 		Hidden:      false,
-		StrokeColor: drawing.Color{R: 192, G: 192, B: 192, A: 100},
+		StrokeColor: gridMajorStrokeColor,
 		StrokeWidth: 0.5,
 	}
 
 	gridMinorStyle := chart.Style{
 		Hidden:      false,
-		StrokeColor: drawing.Color{R: 192, G: 192, B: 192, A: 64},
+		StrokeColor: gridMinorStrokeColor,
 		StrokeWidth: 0.5,
 	}
 
