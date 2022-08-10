@@ -70,7 +70,7 @@ func updatePriceHistoryGraphHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	}
 
 	results := strings.Split(cb.Data, "_")
-	if len(results) < 2 {
+	if len(results) != 3 && len(results) != 4 {
 		return fmt.Errorf("updatePriceHistoryGraphHandler: invalid callback data: %s", cb.Data)
 	}
 	darkMode := database.GetDarkmode(ctx.EffectiveUser.Id)
