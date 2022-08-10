@@ -448,7 +448,7 @@ func Start(botConfig config.Config) {
 		ErrorLog: nil,
 		DispatcherOpts: ext.DispatcherOpts{
 			Error: func(b *gotgbot.Bot, ctx *ext.Context, err error) ext.DispatcherAction {
-				fmt.Println("an error occurred while handling update:", err.Error())
+				log.Println("an error occurred while handling update:", err.Error())
 				return ext.DispatcherActionNoop
 			},
 		},
