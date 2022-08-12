@@ -35,7 +35,7 @@ func showPriceHistoryHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	markup := gotgbot.InlineKeyboardMarkup{
 		InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
 			dateRangeKeyboard,
-			{{Text: "↩️ Zurück", CallbackData: fmt.Sprintf("m03_00_%d", priceagent.ID)}},
+			{{Text: "↩️ Zurück", CallbackData: fmt.Sprintf("m03_01_%d", priceagent.ID)}},
 		},
 	}
 
@@ -79,7 +79,7 @@ func updatePriceHistoryGraphHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	markup := gotgbot.InlineKeyboardMarkup{
 		InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
 			dateRangeKeyboard,
-			{{Text: "↩️ Zurück", CallbackData: fmt.Sprintf("m03_00_%d", priceagent.ID)}},
+			{{Text: "↩️ Zurück", CallbackData: fmt.Sprintf("m03_01_%d", priceagent.ID)}},
 		},
 	}
 

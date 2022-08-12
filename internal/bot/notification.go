@@ -90,7 +90,7 @@ func notifyUsers(priceAgent models.PriceAgent, oldEntity, updatedEntity geizhals
 	markup := gotgbot.InlineKeyboardMarkup{
 		InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
 			{
-				{Text: "Zum Preisagenten!", CallbackData: fmt.Sprintf("m03_00_%d", priceAgent.ID)},
+				{Text: "Zum Preisagenten!", CallbackData: fmt.Sprintf("m03_02_%d", priceAgent.ID)},
 			},
 		},
 	}
