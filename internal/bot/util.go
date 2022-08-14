@@ -77,3 +77,13 @@ func parseIDFromCallbackData(callbackData string, prefix string) (int64, error) 
 	}
 	return int64(priceagentID), nil
 }
+
+func isAllowedLocation(location string) (allowed bool) {
+	allowedLocations := []string{"de", "at", "uk", "pl"}
+	for _, allowedLocation := range allowedLocations {
+		if location == allowedLocation {
+			return true
+		}
+	}
+	return false
+}
