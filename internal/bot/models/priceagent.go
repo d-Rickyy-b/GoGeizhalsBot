@@ -17,6 +17,7 @@ type PriceAgent struct {
 	Location             string               `json:"location" gorm:"default:de"`
 	NotificationID       int64                `json:"-"`
 	NotificationSettings NotificationSettings `json:"notificationSettings" gorm:"foreignkey:NotificationID;constraint:OnDelete:CASCADE;"`
+	Enabled              bool                 `json:"enabled" gorm:"default:1"`
 }
 
 func (pa PriceAgent) String() string {
