@@ -29,7 +29,11 @@ func InitDB() {
 		panic("failed to migrate database")
 	}
 
-	log.Println("All fine")
+	deleteError := DeleteDisabledPriceagents()
+	if deleteError != nil {
+		log.Println("Couldn't delete pending price agents!", deleteError.Error())
+	}
+	log.Println("Database init complete")
 }
 
 func CreatePriceAgentForUser(priceAgent *models.PriceAgent) error {
@@ -113,7 +117,7 @@ func DeletePriceAgentForUser(priceAgent models.PriceAgent) error {
 
 func GetProductPriceagentsForUser(userID int64) ([]models.PriceAgent, error) {
 	var priceagents []models.PriceAgent
-	var query = &models.PriceAgent{UserID: userID}
+	var query = &models.PriceAgent{UserID: userID, Enabled: true}
 
 	tx := db.Joins("JOIN entities on price_agents.entity_id = entities.id").Where(query).Where("entities.type = ?", geizhals.Product).Find(&priceagents)
 	if tx.Error != nil {
@@ -127,7 +131,7 @@ func GetProductPriceagentsForUser(userID int64) ([]models.PriceAgent, error) {
 func GetWishlistPriceagentsForUser(userID int64) ([]models.PriceAgent, error) {
 	var priceagents []models.PriceAgent
 
-	var query = &models.PriceAgent{UserID: userID}
+	var query = &models.PriceAgent{UserID: userID, Enabled: true}
 	tx := db.Joins("JOIN entities on price_agents.entity_id = entities.id").Where(query).Where("entities.type = ?", geizhals.Wishlist).Find(&priceagents)
 	if tx.Error != nil {
 		log.Println(tx.Error)
@@ -182,6 +186,15 @@ func UpdatePriceagent(priceagent models.PriceAgent) error {
 	return nil
 }
 
+func DeleteDisabledPriceagents() error {
+	tx := db.Where("enabled = 0").Delete(&models.PriceAgent{})
+	if tx.Error != nil {
+		log.Println(tx.Error)
+		return tx.Error
+	}
+	return nil
+}
+
 func GetAllEntities() ([]geizhals.Entity, error) {
 	var entities []geizhals.Entity
 	tx := db.Find(&entities)
@@ -195,7 +208,7 @@ func GetAllEntities() ([]geizhals.Entity, error) {
 // HasUserPriceAgentForEntity checks if a user already has a priceagent for a given entity
 func HasUserPriceAgentForEntity(userID int64, entityID int64) (bool, error) {
 	var priceagent models.PriceAgent
-	var query = &models.PriceAgent{UserID: userID, EntityID: entityID}
+	var query = &models.PriceAgent{UserID: userID, EntityID: entityID, Enabled: true}
 	tx := db.Where(query).Limit(1).Find(&priceagent)
 	exists := tx.RowsAffected > 0
 	if tx.Error != nil {
@@ -209,7 +222,7 @@ func HasUserPriceAgentForEntity(userID int64, entityID int64) (bool, error) {
 // GetPriceAgentsForEntity returns all priceagents for a given entity
 func GetPriceAgentsForEntity(entityID int64) ([]models.PriceAgent, error) {
 	var priceagents []models.PriceAgent
-	tx := db.Preload("Entity").Preload("User").Preload("NotificationSettings").Where("entity_id = ?", entityID).Find(&priceagents)
+	tx := db.Preload("Entity").Preload("User").Preload("NotificationSettings").Where("entity_id = ?", entityID).Where("enabled = 1").Find(&priceagents)
 	if tx.Error != nil {
 		log.Println(tx.Error)
 		return []models.PriceAgent{}, tx.Error
