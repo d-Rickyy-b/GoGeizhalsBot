@@ -12,8 +12,8 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-var wishlistURLPattern = regexp.MustCompile(`^((?:https?://)?geizhals\.(?:de|at|eu)/\?cat=WL(-\d+)).*$`)
-var productURLPattern = regexp.MustCompile(`^((?:https?://)?geizhals\.(?:de|at|eu)/[0-9a-zA-Z\-]*a(\d+).html)\??.*$`)
+var wishlistURLPattern = regexp.MustCompile(`^((?:https?://)?(?:geizhals\.(?:de|at|eu)|cenowarka\.pl|skinflint\.co\.uk)(/\?cat=WL(-\d+))).*$`)
+var productURLPattern = regexp.MustCompile(`^((?:https?://)?(?:geizhals\.(?:de|at|eu)|cenowarka\.pl|skinflint\.co\.uk)(/[0-9a-zA-Z\-]*a(\d+).html))\??.*$`)
 
 // parsePrice parses a price from a given string, returns 0 if no price could be found.
 func parsePrice(priceString string) (float64, error) {
