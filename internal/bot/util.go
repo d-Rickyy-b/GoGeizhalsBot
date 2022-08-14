@@ -2,6 +2,7 @@ package bot
 
 import (
 	"GoGeizhalsBot/internal/bot/models"
+	"errors"
 	"fmt"
 	"html"
 	"strconv"
@@ -65,11 +66,14 @@ func generateEntityKeyboard(priceagents []models.PriceAgent, menuID string, numC
 }
 
 func parseIDFromCallbackData(callbackData string, prefix string) (int64, error) {
-	priceagentIDString := strings.TrimPrefix(callbackData, prefix)
+	priceagentIDString := callbackData
 	results := strings.Split(priceagentIDString, "_")
 
 	// get last element from results
-	priceagentIDString = results[len(results)-1]
+	if len(results) != 3 && len(results) != 4 {
+		return 0, errors.New("couldn't parse priceagent ID - wrong number of results")
+	}
+	priceagentIDString = results[2]
 
 	priceagentID, parseErr := strconv.Atoi(priceagentIDString)
 	if parseErr != nil {

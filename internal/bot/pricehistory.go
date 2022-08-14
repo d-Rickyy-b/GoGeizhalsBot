@@ -31,7 +31,8 @@ func showPriceHistoryHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 		return getPriceagentErr
 	}
 
-	dateRangeKeyboard, since := generateDateRangeKeyboard(priceagent, "03")
+	isDarkmode := database.GetDarkmode(ctx.EffectiveUser.Id)
+	dateRangeKeyboard, since := generateDateRangeKeyboard(priceagent, "03", isDarkmode)
 	markup := gotgbot.InlineKeyboardMarkup{
 		InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
 			dateRangeKeyboard,
@@ -46,7 +47,7 @@ func showPriceHistoryHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	}
 
 	buffer := bytes.NewBuffer([]byte{})
-	renderChart(priceagent, history, since, buffer)
+	renderChart(priceagent, history, since, buffer, isDarkmode)
 
 	_, _ = bot.DeleteMessage(ctx.EffectiveChat.Id, cb.Message.MessageId)
 
@@ -69,12 +70,23 @@ func updatePriceHistoryGraphHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	}
 
 	results := strings.Split(cb.Data, "_")
-	if len(results) < 2 {
+	if len(results) != 3 && len(results) != 4 {
 		return fmt.Errorf("updatePriceHistoryGraphHandler: invalid callback data: %s", cb.Data)
 	}
+	darkMode := database.GetDarkmode(ctx.EffectiveUser.Id)
+	if len(results) == 4 {
+		changeDarkmodeTo := results[3]
+		switch changeDarkmodeTo {
+		case "0":
+			darkMode = false
+		default:
+			darkMode = true
+		}
+	}
+	database.UpdateDarkMode(ctx.EffectiveUser.Id, darkMode)
 	dateRange := results[1]
 
-	dateRangeKeyboard, since := generateDateRangeKeyboard(priceagent, dateRange)
+	dateRangeKeyboard, since := generateDateRangeKeyboard(priceagent, dateRange, darkMode)
 
 	markup := gotgbot.InlineKeyboardMarkup{
 		InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
@@ -90,7 +102,7 @@ func updatePriceHistoryGraphHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	}
 
 	buffer := bytes.NewBuffer([]byte{})
-	renderChart(priceagent, history, since, buffer)
+	renderChart(priceagent, history, since, buffer, darkMode)
 
 	newPic := gotgbot.InputMediaPhoto{Media: buffer, Caption: "Für welchen Zeitraum möchtest du die Preishistorie sehen?"}
 	_, sendErr := cb.Message.EditMedia(b, newPic, &gotgbot.EditMessageMediaOpts{ReplyMarkup: markup})
@@ -101,12 +113,20 @@ func updatePriceHistoryGraphHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 }
 
 // generateDateRangeKeyboard generates the keyboard for the date range buttons below the pricehistory chart.
-func generateDateRangeKeyboard(priceagent models.PriceAgent, dateRange string) ([]gotgbot.InlineKeyboardButton, time.Time) {
+func generateDateRangeKeyboard(priceagent models.PriceAgent, dateRange string, isDarkmode bool) ([]gotgbot.InlineKeyboardButton, time.Time) {
+	themeButton := "🌑"
+	switchTheme := 1
+	if isDarkmode {
+		themeButton = "🌕"
+		switchTheme = 0
+	}
+
 	dateRangeKeyboard := []gotgbot.InlineKeyboardButton{
 		{Text: "1M", CallbackData: fmt.Sprintf("m05_01_%d", priceagent.ID)},
 		{Text: "3M", CallbackData: fmt.Sprintf("m05_03_%d", priceagent.ID)},
 		{Text: "6M", CallbackData: fmt.Sprintf("m05_06_%d", priceagent.ID)},
 		{Text: "12M", CallbackData: fmt.Sprintf("m05_12_%d", priceagent.ID)},
+		{Text: themeButton, CallbackData: fmt.Sprintf("m05_%s_%d_%d", dateRange, priceagent.ID, switchTheme)},
 	}
 
 	var since time.Time
@@ -124,7 +144,7 @@ func generateDateRangeKeyboard(priceagent models.PriceAgent, dateRange string) (
 		dateRangeKeyboard[3].Text = "🔘 12M"
 		since = time.Now().AddDate(0, -12, 0)
 	default:
-		return generateDateRangeKeyboard(priceagent, "03")
+		return generateDateRangeKeyboard(priceagent, "03", isDarkmode)
 	}
 	return dateRangeKeyboard, since
 }
@@ -145,28 +165,29 @@ func getPriceagentFromContext(ctx *ext.Context) (models.PriceAgent, error) {
 }
 
 // renderChart renders a price history chart to the given writer.
-func renderChart(priceagent models.PriceAgent, history geizhals.PriceHistory, since time.Time, w io.Writer) {
+func renderChart(priceagent models.PriceAgent, history geizhals.PriceHistory, since time.Time, w io.Writer, darkmode bool) {
 	prometheus.GraphsRendered.Inc()
-	darkFontColor := drawing.ColorFromHex("c2c2c2")
-	fontColor := darkFontColor
+	var fontColor, chartBackgroundColor, regressionColor, mainSeriesColor, legendBackgroundColor, gridMajorStrokeColor, gridMinorStrokeColor drawing.Color
 
-	darkChartBackgroundColor := drawing.ColorFromHex("161b2b")
-	chartBackgroundColor := darkChartBackgroundColor
+	fontColor = chart.DefaultTextColor
+	chartBackgroundColor = chart.DefaultBackgroundColor
+	regressionColor = drawing.ColorFromHex("e8a71a")
+	mainSeriesColor = drawing.ColorFromHex("2569d1")
+	legendBackgroundColor = chart.DefaultBackgroundColor
+	gridMajorStrokeColor = drawing.Color{R: 192, G: 192, B: 192, A: 100}
+	gridMinorStrokeColor = drawing.Color{R: 192, G: 192, B: 192, A: 64}
 
-	darkRegressionColor := drawing.ColorFromHex("e8a71a")
-	regressionColor := darkRegressionColor
-
-	darkMainSeriesColor := drawing.ColorFromHex("2569d1")
-	mainSeriesColor := darkMainSeriesColor
-
-	darkLegendBackgroundColor := drawing.ColorFromHex("2d364f")
-	legendBackgroundColor := darkLegendBackgroundColor
+	if darkmode {
+		fontColor = drawing.ColorFromHex("c2c2c2")
+		chartBackgroundColor = drawing.ColorFromHex("161b2b")
+		legendBackgroundColor = drawing.ColorFromHex("2d364f")
+	}
 
 	mainSeries := chart.TimeSeries{
 		Name: priceagent.Name,
 		Style: chart.Style{
 			StrokeColor: mainSeriesColor,
-			StrokeWidth: 2,
+			StrokeWidth: 3,
 		},
 	}
 
@@ -209,7 +230,7 @@ func renderChart(priceagent models.PriceAgent, history geizhals.PriceHistory, si
 		InnerSeries: mainSeries,
 		Style: chart.Style{
 			StrokeColor:     regressionColor,
-			StrokeWidth:     2,
+			StrokeWidth:     3,
 			StrokeDashArray: []float64{5.0, 5.0},
 		},
 	}
@@ -219,17 +240,17 @@ func renderChart(priceagent models.PriceAgent, history geizhals.PriceHistory, si
 		FontColor: fontColor,
 	}
 
-	fontStyle := chart.Style{FontColor: fontColor}
+	fontStyle := chart.Style{FontColor: fontColor, FontSize: 12}
 
 	gridMajorStyle := chart.Style{
 		Hidden:      false,
-		StrokeColor: drawing.Color{R: 192, G: 192, B: 192, A: 100},
+		StrokeColor: gridMajorStrokeColor,
 		StrokeWidth: 0.5,
 	}
 
 	gridMinorStyle := chart.Style{
 		Hidden:      false,
-		StrokeColor: drawing.Color{R: 192, G: 192, B: 192, A: 64},
+		StrokeColor: gridMinorStrokeColor,
 		StrokeWidth: 0.5,
 	}
 
@@ -263,7 +284,8 @@ func renderChart(priceagent models.PriceAgent, history geizhals.PriceHistory, si
 	}
 	graph.Elements = []chart.Renderable{chart.Legend(&graph, chart.Style{
 		FillColor: legendBackgroundColor,
-		FontColor: fontColor,
+		FontColor: fontStyle.FontColor,
+		FontSize:  fontStyle.FontSize,
 	})}
 
 	renderErr := graph.Render(chart.PNG, w)
