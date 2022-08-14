@@ -173,6 +173,15 @@ func UpdateNotificationSettings(userID int64, priceagentID int64, notifSettings 
 	return nil
 }
 
+func UpdatePriceagent(priceagent models.PriceAgent) error {
+	tx := db.Model(&priceagent).Updates(priceagent)
+	if tx.Error != nil {
+		log.Println(tx.Error)
+		return tx.Error
+	}
+	return nil
+}
+
 func GetAllEntities() ([]geizhals.Entity, error) {
 	var entities []geizhals.Entity
 	tx := db.Find(&entities)
