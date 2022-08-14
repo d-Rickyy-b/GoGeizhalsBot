@@ -468,14 +468,17 @@ func Start(botConfig config.Config) {
 		}
 		log.Printf("Starting webhook on '%s:%d%s'...\n", botConfig.Webhook.ListenIP, botConfig.Webhook.ListenPort, botConfig.Webhook.ListenPath)
 		// TODO add support for custom certificates
-		err := updater.StartWebhook(bot, ext.WebhookOpts{
+		startErr := updater.StartWebhook(bot, ext.WebhookOpts{
 			Listen:  botConfig.Webhook.ListenIP,
 			Port:    botConfig.Webhook.ListenPort,
 			URLPath: parsedURL.Path,
 		})
-		bot.SetWebhook(botConfig.Webhook.URL, &gotgbot.SetWebhookOpts{})
-		if err != nil {
-			panic("failed to start webhook: " + err.Error())
+		if startErr != nil {
+			panic("failed to start webhook: " + startErr.Error())
+		}
+		_, setWebhookErr := bot.SetWebhook(botConfig.Webhook.URL, &gotgbot.SetWebhookOpts{})
+		if setWebhookErr != nil {
+			panic("failed to set webhook: " + setWebhookErr.Error())
 		}
 	} else {
 		log.Println("Start polling...")
