@@ -238,6 +238,17 @@ func UpdateEntity(entity geizhals.Entity) {
 	}
 }
 
+func UpdateEntityPrice(price geizhals.EntityPrice) {
+	tx := db.Model(&geizhals.EntityPrice{}).Where("entity_id = ?", price.EntityID).Where("location = ?", price.Location).Updates(price)
+	if tx.RowsAffected == 0 {
+		tx = db.Create(&price)
+	}
+	if tx.Error != nil {
+		log.Println(tx.Error)
+		return
+	}
+}
+
 // DeleteUser deletes a user and their PriceAgents from the database
 func DeleteUser(userID int64) {
 	// Start a new transaction
