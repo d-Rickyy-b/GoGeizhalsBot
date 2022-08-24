@@ -109,6 +109,12 @@ func textNewPriceagentHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 		return nil
 	}
 
+	location, parseErr := geizhals.LocationFromURL(ctx.EffectiveMessage.Text)
+	if parseErr != nil {
+		log.Printf("textNewPriceagentHandler: %s\n", parseErr)
+		ctx.EffectiveMessage.Reply(b, "Bitte sende mir eine valide Geizhals URL!", &gotgbot.SendMessageOpts{})
+		return nil
+	}
 	newPriceagent := models.PriceAgent{
 		//ID:     entity.ID,
 		Name:   entity.Name,
@@ -117,6 +123,7 @@ func textNewPriceagentHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 		NotificationSettings: models.NotificationSettings{
 			NotifyAlways: true,
 		},
+		Location: location,
 	}
 
 	createErr := database.CreatePriceAgentForUser(&newPriceagent)

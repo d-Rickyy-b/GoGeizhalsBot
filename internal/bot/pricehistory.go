@@ -40,7 +40,7 @@ func showPriceHistoryHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	}
 
 	_, _ = b.SendChatAction(ctx.EffectiveChat.Id, "upload_photo")
-	history, err := geizhals.GetPriceHistory(priceagent.Entity)
+	history, err := geizhals.GetPriceHistory(priceagent.Entity, priceagent.Location)
 	if err != nil {
 		return fmt.Errorf("showPriceagentDetail: failed to download pricehistory: %w", err)
 	}

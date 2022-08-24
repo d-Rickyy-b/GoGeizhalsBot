@@ -24,6 +24,22 @@ func (pa PriceAgent) String() string {
 	return fmt.Sprintf("%d - '%s' (%s) | User: %d", pa.ID, pa.Name, pa.Entity.Name, pa.UserID)
 }
 
+func (pa PriceAgent) EntityURL() string {
+	return pa.Entity.FullURL(pa.Location)
+}
+
+func (pa PriceAgent) CurrentEntityPrice() geizhals.EntityPrice {
+	return pa.Entity.GetPrice(pa.Location)
+}
+
+func (pa PriceAgent) CurrentPrice() float64 {
+	return pa.Entity.GetPrice(pa.Location).Price
+}
+
+func (pa PriceAgent) GetCurrency() geizhals.Currency {
+	return pa.Entity.GetPrice(pa.Location).Currency
+}
+
 type NotificationSettings struct {
 	CreatedAt       time.Time
 	UpdatedAt       time.Time

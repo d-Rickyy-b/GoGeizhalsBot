@@ -24,7 +24,7 @@ func InitDB() {
 
 	// Migrate the schema
 	migrateError := db.AutoMigrate(&models.User{}, &models.NotificationSettings{}, &models.PriceAgent{},
-		&geizhals.Entity{})
+		&geizhals.Entity{}, &geizhals.EntityPrice{})
 	if migrateError != nil {
 		panic("failed to migrate database")
 	}
@@ -143,7 +143,7 @@ func GetWishlistPriceagentsForUser(userID int64) ([]models.PriceAgent, error) {
 
 func GetPriceagentForUserByID(userID int64, priceagentID int64) (models.PriceAgent, error) {
 	var priceagent models.PriceAgent
-	tx := db.Preload("Entity").Preload("NotificationSettings").Where("user_id = ?", userID).Where("id = ?", priceagentID).First(&priceagent)
+	tx := db.Preload("Entity").Preload("Entity.Prices").Preload("NotificationSettings").Where("user_id = ?", userID).Where("id = ?", priceagentID).First(&priceagent)
 	if tx.Error != nil {
 		log.Println(tx.Error)
 		return models.PriceAgent{}, tx.Error

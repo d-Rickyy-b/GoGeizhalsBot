@@ -34,7 +34,8 @@ func setNotificationBelowHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 		return fmt.Errorf("setNotificationBelowHandler: failed to answer callback query: %w", err)
 	}
 
-	editedText := fmt.Sprintf("Ab welchem Preis möchtest du für %s alarmiert werden?\nAktueller Preis: %s", createLink(priceagent.Entity.URL, priceagent.Name), bold(createPrice(priceagent.Entity.Price)))
+	entityPrice := priceagent.CurrentEntityPrice()
+	editedText := fmt.Sprintf("Ab welchem Preis möchtest du für %s alarmiert werden?\nAktueller Preis: %s", createLink(priceagent.EntityURL(), priceagent.Name), bold(entityPrice.String()))
 	_, err := cb.Message.EditText(b, editedText, &gotgbot.EditMessageTextOpts{ReplyMarkup: gotgbot.InlineKeyboardMarkup{}, ParseMode: "HTML"})
 	if err != nil {
 		return fmt.Errorf("setNotificationBelowHandler: failed to edit message text: %w", err)
