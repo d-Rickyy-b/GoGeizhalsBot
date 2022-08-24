@@ -17,8 +17,8 @@ func createLink(url, name string) string {
 }
 
 // createPrice formats a given float to a formatted pricetag string
-func createPrice(price float64) string {
-	return fmt.Sprintf("%.2f €", price)
+func createPrice(price float64, currency string) string {
+	return fmt.Sprintf("%.2f %s", price, currency)
 }
 
 // bold encapsulates a string in a html <b> tag

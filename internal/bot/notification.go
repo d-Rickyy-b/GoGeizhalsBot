@@ -12,73 +12,91 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/v2"
 )
 
+type tempPriceStore struct {
+	store map[int64]map[string]float64
+}
+
+func (t *tempPriceStore) getPrice(entityID int64, location string) (float64, bool) {
+	entity, entityOk := t.store[entityID]
+	if !entityOk {
+		return 0, false
+	}
+
+	price, locationOk := entity[location]
+	if !locationOk {
+		return 0, false
+	}
+	return price, true
+}
+
+func (t *tempPriceStore) storePrice(entityID int64, location string, price float64) {
+	if t.store == nil {
+		t.store = make(map[int64]map[string]float64)
+	}
+	entity, entityOk := t.store[entityID]
+	if !entityOk {
+		entity = make(map[string]float64)
+	}
+
+	entity[location] = price
+	t.store[entityID] = entity
+}
+
 // updateEntityPrices fetches the current price of all entities and updates the database
 func updateEntityPrices() {
-	allEntities, fetchEntitiesErr := database.GetAllEntities()
-	if fetchEntitiesErr != nil {
-		log.Println("Error fetching entites:", fetchEntitiesErr)
+	allPriceAgents, fetchErr := database.GetActivePriceAgents()
+	if fetchErr != nil {
+		log.Println("Error fetching price agents:", fetchErr)
 		return
 	}
 
-	// Iterate over all price agents.
-	// For each price agent, update prices and store updated prices in the entity in the database.
-	// Also update price history with the new prices.
-	for _, entity := range allEntities {
-		log.Println("Updating prices for:", entity.URL)
+	priceStore := tempPriceStore{}
 
-		// If there are two price agents with the same entity, we currently fetch it twice
-		updatedEntity, updateErr := geizhals.UpdateEntity(entity)
-		if updateErr != nil {
-			log.Println("Error updating entity:", updateErr)
-			continue
+	for _, priceAgent := range allPriceAgents {
+		log.Printf("Updating prices for price agent: %d, '%s'\n", priceAgent.ID, priceAgent.EntityURL())
+		var price float64
+		var isCached bool
+		price, isCached = priceStore.getPrice(priceAgent.EntityID, priceAgent.Location)
+		if !isCached {
+			updatedPrice, updateErr := geizhals.UpdateEntityPrice(priceAgent.Entity, priceAgent.Location)
+			if updateErr != nil {
+				log.Println("Error updating entity:", updateErr)
+				continue
+			}
+
+			if updatedPrice.Price == priceAgent.CurrentPrice() {
+				log.Println("Entity price has not changed, skipping update")
+				continue
+			}
+
+			database.UpdateEntityPrice(updatedPrice)
+			price = updatedPrice.Price
 		}
 
-		if updatedEntity.Price == entity.Price {
-			log.Println("Entity price has not changed, skipping update")
-			continue
-		}
-
-		database.UpdateEntity(updatedEntity)
-
-		// fetch all priceagents for this entity
-		priceAgents, fetchPriceAgentsErr := database.GetPriceAgentsForEntity(updatedEntity.ID)
-		if fetchPriceAgentsErr != nil {
-			log.Println("Error fetching price agents for entity:", fetchPriceAgentsErr)
-			continue
-		}
-
-		for _, priceAgent := range priceAgents {
-			notifyUsers(priceAgent, entity, updatedEntity)
-		}
+		notifyUsers(priceAgent, priceAgent.CurrentPrice(), price)
 	}
 }
 
 // notifyUsers sends a notification to the users of the price agent if the settings allow it
-func notifyUsers(priceAgent models.PriceAgent, oldEntity, updatedEntity geizhals.Entity) {
+func notifyUsers(priceAgent models.PriceAgent, oldPrice, updatedPrice float64) {
 	settings := priceAgent.NotificationSettings
 	user := priceAgent.User
-	diff := updatedEntity.Price - oldEntity.Price
+	diff := updatedPrice - oldPrice
 
 	var change string
-	if updatedEntity.Price > oldEntity.Price {
-		change = fmt.Sprintf("📈 %s teurer", bold(createPrice(diff)))
+	if updatedPrice > oldPrice {
+		change = fmt.Sprintf("📈 %s teurer", bold(createPrice(diff, priceAgent.GetCurrency().String())))
 	} else {
-		change = fmt.Sprintf("📉 %s günstiger", bold(createPrice(diff)))
+		change = fmt.Sprintf("📉 %s günstiger", bold(createPrice(diff, priceAgent.GetCurrency().String())))
 	}
 
 	var notificationText string
-	entityLink := createLink(updatedEntity.URL, updatedEntity.Name)
-	entityPrice := bold(createPrice(updatedEntity.Price))
+	entityLink := createLink(priceAgent.EntityURL(), priceAgent.Entity.Name)
+	entityPrice := bold(createPrice(updatedPrice, priceAgent.GetCurrency().String()))
 	if settings.NotifyAlways {
 		notificationText = fmt.Sprintf("Der Preis von %s hat sich geändert: %s\n\n%s", entityLink, entityPrice, change)
-	} else if settings.NotifyBelow && updatedEntity.Price < settings.BelowPrice {
+	} else if settings.NotifyBelow && updatedPrice < settings.BelowPrice {
 		notificationText = fmt.Sprintf("Der Preis von %s hat sich geändert: %s\n\n%s", entityLink, entityPrice, change)
-	} else if settings.NotifyAbove && updatedEntity.Price > settings.AbovePrice {
-		notificationText = "Hi, preis über Grenze!"
-	} else if settings.NotifyPriceDrop && updatedEntity.Price < oldEntity.Price {
-		notificationText = "Hi, preis gefallen!"
-	} else if settings.NotifyPriceRise && updatedEntity.Price > oldEntity.Price {
-		notificationText = "Hi, preis gestiegen!"
 	} else {
 		log.Println("Price changes don't match the notification settings for user")
 		return

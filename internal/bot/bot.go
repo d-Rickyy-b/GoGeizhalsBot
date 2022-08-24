@@ -205,8 +205,9 @@ func showPriceagentDetail(b *gotgbot.Bot, ctx *ext.Context) error {
 
 	notificationButtonText := fmt.Sprintf("⏰ %s", priceagent.NotificationSettings.String())
 
-	linkName := createLink(priceagent.Entity.URL, priceagent.Entity.Name)
-	editedText := fmt.Sprintf("%s kostet aktuell %s", linkName, bold(createPrice(priceagent.Entity.Price)))
+	linkName := createLink(priceagent.EntityURL(), priceagent.Entity.Name)
+	price := priceagent.CurrentEntityPrice()
+	editedText := fmt.Sprintf("%s kostet aktuell %s", linkName, bold(price.String()))
 	markup := gotgbot.InlineKeyboardMarkup{
 		InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
 			{
@@ -261,8 +262,9 @@ func changePriceagentSettingsHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 		return fmt.Errorf("changePriceagentSettingsHandler: failed to answer callback query: %w", err)
 	}
 
-	linkName := createLink(priceagent.Entity.URL, priceagent.Entity.Name)
-	editedText := fmt.Sprintf("%s\n\nWann möchtest du für %s alarmiert werden?\n\nAktuelle Einstellung: %s\nAktueller Preis: %s", bold("Benachrichtigungseinstellungen"), linkName, bold(priceagent.NotificationSettings.String()), bold(createPrice(priceagent.Entity.Price)))
+	linkName := createLink(priceagent.EntityURL(), priceagent.Entity.Name)
+	price := priceagent.CurrentEntityPrice()
+	editedText := fmt.Sprintf("%s\n\nWann möchtest du für %s alarmiert werden?\n\nAktuelle Einstellung: %s\nAktueller Preis: %s", bold("Benachrichtigungseinstellungen"), linkName, bold(priceagent.NotificationSettings.String()), bold(price.String()))
 	markup := gotgbot.InlineKeyboardMarkup{
 		InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
 			{
@@ -298,7 +300,7 @@ func deletePriceagentConfirmationHandler(b *gotgbot.Bot, ctx *ext.Context) error
 		return fmt.Errorf("deletePriceagentConfirmationHandler: failed to answer callback query: %w", err)
 	}
 
-	linkName := createLink(priceagent.Entity.URL, priceagent.Entity.Name)
+	linkName := createLink(priceagent.EntityURL(), priceagent.Entity.Name)
 	editedText := fmt.Sprintf("%s\n\nMöchtest du den Preisagenten für %s wirklich löschen?", bold("Löschen bestätigen"), linkName)
 	markup := gotgbot.InlineKeyboardMarkup{
 		InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
@@ -341,7 +343,7 @@ func deletePriceagentHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 		return fmt.Errorf("deletePriceagentHandler: failed to delete priceagent from database: %w", deleteErr)
 	}
 
-	editText := fmt.Sprintf("Preisagent für %s wurde gelöscht!", bold(createLink(priceagent.Entity.URL, priceagent.Entity.Name)))
+	editText := fmt.Sprintf("Preisagent für %s wurde gelöscht!", bold(createLink(priceagent.EntityURL(), priceagent.Entity.Name)))
 
 	_, err := cb.Message.EditText(b, editText, &gotgbot.EditMessageTextOpts{ParseMode: "HTML", DisableWebPagePreview: true})
 	if err != nil {

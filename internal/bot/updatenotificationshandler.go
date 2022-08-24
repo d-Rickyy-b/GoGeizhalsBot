@@ -85,8 +85,9 @@ func setNotificationAlwaysHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 		backCallbackData = "invalidType"
 	}
 
-	linkName := createLink(priceagent.Entity.URL, priceagent.Entity.Name)
-	editedText := fmt.Sprintf("%s kostet aktuell %s", linkName, bold(createPrice(priceagent.Entity.Price)))
+	linkName := createLink(priceagent.EntityURL(), priceagent.Entity.Name)
+	price := priceagent.CurrentEntityPrice()
+	editedText := fmt.Sprintf("%s kostet aktuell %s", linkName, bold(price.String()))
 	markup := gotgbot.InlineKeyboardMarkup{
 		InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
 			{

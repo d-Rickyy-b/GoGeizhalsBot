@@ -84,7 +84,7 @@ func updatePriceHistoryGraphHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	}
 
 	_, _ = cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{})
-	history, err := geizhals.GetPriceHistory(priceagent.Entity)
+	history, err := geizhals.GetPriceHistory(priceagent.Entity, priceagent.Location)
 	if err != nil {
 		return fmt.Errorf("updatePriceHistoryGraphHandler: failed to download pricehistory: %w", err)
 	}
