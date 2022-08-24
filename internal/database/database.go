@@ -92,6 +92,16 @@ func GetAllUsers() []models.User {
 	return users
 }
 
+func GetActivePriceAgents() ([]models.PriceAgent, error) {
+	var priceagents []models.PriceAgent
+	tx := db.Preload("Entity").Preload("Entity.Prices").Where("enabled = true").Find(&priceagents)
+	if tx.Error != nil {
+		log.Println(tx.Error)
+		return []models.PriceAgent{}, tx.Error
+	}
+	return priceagents, nil
+}
+
 func DeletePriceAgentForUser(priceAgent models.PriceAgent) error {
 	log.Println("Delete priceagent!")
 
