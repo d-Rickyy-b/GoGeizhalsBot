@@ -215,6 +215,20 @@ func GetAllEntities() ([]geizhals.Entity, error) {
 	return entities, nil
 }
 
+func GetAllEntitiesWithPriceagents() ([]geizhals.Entity, error) {
+	var entities []geizhals.Entity
+	tx := db.Model(&geizhals.Entity{}).Joins("JOIN price_agents on price_agents.entity_id = entities.id").
+		//Joins("JOIN entity_prices on entity_prices.entity_id = entities.id").
+		Where("price_agents.enabled = 1").
+		//Where("price_agents.location = entity_prices.location").
+		Find(&entities)
+	if tx.Error != nil {
+		log.Println(tx.Error)
+		return []geizhals.Entity{}, tx.Error
+	}
+	return entities, nil
+}
+
 // HasUserPriceAgentForEntity checks if a user already has a priceagent for a given entity
 func HasUserPriceAgentForEntity(userID int64, entityID int64) (bool, error) {
 	var priceagent models.PriceAgent
