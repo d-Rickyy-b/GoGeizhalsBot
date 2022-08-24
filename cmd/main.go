@@ -4,8 +4,8 @@ import (
 	"GoGeizhalsBot/internal/bot"
 	"GoGeizhalsBot/internal/config"
 	"GoGeizhalsBot/internal/database"
-	"GoGeizhalsBot/internal/geizhals"
 	"GoGeizhalsBot/internal/logging"
+	"GoGeizhalsBot/internal/proxy"
 	"flag"
 	"log"
 	"net/url"
@@ -35,6 +35,6 @@ func main() {
 		log.Println("Loaded proxies:", len(proxies))
 	}
 
-	geizhals.InitProxies(proxies)
+	proxy.InitProxies(proxies)
 	bot.Start(botConfig)
 }

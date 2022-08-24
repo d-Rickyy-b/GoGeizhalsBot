@@ -1,4 +1,4 @@
-package geizhals
+package proxy
 
 import (
 	"math/rand"
@@ -18,9 +18,9 @@ func InitProxies(p []*url.URL) {
 	proxies = p
 }
 
-// getNextProxy returns the next proxy from the list. Proxies are cycled so that
+// GetNextProxy returns the next proxy from the list. Proxies are cycled so that
 // a maximum time between first and second use of the same proxy passes.
-func getNextProxy() *url.URL {
+func GetNextProxy() *url.URL {
 	if len(proxies) == 0 {
 		return nil
 	}

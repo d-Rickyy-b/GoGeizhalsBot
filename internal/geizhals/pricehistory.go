@@ -1,6 +1,7 @@
 package geizhals
 
 import (
+	"GoGeizhalsBot/internal/proxy"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -136,7 +137,7 @@ func downloadPriceHistory(entity Entity) (PriceHistory, error) {
 
 	log.Println("Downloading price history for", entity.Name)
 	priceHistoryAPI := "https://geizhals.de/api/gh0/price_history"
-	proxyURL := getNextProxy()
+	proxyURL := proxy.GetNextProxy()
 	httpClient := &http.Client{}
 	if proxyURL != nil {
 		httpClient.Transport = &http.Transport{Proxy: http.ProxyURL(proxyURL)}
