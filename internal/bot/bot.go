@@ -179,12 +179,12 @@ func mainMenuHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 func showPriceagentDetail(b *gotgbot.Bot, ctx *ext.Context) error {
 	cb := ctx.Update.CallbackQuery
 
-	priceagentID, parseErr := parseIDFromCallbackData(cb.Data, "m03_00_")
+	menu, parseErr := models.NewMenu(cb.Data)
 	if parseErr != nil {
-		return fmt.Errorf("showPriceagentDetail: failed to parse priceagentID from callback data: %w", parseErr)
+		return fmt.Errorf("showPriceagentDetail: failed to parse callback data: %w", parseErr)
 	}
 
-	priceagent, dbErr := database.GetPriceagentForUserByID(ctx.EffectiveUser.Id, priceagentID)
+	priceagent, dbErr := database.GetPriceagentForUserByID(ctx.EffectiveUser.Id, menu.PriceAgent)
 	if dbErr != nil {
 		return fmt.Errorf("showPriceagentDetail: failed to get priceagent from database: %w", dbErr)
 	}
@@ -220,21 +220,25 @@ func showPriceagentDetail(b *gotgbot.Bot, ctx *ext.Context) error {
 		},
 	}
 
-	// Check if the initial message contained a photo, if yes, we're coming from the price history graph
-	if len(cb.Message.Photo) > 0 {
+	switch menu.SubMenu {
+	case "00":
+		_, err := cb.Message.EditText(b, editedText, &gotgbot.EditMessageTextOpts{ReplyMarkup: markup, ParseMode: "HTML"})
+		if err != nil {
+			return fmt.Errorf("showPriceagent: failed to edit message text: %w", err)
+		}
+	case "01":
 		bot.DeleteMessage(ctx.EffectiveChat.Id, cb.Message.MessageId)
 
 		_, err := b.SendMessage(ctx.EffectiveChat.Id, editedText, &gotgbot.SendMessageOpts{ReplyMarkup: markup, ParseMode: "HTML"})
 		if err != nil {
 			return fmt.Errorf("showPriceagent: failed to send new message: %w", err)
 		}
-	} else {
-		_, err := cb.Message.EditText(b, editedText, &gotgbot.EditMessageTextOpts{ReplyMarkup: markup, ParseMode: "HTML"})
+	case "02":
+		_, err := b.SendMessage(ctx.EffectiveChat.Id, editedText, &gotgbot.SendMessageOpts{ReplyMarkup: markup, ParseMode: "HTML"})
 		if err != nil {
-			return fmt.Errorf("showPriceagent: failed to edit message text: %w", err)
+			return fmt.Errorf("showPriceagent: failed to send new message: %w", err)
 		}
 	}
-
 	return nil
 }
 
@@ -410,7 +414,7 @@ func addMessageHandlers(dispatcher *ext.Dispatcher) {
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_02_"), setNotificationBelowHandler))
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_01_"), setNotificationAlwaysHandler))
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_00_"), changePriceagentSettingsHandler))
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m03_00_"), showPriceagentDetail))
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m03_"), showPriceagentDetail))
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal("m02_00"), showWishlistPriceagents))
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal("m02_01"), showProductPriceagents))
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal("m01_01"), viewPriceagentsHandler))
