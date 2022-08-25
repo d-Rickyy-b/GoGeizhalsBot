@@ -179,14 +179,9 @@ func mainMenuHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 func showPriceagentDetail(b *gotgbot.Bot, ctx *ext.Context) error {
 	cb := ctx.Update.CallbackQuery
 
-	menu, parseErr := models.NewMenu(cb.Data)
+	menu, priceagent, parseErr := parseMenuPriceagent(ctx)
 	if parseErr != nil {
 		return fmt.Errorf("showPriceagentDetail: failed to parse callback data: %w", parseErr)
-	}
-
-	priceagent, dbErr := database.GetPriceagentForUserByID(ctx.EffectiveUser.Id, menu.PriceAgentID)
-	if dbErr != nil {
-		return fmt.Errorf("showPriceagentDetail: failed to get priceagent from database: %w", dbErr)
 	}
 
 	var backCallbackData string
@@ -225,19 +220,19 @@ func showPriceagentDetail(b *gotgbot.Bot, ctx *ext.Context) error {
 	case "00":
 		_, err := cb.Message.EditText(b, editedText, &gotgbot.EditMessageTextOpts{ReplyMarkup: markup, ParseMode: "HTML"})
 		if err != nil {
-			return fmt.Errorf("showPriceagent: failed to edit message text: %w", err)
+			return fmt.Errorf("showPriceagentDetail: failed to edit message text: %w", err)
 		}
 	case "01":
 		bot.DeleteMessage(ctx.EffectiveChat.Id, cb.Message.MessageId)
 
 		_, err := b.SendMessage(ctx.EffectiveChat.Id, editedText, &gotgbot.SendMessageOpts{ReplyMarkup: markup, ParseMode: "HTML"})
 		if err != nil {
-			return fmt.Errorf("showPriceagent: failed to send new message: %w", err)
+			return fmt.Errorf("showPriceagentDetail: failed to send new message: %w", err)
 		}
 	case "02":
 		_, err := b.SendMessage(ctx.EffectiveChat.Id, editedText, &gotgbot.SendMessageOpts{ReplyMarkup: markup, ParseMode: "HTML"})
 		if err != nil {
-			return fmt.Errorf("showPriceagent: failed to send new message: %w", err)
+			return fmt.Errorf("showPriceagentDetail: failed to send new message: %w", err)
 		}
 	}
 	return nil
@@ -248,14 +243,9 @@ func showPriceagentDetail(b *gotgbot.Bot, ctx *ext.Context) error {
 func changePriceagentSettingsHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	cb := ctx.Update.CallbackQuery
 
-	priceagentID, parseErr := parseIDFromCallbackData(cb.Data, "m04_00_")
+	_, priceagent, parseErr := parseMenuPriceagent(ctx)
 	if parseErr != nil {
-		return fmt.Errorf("changePriceagentSettingsHandler: failed to parse priceagentID from callback data: %w", parseErr)
-	}
-
-	priceagent, dbErr := database.GetPriceagentForUserByID(ctx.EffectiveUser.Id, priceagentID)
-	if dbErr != nil {
-		return fmt.Errorf("setNotifPriceagentHandler: failed to get priceagent from database: %w", dbErr)
+		return fmt.Errorf("changePriceagentSettingsHandler: failed to parse callback data: %w", parseErr)
 	}
 
 	if _, err := cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{}); err != nil {
@@ -286,14 +276,9 @@ func changePriceagentSettingsHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 func deletePriceagentConfirmationHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	cb := ctx.Update.CallbackQuery
 
-	priceagentID, parseErr := parseIDFromCallbackData(cb.Data, "m04_98_")
+	_, priceagent, parseErr := parseMenuPriceagent(ctx)
 	if parseErr != nil {
-		return fmt.Errorf("deletePriceagentConfirmationHandler: failed to parse priceagentID from callback data: %w", parseErr)
-	}
-
-	priceagent, dbErr := database.GetPriceagentForUserByID(ctx.EffectiveUser.Id, priceagentID)
-	if dbErr != nil {
-		return fmt.Errorf("deletePriceagentConfirmationHandler: failed to get priceagent from database: %w", dbErr)
+		return fmt.Errorf("deletePriceagentConfirmationHandler: failed to parse callback data: %w", parseErr)
 	}
 
 	if _, err := cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{}); err != nil {
@@ -326,15 +311,10 @@ func deletePriceagentHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	}
 
 	// Get Priceagent from DB
-	priceagentID, parseErr := parseIDFromCallbackData(cb.Data, "m04_99_")
+	_, priceagent, parseErr := parseMenuPriceagent(ctx)
 	if parseErr != nil {
-		return fmt.Errorf("deletePriceagentHandler: failed to parse priceagentID from callback data: %w", parseErr)
-	}
-
-	priceagent, dbErr := database.GetPriceagentForUserByID(ctx.EffectiveUser.Id, priceagentID)
-	if dbErr != nil {
 		ctx.EffectiveMessage.Reply(b, "Der Preisagent existiert nicht mehr, vielleicht wurde er schon gelöscht?", &gotgbot.SendMessageOpts{})
-		return fmt.Errorf("deletePriceagentHandler: failed to get priceagent from database: %w", dbErr)
+		return fmt.Errorf("deletePriceagentHandler: failed to parse callback data: %w", parseErr)
 	}
 
 	deleteErr := database.DeletePriceAgentForUser(priceagent)
@@ -347,7 +327,7 @@ func deletePriceagentHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 
 	_, err := cb.Message.EditText(b, editText, &gotgbot.EditMessageTextOpts{ParseMode: "HTML", DisableWebPagePreview: true})
 	if err != nil {
-		return fmt.Errorf("deletePriceagent: failed to edit message text: %w", err)
+		return fmt.Errorf("deletePriceagentHandler: failed to edit message text: %w", err)
 	}
 	return nil
 }
@@ -514,4 +494,18 @@ func Start(botConfig config.Config) {
 	}
 
 	updater.Idle()
+}
+
+func parseMenuPriceagent(ctx *ext.Context) (models.Menu, models.PriceAgent, error) {
+	menu, parseMenuErr := models.NewMenu(ctx.CallbackQuery.Data)
+	if parseMenuErr != nil {
+		return models.Menu{}, models.PriceAgent{}, fmt.Errorf("invalid callback data: %s", ctx.CallbackQuery.Data)
+	}
+
+	priceAgent, dbErr := database.GetPriceagentForUserByID(ctx.EffectiveUser.Id, menu.PriceAgentID)
+	if dbErr != nil {
+		return models.Menu{}, models.PriceAgent{}, fmt.Errorf("invalid callback data: %s", ctx.CallbackQuery.Data)
+	}
+
+	return *menu, priceAgent, nil
 }

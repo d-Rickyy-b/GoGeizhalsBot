@@ -2,7 +2,6 @@ package bot
 
 import (
 	"GoGeizhalsBot/internal/bot/models"
-	"GoGeizhalsBot/internal/database"
 	"GoGeizhalsBot/internal/geizhals"
 	"GoGeizhalsBot/internal/prometheus"
 	"bytes"
@@ -10,7 +9,6 @@ import (
 	"io"
 	"log"
 	"math"
-	"strings"
 	"time"
 
 	"github.com/wcharczuk/go-chart/v2/drawing"
@@ -26,9 +24,9 @@ import (
 func showPriceHistoryHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	cb := ctx.Update.CallbackQuery
 
-	priceagent, getPriceagentErr := getPriceagentFromContext(ctx)
-	if getPriceagentErr != nil {
-		return getPriceagentErr
+	_, priceagent, parseErr := parseMenuPriceagent(ctx)
+	if parseErr != nil {
+		return fmt.Errorf("showPriceHistoryHandler: failed to parse callback data: %w", parseErr)
 	}
 
 	dateRangeKeyboard, since := generateDateRangeKeyboard(priceagent, "03")
@@ -63,17 +61,12 @@ func showPriceHistoryHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 func updatePriceHistoryGraphHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	cb := ctx.Update.CallbackQuery
 
-	priceagent, getPriceagentErr := getPriceagentFromContext(ctx)
-	if getPriceagentErr != nil {
-		return getPriceagentErr
+	menu, priceagent, parseErr := parseMenuPriceagent(ctx)
+	if parseErr != nil {
+		return fmt.Errorf("updatePriceHistoryGraphHandler: failed to parse callback data: %w", parseErr)
 	}
 
-	results := strings.Split(cb.Data, "_")
-	if len(results) < 2 {
-		return fmt.Errorf("updatePriceHistoryGraphHandler: invalid callback data: %s", cb.Data)
-	}
-	dateRange := results[1]
-
+	dateRange := menu.SubMenu
 	dateRangeKeyboard, since := generateDateRangeKeyboard(priceagent, dateRange)
 
 	markup := gotgbot.InlineKeyboardMarkup{
@@ -128,21 +121,6 @@ func generateDateRangeKeyboard(priceagent models.PriceAgent, dateRange string) (
 		return generateDateRangeKeyboard(priceagent, "03")
 	}
 	return dateRangeKeyboard, since
-}
-
-// getPriceagentFromContext returns the priceagent from the callbackQuery data.
-func getPriceagentFromContext(ctx *ext.Context) (models.PriceAgent, error) {
-	cb := ctx.CallbackQuery
-	priceagentID, parseErr := parseIDFromCallbackData(cb.Data, "m05_00_")
-	if parseErr != nil {
-		return models.PriceAgent{}, fmt.Errorf("showPriceagentDetail: failed to parse priceagentID from callback data: %w", parseErr)
-	}
-
-	priceagent, dbErr := database.GetPriceagentForUserByID(ctx.EffectiveUser.Id, priceagentID)
-	if dbErr != nil {
-		return models.PriceAgent{}, fmt.Errorf("showPriceagentDetail: failed to get priceagent from database: %w", dbErr)
-	}
-	return priceagent, nil
 }
 
 // renderChart renders a price history chart to the given writer.

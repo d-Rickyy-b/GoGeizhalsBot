@@ -17,14 +17,9 @@ import (
 func setNotificationBelowHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	cb := ctx.Update.CallbackQuery
 
-	priceagentID, parseErr := parseIDFromCallbackData(cb.Data, "m04_02_")
+	_, priceagent, parseErr := parseMenuPriceagent(ctx)
 	if parseErr != nil {
-		return fmt.Errorf("setNotificationBelowHandler: failed to parse priceagentID from callback data: %w", parseErr)
-	}
-
-	priceagent, dbErr := database.GetPriceagentForUserByID(ctx.EffectiveUser.Id, priceagentID)
-	if dbErr != nil {
-		return fmt.Errorf("setNotificationBelowHandler: failed to get priceagent from database: %w", dbErr)
+		return fmt.Errorf("setNotificationBelowHandler: failed to parse callback data: %w", parseErr)
 	}
 
 	userID := ctx.EffectiveUser.Id
@@ -48,14 +43,9 @@ func setNotificationBelowHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 func setNotificationAlwaysHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	cb := ctx.Update.CallbackQuery
 
-	priceagentID, parseErr := parseIDFromCallbackData(cb.Data, "m04_01_")
+	_, priceagent, parseErr := parseMenuPriceagent(ctx)
 	if parseErr != nil {
-		return fmt.Errorf("setNotificationAlwaysHandler: failed to parse priceagentID from callback data: %w", parseErr)
-	}
-
-	priceagent, dbErr := database.GetPriceagentForUserByID(ctx.EffectiveUser.Id, priceagentID)
-	if dbErr != nil {
-		return fmt.Errorf("setNotificationAlwaysHandler: failed to get priceagent from database: %w", dbErr)
+		return fmt.Errorf("setNotificationAlwaysHandler: failed to parse callback data: %w", parseErr)
 	}
 
 	newNotifSettings := models.NotificationSettings{
