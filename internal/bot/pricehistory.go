@@ -165,7 +165,7 @@ func renderChart(priceagent models.PriceAgent, history geizhals.PriceHistory, si
 	}
 
 	mainSeries := chart.TimeSeries{
-		Name: priceagent.Name,
+		Name: fmt.Sprintf("Preis (%s)", priceagent.CurrentEntityPrice().Currency.String()),
 		Style: chart.Style{
 			StrokeColor: mainSeriesColor,
 			StrokeWidth: 3,
@@ -236,6 +236,11 @@ func renderChart(priceagent models.PriceAgent, history geizhals.PriceHistory, si
 	}
 
 	graph := chart.Chart{
+		Title: priceagent.Name,
+		TitleStyle: chart.Style{
+			FontColor: fontColor,
+			FontSize:  12,
+		},
 		Width:      1280,
 		Height:     720,
 		Background: backgroundStyle,
