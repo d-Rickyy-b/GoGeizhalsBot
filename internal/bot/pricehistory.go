@@ -50,8 +50,8 @@ func showPriceHistoryHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 
 	_, _ = bot.DeleteMessage(ctx.EffectiveChat.Id, cb.Message.MessageId)
 
-	editedText := "Für welchen Zeitraum möchtest du die Preishistorie sehen?"
-	_, sendErr := bot.SendPhoto(ctx.EffectiveUser.Id, buffer, &gotgbot.SendPhotoOpts{Caption: editedText, ReplyMarkup: markup})
+	editedText := fmt.Sprintf("%s\nFür welchen Zeitraum möchtest du die Preishistorie sehen?", bold(createLink(priceagent.EntityURL(), priceagent.Name)))
+	_, sendErr := bot.SendPhoto(ctx.EffectiveUser.Id, buffer, &gotgbot.SendPhotoOpts{Caption: editedText, ReplyMarkup: markup, ParseMode: "HTML"})
 	if sendErr != nil {
 		return fmt.Errorf("showPriceagentDetail: failed to send photo: %w", sendErr)
 	}
@@ -92,7 +92,8 @@ func updatePriceHistoryGraphHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	buffer := bytes.NewBuffer([]byte{})
 	renderChart(priceagent, history, since, buffer)
 
-	newPic := gotgbot.InputMediaPhoto{Media: buffer, Caption: "Für welchen Zeitraum möchtest du die Preishistorie sehen?"}
+	caption := fmt.Sprintf("%s\nFür welchen Zeitraum möchtest du die Preishistorie sehen?", bold(createLink(priceagent.EntityURL(), priceagent.Name)))
+	newPic := gotgbot.InputMediaPhoto{Media: buffer, Caption: caption, ParseMode: "HTML"}
 	_, sendErr := cb.Message.EditMedia(b, newPic, &gotgbot.EditMessageMediaOpts{ReplyMarkup: markup})
 	if sendErr != nil {
 		return fmt.Errorf("updatePriceHistoryGraphHandler: failed to send photo: %w", sendErr)
