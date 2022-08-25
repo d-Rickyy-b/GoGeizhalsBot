@@ -86,6 +86,23 @@ func CreateUser(user models.User) error {
 	return tx.Error
 }
 
+func GetDarkmode(userID int64) bool {
+	var user models.User
+	tx := db.Where("id = ?", userID).First(&user)
+	if tx.Error != nil {
+		log.Println(tx.Error)
+		return true
+	}
+	return user.DarkMode
+}
+
+func UpdateDarkMode(userID int64, darkMode bool) {
+	tx := db.Model(&models.User{}).Where("id = ?", userID).Update("dark_mode", darkMode)
+	if tx.Error != nil {
+		log.Println(tx.Error)
+	}
+}
+
 func GetAllUsers() []models.User {
 	var users []models.User
 	db.Find(&users)
