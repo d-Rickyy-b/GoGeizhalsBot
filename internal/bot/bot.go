@@ -184,7 +184,7 @@ func showPriceagentDetail(b *gotgbot.Bot, ctx *ext.Context) error {
 		return fmt.Errorf("showPriceagentDetail: failed to parse callback data: %w", parseErr)
 	}
 
-	priceagent, dbErr := database.GetPriceagentForUserByID(ctx.EffectiveUser.Id, menu.PriceAgent)
+	priceagent, dbErr := database.GetPriceagentForUserByID(ctx.EffectiveUser.Id, menu.PriceAgentID)
 	if dbErr != nil {
 		return fmt.Errorf("showPriceagentDetail: failed to get priceagent from database: %w", dbErr)
 	}

@@ -7,10 +7,10 @@ import (
 )
 
 type Menu struct {
-	ID         string
-	SubMenu    string
-	PriceAgent int64
-	Extra      string
+	ID           string
+	SubMenu      string
+	PriceAgentID int64
+	Extra        string
 }
 
 // NewMenu returns a menu struct from a given menuData string. The menu follows the format <menuID>_<submenuID>_<priceagentID>[_<extraData>]
@@ -29,9 +29,9 @@ func NewMenu(menuData string) (*Menu, error) {
 	}
 
 	menu := &Menu{
-		ID:         components[0],
-		SubMenu:    components[1],
-		PriceAgent: int64(priceagentID),
+		ID:           components[0],
+		SubMenu:      components[1],
+		PriceAgentID: int64(priceagentID),
 	}
 
 	if len(components) == 4 {
