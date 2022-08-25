@@ -14,12 +14,30 @@ type PriceAgent struct {
 	User                 User                 `json:"user" gorm:"foreignkey:UserID"`
 	EntityID             int64                `json:"-" gorm:"index:user_entity_idx,unique"`
 	Entity               geizhals.Entity      `json:"entity" gorm:"foreignkey:EntityID"`
+	Location             string               `json:"location" gorm:"default:de"`
 	NotificationID       int64                `json:"-"`
 	NotificationSettings NotificationSettings `json:"notificationSettings" gorm:"foreignkey:NotificationID;constraint:OnDelete:CASCADE;"`
+	Enabled              bool                 `json:"enabled" gorm:"default:1"`
 }
 
 func (pa PriceAgent) String() string {
 	return fmt.Sprintf("%d - '%s' (%s) | User: %d", pa.ID, pa.Name, pa.Entity.Name, pa.UserID)
+}
+
+func (pa PriceAgent) EntityURL() string {
+	return pa.Entity.FullURL(pa.Location)
+}
+
+func (pa PriceAgent) CurrentEntityPrice() geizhals.EntityPrice {
+	return pa.Entity.GetPrice(pa.Location)
+}
+
+func (pa PriceAgent) CurrentPrice() float64 {
+	return pa.Entity.GetPrice(pa.Location).Price
+}
+
+func (pa PriceAgent) GetCurrency() geizhals.Currency {
+	return pa.Entity.GetPrice(pa.Location).Currency
 }
 
 type NotificationSettings struct {

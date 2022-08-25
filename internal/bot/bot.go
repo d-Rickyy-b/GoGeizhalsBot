@@ -179,14 +179,9 @@ func mainMenuHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 func showPriceagentDetail(b *gotgbot.Bot, ctx *ext.Context) error {
 	cb := ctx.Update.CallbackQuery
 
-	menu, parseErr := models.NewMenu(cb.Data)
+	menu, priceagent, parseErr := parseMenuPriceagent(ctx)
 	if parseErr != nil {
 		return fmt.Errorf("showPriceagentDetail: failed to parse callback data: %w", parseErr)
-	}
-
-	priceagent, dbErr := database.GetPriceagentForUserByID(ctx.EffectiveUser.Id, menu.PriceAgent)
-	if dbErr != nil {
-		return fmt.Errorf("showPriceagentDetail: failed to get priceagent from database: %w", dbErr)
 	}
 
 	var backCallbackData string
@@ -205,8 +200,9 @@ func showPriceagentDetail(b *gotgbot.Bot, ctx *ext.Context) error {
 
 	notificationButtonText := fmt.Sprintf("⏰ %s", priceagent.NotificationSettings.String())
 
-	linkName := createLink(priceagent.Entity.URL, priceagent.Entity.Name)
-	editedText := fmt.Sprintf("%s kostet aktuell %s", linkName, bold(createPrice(priceagent.Entity.Price)))
+	linkName := createLink(priceagent.EntityURL(), priceagent.Entity.Name)
+	price := priceagent.CurrentEntityPrice()
+	editedText := fmt.Sprintf("%s kostet aktuell %s", linkName, bold(price.String()))
 	markup := gotgbot.InlineKeyboardMarkup{
 		InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
 			{
@@ -224,19 +220,19 @@ func showPriceagentDetail(b *gotgbot.Bot, ctx *ext.Context) error {
 	case "00":
 		_, err := cb.Message.EditText(b, editedText, &gotgbot.EditMessageTextOpts{ReplyMarkup: markup, ParseMode: "HTML"})
 		if err != nil {
-			return fmt.Errorf("showPriceagent: failed to edit message text: %w", err)
+			return fmt.Errorf("showPriceagentDetail: failed to edit message text: %w", err)
 		}
 	case "01":
 		bot.DeleteMessage(ctx.EffectiveChat.Id, cb.Message.MessageId)
 
 		_, err := b.SendMessage(ctx.EffectiveChat.Id, editedText, &gotgbot.SendMessageOpts{ReplyMarkup: markup, ParseMode: "HTML"})
 		if err != nil {
-			return fmt.Errorf("showPriceagent: failed to send new message: %w", err)
+			return fmt.Errorf("showPriceagentDetail: failed to send new message: %w", err)
 		}
 	case "02":
 		_, err := b.SendMessage(ctx.EffectiveChat.Id, editedText, &gotgbot.SendMessageOpts{ReplyMarkup: markup, ParseMode: "HTML"})
 		if err != nil {
-			return fmt.Errorf("showPriceagent: failed to send new message: %w", err)
+			return fmt.Errorf("showPriceagentDetail: failed to send new message: %w", err)
 		}
 	}
 	return nil
@@ -247,22 +243,18 @@ func showPriceagentDetail(b *gotgbot.Bot, ctx *ext.Context) error {
 func changePriceagentSettingsHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	cb := ctx.Update.CallbackQuery
 
-	priceagentID, parseErr := parseIDFromCallbackData(cb.Data, "m04_00_")
+	_, priceagent, parseErr := parseMenuPriceagent(ctx)
 	if parseErr != nil {
-		return fmt.Errorf("changePriceagentSettingsHandler: failed to parse priceagentID from callback data: %w", parseErr)
-	}
-
-	priceagent, dbErr := database.GetPriceagentForUserByID(ctx.EffectiveUser.Id, priceagentID)
-	if dbErr != nil {
-		return fmt.Errorf("setNotifPriceagentHandler: failed to get priceagent from database: %w", dbErr)
+		return fmt.Errorf("changePriceagentSettingsHandler: failed to parse callback data: %w", parseErr)
 	}
 
 	if _, err := cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{}); err != nil {
 		return fmt.Errorf("changePriceagentSettingsHandler: failed to answer callback query: %w", err)
 	}
 
-	linkName := createLink(priceagent.Entity.URL, priceagent.Entity.Name)
-	editedText := fmt.Sprintf("%s\n\nWann möchtest du für %s alarmiert werden?\n\nAktuelle Einstellung: %s\nAktueller Preis: %s", bold("Benachrichtigungseinstellungen"), linkName, bold(priceagent.NotificationSettings.String()), bold(createPrice(priceagent.Entity.Price)))
+	linkName := createLink(priceagent.EntityURL(), priceagent.Entity.Name)
+	price := priceagent.CurrentEntityPrice()
+	editedText := fmt.Sprintf("%s\n\nWann möchtest du für %s alarmiert werden?\n\nAktuelle Einstellung: %s\nAktueller Preis: %s", bold("Benachrichtigungseinstellungen"), linkName, bold(priceagent.NotificationSettings.String()), bold(price.String()))
 	markup := gotgbot.InlineKeyboardMarkup{
 		InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
 			{
@@ -284,21 +276,16 @@ func changePriceagentSettingsHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 func deletePriceagentConfirmationHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	cb := ctx.Update.CallbackQuery
 
-	priceagentID, parseErr := parseIDFromCallbackData(cb.Data, "m04_98_")
+	_, priceagent, parseErr := parseMenuPriceagent(ctx)
 	if parseErr != nil {
-		return fmt.Errorf("deletePriceagentConfirmationHandler: failed to parse priceagentID from callback data: %w", parseErr)
-	}
-
-	priceagent, dbErr := database.GetPriceagentForUserByID(ctx.EffectiveUser.Id, priceagentID)
-	if dbErr != nil {
-		return fmt.Errorf("deletePriceagentConfirmationHandler: failed to get priceagent from database: %w", dbErr)
+		return fmt.Errorf("deletePriceagentConfirmationHandler: failed to parse callback data: %w", parseErr)
 	}
 
 	if _, err := cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{}); err != nil {
 		return fmt.Errorf("deletePriceagentConfirmationHandler: failed to answer callback query: %w", err)
 	}
 
-	linkName := createLink(priceagent.Entity.URL, priceagent.Entity.Name)
+	linkName := createLink(priceagent.EntityURL(), priceagent.Entity.Name)
 	editedText := fmt.Sprintf("%s\n\nMöchtest du den Preisagenten für %s wirklich löschen?", bold("Löschen bestätigen"), linkName)
 	markup := gotgbot.InlineKeyboardMarkup{
 		InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
@@ -324,15 +311,10 @@ func deletePriceagentHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	}
 
 	// Get Priceagent from DB
-	priceagentID, parseErr := parseIDFromCallbackData(cb.Data, "m04_99_")
+	_, priceagent, parseErr := parseMenuPriceagent(ctx)
 	if parseErr != nil {
-		return fmt.Errorf("deletePriceagentHandler: failed to parse priceagentID from callback data: %w", parseErr)
-	}
-
-	priceagent, dbErr := database.GetPriceagentForUserByID(ctx.EffectiveUser.Id, priceagentID)
-	if dbErr != nil {
 		ctx.EffectiveMessage.Reply(b, "Der Preisagent existiert nicht mehr, vielleicht wurde er schon gelöscht?", &gotgbot.SendMessageOpts{})
-		return fmt.Errorf("deletePriceagentHandler: failed to get priceagent from database: %w", dbErr)
+		return fmt.Errorf("deletePriceagentHandler: failed to parse callback data: %w", parseErr)
 	}
 
 	deleteErr := database.DeletePriceAgentForUser(priceagent)
@@ -341,11 +323,11 @@ func deletePriceagentHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 		return fmt.Errorf("deletePriceagentHandler: failed to delete priceagent from database: %w", deleteErr)
 	}
 
-	editText := fmt.Sprintf("Preisagent für %s wurde gelöscht!", bold(createLink(priceagent.Entity.URL, priceagent.Entity.Name)))
+	editText := fmt.Sprintf("Preisagent für %s wurde gelöscht!", bold(createLink(priceagent.EntityURL(), priceagent.Entity.Name)))
 
 	_, err := cb.Message.EditText(b, editText, &gotgbot.EditMessageTextOpts{ParseMode: "HTML", DisableWebPagePreview: true})
 	if err != nil {
-		return fmt.Errorf("deletePriceagent: failed to edit message text: %w", err)
+		return fmt.Errorf("deletePriceagentHandler: failed to edit message text: %w", err)
 	}
 	return nil
 }
@@ -468,14 +450,17 @@ func Start(botConfig config.Config) {
 		}
 		log.Printf("Starting webhook on '%s:%d%s'...\n", botConfig.Webhook.ListenIP, botConfig.Webhook.ListenPort, botConfig.Webhook.ListenPath)
 		// TODO add support for custom certificates
-		err := updater.StartWebhook(bot, ext.WebhookOpts{
+		startErr := updater.StartWebhook(bot, ext.WebhookOpts{
 			Listen:  botConfig.Webhook.ListenIP,
 			Port:    botConfig.Webhook.ListenPort,
 			URLPath: parsedURL.Path,
 		})
-		bot.SetWebhook(botConfig.Webhook.URL, &gotgbot.SetWebhookOpts{})
-		if err != nil {
-			panic("failed to start webhook: " + err.Error())
+		if startErr != nil {
+			panic("failed to start webhook: " + startErr.Error())
+		}
+		_, setWebhookErr := bot.SetWebhook(botConfig.Webhook.URL, &gotgbot.SetWebhookOpts{})
+		if setWebhookErr != nil {
+			panic("failed to set webhook: " + setWebhookErr.Error())
 		}
 	} else {
 		log.Println("Start polling...")
@@ -509,4 +494,18 @@ func Start(botConfig config.Config) {
 	}
 
 	updater.Idle()
+}
+
+func parseMenuPriceagent(ctx *ext.Context) (models.Menu, models.PriceAgent, error) {
+	menu, parseMenuErr := models.NewMenu(ctx.CallbackQuery.Data)
+	if parseMenuErr != nil {
+		return models.Menu{}, models.PriceAgent{}, fmt.Errorf("invalid callback data: %s", ctx.CallbackQuery.Data)
+	}
+
+	priceAgent, dbErr := database.GetPriceagentForUserByID(ctx.EffectiveUser.Id, menu.PriceAgentID)
+	if dbErr != nil {
+		return models.Menu{}, models.PriceAgent{}, fmt.Errorf("invalid callback data: %s", ctx.CallbackQuery.Data)
+	}
+
+	return *menu, priceAgent, nil
 }

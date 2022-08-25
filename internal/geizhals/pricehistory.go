@@ -1,6 +1,7 @@
 package geizhals
 
 import (
+	"GoGeizhalsBot/internal/proxy"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -32,6 +33,7 @@ type PriceHistoryMeta struct {
 type PriceHistory struct {
 	Meta     PriceHistoryMeta `json:"meta"`
 	Response []PriceEntry     `json:"response"`
+	Location string           `json:"location"`
 }
 
 type PriceEntry struct {
@@ -80,18 +82,14 @@ func (entry *PriceEntry) UnmarshalJSON(p []byte) error {
 }
 
 // GetPriceHistory returns the price history for the given entity either from cache or by downloading it.
-func GetPriceHistory(entity Entity) (PriceHistory, error) {
-	//if entity.Type != Product {
-	//	return PriceHistory{}, fmt.Errorf("can only fetch pricehistory for products as of now")
-	//}
-
+func GetPriceHistory(entity Entity, location string) (PriceHistory, error) {
 	// Check if we already have the price history in cache
 	history, isCached := getPriceHistoryFromCache(entity)
 	if isCached {
 		return history, nil
 	}
 
-	return downloadPriceHistory(entity)
+	return downloadPriceHistory(entity, location)
 }
 
 // getPriceHistoryFromCache returns the price history for the given entity from cache, if it is cached.
@@ -111,7 +109,7 @@ func getPriceHistoryFromCache(entity Entity) (PriceHistory, bool) {
 }
 
 // downloadPriceHistory downloads the price history for the given entity.
-func downloadPriceHistory(entity Entity) (PriceHistory, error) {
+func downloadPriceHistory(entity Entity, location string) (PriceHistory, error) {
 	var entityIDs []int64
 	var amounts []int64
 
@@ -120,7 +118,7 @@ func downloadPriceHistory(entity Entity) (PriceHistory, error) {
 		entityIDs = append(entityIDs, entity.ID)
 		amounts = append(amounts, 1)
 	case Wishlist:
-		html, _, downloadErr := downloadHTML(entity.URL)
+		html, _, downloadErr := downloadHTML(entity.FullURL(location))
 		if downloadErr != nil {
 			return PriceHistory{}, downloadErr
 		}
@@ -136,7 +134,7 @@ func downloadPriceHistory(entity Entity) (PriceHistory, error) {
 
 	log.Println("Downloading price history for", entity.Name)
 	priceHistoryAPI := "https://geizhals.de/api/gh0/price_history"
-	proxyURL := getNextProxy()
+	proxyURL := proxy.GetNextProxy()
 	httpClient := &http.Client{}
 	if proxyURL != nil {
 		httpClient.Transport = &http.Transport{Proxy: http.ProxyURL(proxyURL)}
@@ -150,7 +148,7 @@ func downloadPriceHistory(entity Entity) (PriceHistory, error) {
 		Params: struct {
 			Days int    `json:"days"`
 			Loc  string `json:"loc"`
-		}{Days: 9999, Loc: "de"},
+		}{Days: 9999, Loc: location},
 	}
 
 	result, marshalErr := json.Marshal(requestBody)

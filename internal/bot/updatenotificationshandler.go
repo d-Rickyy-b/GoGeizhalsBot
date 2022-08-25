@@ -17,14 +17,9 @@ import (
 func setNotificationBelowHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	cb := ctx.Update.CallbackQuery
 
-	priceagentID, parseErr := parseIDFromCallbackData(cb.Data, "m04_02_")
+	_, priceagent, parseErr := parseMenuPriceagent(ctx)
 	if parseErr != nil {
-		return fmt.Errorf("setNotificationBelowHandler: failed to parse priceagentID from callback data: %w", parseErr)
-	}
-
-	priceagent, dbErr := database.GetPriceagentForUserByID(ctx.EffectiveUser.Id, priceagentID)
-	if dbErr != nil {
-		return fmt.Errorf("setNotificationBelowHandler: failed to get priceagent from database: %w", dbErr)
+		return fmt.Errorf("setNotificationBelowHandler: failed to parse callback data: %w", parseErr)
 	}
 
 	userID := ctx.EffectiveUser.Id
@@ -34,7 +29,8 @@ func setNotificationBelowHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 		return fmt.Errorf("setNotificationBelowHandler: failed to answer callback query: %w", err)
 	}
 
-	editedText := fmt.Sprintf("Ab welchem Preis möchtest du für %s alarmiert werden?\nAktueller Preis: %s", createLink(priceagent.Entity.URL, priceagent.Name), bold(createPrice(priceagent.Entity.Price)))
+	entityPrice := priceagent.CurrentEntityPrice()
+	editedText := fmt.Sprintf("Ab welchem Preis möchtest du für %s alarmiert werden?\nAktueller Preis: %s", createLink(priceagent.EntityURL(), priceagent.Name), bold(entityPrice.String()))
 	_, err := cb.Message.EditText(b, editedText, &gotgbot.EditMessageTextOpts{ReplyMarkup: gotgbot.InlineKeyboardMarkup{}, ParseMode: "HTML"})
 	if err != nil {
 		return fmt.Errorf("setNotificationBelowHandler: failed to edit message text: %w", err)
@@ -47,14 +43,9 @@ func setNotificationBelowHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 func setNotificationAlwaysHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	cb := ctx.Update.CallbackQuery
 
-	priceagentID, parseErr := parseIDFromCallbackData(cb.Data, "m04_01_")
+	_, priceagent, parseErr := parseMenuPriceagent(ctx)
 	if parseErr != nil {
-		return fmt.Errorf("setNotificationAlwaysHandler: failed to parse priceagentID from callback data: %w", parseErr)
-	}
-
-	priceagent, dbErr := database.GetPriceagentForUserByID(ctx.EffectiveUser.Id, priceagentID)
-	if dbErr != nil {
-		return fmt.Errorf("setNotificationAlwaysHandler: failed to get priceagent from database: %w", dbErr)
+		return fmt.Errorf("setNotificationAlwaysHandler: failed to parse callback data: %w", parseErr)
 	}
 
 	newNotifSettings := models.NotificationSettings{
@@ -84,8 +75,9 @@ func setNotificationAlwaysHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 		backCallbackData = "invalidType"
 	}
 
-	linkName := createLink(priceagent.Entity.URL, priceagent.Entity.Name)
-	editedText := fmt.Sprintf("%s kostet aktuell %s", linkName, bold(createPrice(priceagent.Entity.Price)))
+	linkName := createLink(priceagent.EntityURL(), priceagent.Entity.Name)
+	price := priceagent.CurrentEntityPrice()
+	editedText := fmt.Sprintf("%s kostet aktuell %s", linkName, bold(price.String()))
 	markup := gotgbot.InlineKeyboardMarkup{
 		InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
 			{
