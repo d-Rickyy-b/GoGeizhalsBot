@@ -7,9 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- Store prices per location per entity
+- Allow skinflint.co.uk links
+- Ability to disable price agents (no UI yet)
+ 
 ### Changed
+- Display price agent name (& link) in price history graph caption
+- Display currency in price history graph
+- Send new message with price agent details when clicking on the button for the price notification message
+
 ### Fixed
-### Docs
+- Improve graph visibility
 
 ## [1.1.0] - 2022-03-28
 
