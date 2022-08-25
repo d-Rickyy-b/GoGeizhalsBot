@@ -240,7 +240,7 @@ func renderChart(priceagent models.PriceAgent, history geizhals.PriceHistory, si
 		Background: backgroundStyle,
 		Canvas:     backgroundStyle,
 		YAxis: chart.YAxis{
-			Name: "Preis",
+			Name: fmt.Sprintf("Preis (%s)", priceagent.CurrentEntityPrice().Currency.String()),
 			Range: &chart.ContinuousRange{
 				Min: minPrice - (maxPrice)*0.1,
 				Max: maxPrice + (maxPrice)*0.1,
