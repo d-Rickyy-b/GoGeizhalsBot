@@ -350,15 +350,6 @@ func newUserHandler(_ *gotgbot.Bot, ctx *ext.Context) error {
 	return nil
 }
 
-func cbqNotImplementedHandler(b *gotgbot.Bot, ctx *ext.Context) error {
-	cb := ctx.Update.CallbackQuery
-
-	if _, err := cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{Text: "Not implemented yet"}); err != nil {
-		return fmt.Errorf("priceHistoryHandler: failed to answer callback query: %w", err)
-	}
-	return nil
-}
-
 // setCommands sets all the available commands for the bot on Telegram
 func setCommands() {
 	_, setCommandErr := bot.SetMyCommands([]gotgbot.BotCommand{
