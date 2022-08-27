@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.1] - 2022-08-27
+### Fixed
+- Fixed a bug with Notifications not being sent 
+
 ## [2.0.0] - 2022-08-25
 ### Added
 - Store prices per location per entity
