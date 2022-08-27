@@ -80,7 +80,6 @@ func updateEntityPrices() {
 // notifyUsers sends a notification to the users of the price agent if the settings allow it
 func notifyUsers(priceAgent models.PriceAgent, oldPrice, updatedPrice float64) {
 	settings := priceAgent.NotificationSettings
-	user := priceAgent.User
 	diff := updatedPrice - oldPrice
 
 	var change string
@@ -102,7 +101,7 @@ func notifyUsers(priceAgent models.PriceAgent, oldPrice, updatedPrice float64) {
 		return
 	}
 
-	log.Println("Sending notification to user:", user.ID)
+	log.Println("Sending notification to user:", priceAgent.UserID)
 	prometheus.PriceagentNotifications.Inc()
 
 	markup := gotgbot.InlineKeyboardMarkup{
@@ -113,7 +112,7 @@ func notifyUsers(priceAgent models.PriceAgent, oldPrice, updatedPrice float64) {
 		},
 	}
 	// TODO implement message queueing to avoid hitting telegram api limits (30 msgs/sec)
-	_, sendErr := bot.SendMessage(user.ID, notificationText, &gotgbot.SendMessageOpts{ParseMode: "HTML", DisableWebPagePreview: true, ReplyMarkup: markup})
+	_, sendErr := bot.SendMessage(priceAgent.UserID, notificationText, &gotgbot.SendMessageOpts{ParseMode: "HTML", DisableWebPagePreview: true, ReplyMarkup: markup})
 	if sendErr != nil {
 		log.Println("Error sending message:", sendErr)
 		return
