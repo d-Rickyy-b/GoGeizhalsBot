@@ -111,7 +111,7 @@ func GetAllUsers() []models.User {
 
 func GetActivePriceAgents() ([]models.PriceAgent, error) {
 	var priceagents []models.PriceAgent
-	tx := db.Preload("Entity").Preload("Entity.Prices").Preload("NotificationSettings").Where("enabled = true").Find(&priceagents)
+	tx := db.Preload("Entity").Preload("Entity.Prices").Preload("NotificationSettings").Preload("User").Where("enabled = true").Find(&priceagents)
 	if tx.Error != nil {
 		log.Println(tx.Error)
 		return []models.PriceAgent{}, tx.Error
