@@ -6,7 +6,7 @@ before:
 
 builds:
   - main: ./cmd/main.go
-    ldflags: -s -w
+    ldflags: -s -w -X 'GoGeizhalsBot/internal/bot.version={{.Version}} (GitHub)'
     goos:
       - linux
       - darwin
