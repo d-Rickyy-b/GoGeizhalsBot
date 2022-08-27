@@ -6,7 +6,6 @@ import (
 )
 
 type Entity struct {
-	html      []byte
 	ID         int64 `json:"id"`
 	GeizhalsID int64
 	UpdatedAt  time.Time
