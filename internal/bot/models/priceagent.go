@@ -44,13 +44,13 @@ type NotificationSettings struct {
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
 	ID              int64   `gorm:"primarykey"`
-	NotifyAlways    bool    `json:"notifyAlways"`
-	NotifyPriceDrop bool    `json:"notifyPriceDrop"`
-	NotifyPriceRise bool    `json:"notifyPriceRise"`
-	NotifyAbove     bool    `json:"notifyAbove"`
-	NotifyBelow     bool    `json:"notifyBelow"`
-	AbovePrice      float64 `json:"abovePrice"`
-	BelowPrice      float64 `json:"belowPrice"`
+	NotifyAlways    bool    `json:"notifyAlways" gorm:"default:true"`
+	NotifyPriceDrop bool    `json:"notifyPriceDrop" gorm:"default:false"`
+	NotifyPriceRise bool    `json:"notifyPriceRise" gorm:"default:false"`
+	NotifyAbove     bool    `json:"notifyAbove" gorm:"default:false"`
+	NotifyBelow     bool    `json:"notifyBelow" gorm:"default:false"`
+	AbovePrice      float64 `json:"abovePrice" gorm:"default:0"`
+	BelowPrice      float64 `json:"belowPrice" gorm:"default:0"`
 }
 
 func (ns NotificationSettings) String() string {
