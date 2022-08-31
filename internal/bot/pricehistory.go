@@ -12,9 +12,8 @@ import (
 	"math"
 	"time"
 
-	"github.com/wcharczuk/go-chart/v2/drawing"
-
-	"github.com/wcharczuk/go-chart/v2"
+	"github.com/d-Rickyy-b/go-chart-x/v2/pkg/chart"
+	"github.com/d-Rickyy-b/go-chart-x/v2/pkg/drawing"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
@@ -268,7 +267,7 @@ func renderChart(priceagent models.PriceAgent, history geizhals.PriceHistory, si
 			linRegSeries,
 		},
 	}
-	graph.Elements = []chart.Renderable{chart.Legend(&graph, chart.Style{
+	graph.Elements = []chart.Renderable{chart.LegendLineLeft(&graph, chart.Style{
 		FillColor: legendBackgroundColor,
 		FontColor: fontStyle.FontColor,
 		FontSize:  fontStyle.FontSize,
