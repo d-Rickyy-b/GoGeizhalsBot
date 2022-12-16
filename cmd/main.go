@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	var configFile = flag.String("config", "config.yml", "Path to config file")
+	configFile := flag.String("config", "config.yml", "Path to config file")
 	flag.Parse()
 
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
