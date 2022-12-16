@@ -7,8 +7,10 @@ import (
 	"github.com/d-Rickyy-b/gogeizhalsbot/internal/bot/models"
 )
 
-var userCache = make(map[int64]models.User)
-var cacheMutex sync.Mutex
+var (
+	userCache  = make(map[int64]models.User)
+	cacheMutex sync.Mutex
+)
 
 func GetUserFromCache(userID int64) models.User {
 	if cachedUser, ok := userCache[userID]; ok {

@@ -16,14 +16,14 @@ func setupLogfile(logDirPath string) {
 	logfileName := "geizhalsbot.log"
 	logDir := filepath.Clean(logDirPath)
 
-	mkdirErr := os.MkdirAll(logDir, 0666)
+	mkdirErr := os.MkdirAll(logDir, 0o666)
 	if mkdirErr != nil {
 		log.Fatal("error creating folders:", mkdirErr)
 	}
 
 	logFilePath := filepath.Join(logDir, logfileName)
 
-	f, openErr := os.OpenFile(logFilePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	f, openErr := os.OpenFile(logFilePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0o666)
 	if openErr != nil {
 		log.Fatalf("error opening file: %v", openErr)
 	}

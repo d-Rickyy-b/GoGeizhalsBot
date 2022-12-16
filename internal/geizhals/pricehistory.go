@@ -42,8 +42,10 @@ type PriceEntry struct {
 	Valid     bool      `json:"valid"`
 }
 
-var userCache = make(map[int64]PriceHistory)
-var cacheMutex sync.Mutex
+var (
+	userCache  = make(map[int64]PriceHistory)
+	cacheMutex sync.Mutex
+)
 
 // UnmarshalJSON implements a custom unmarshaller for the price history response.
 // The API response is an array of length 3, containing the timestamp, price and validity.

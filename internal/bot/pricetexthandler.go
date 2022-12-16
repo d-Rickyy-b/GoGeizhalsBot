@@ -26,8 +26,8 @@ func parsePrice(messageText string) (float64, error) {
 	}
 
 	// check if price is in range
-	var upperBound = 1000000.00
-	var lowerBound = 0.01
+	upperBound := 1000000.00
+	lowerBound := 0.01
 
 	if price < lowerBound {
 		return lowerBound, ErrOutOfRange

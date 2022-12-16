@@ -146,7 +146,7 @@ func DeletePriceAgentForUser(priceAgent models.PriceAgent) error {
 
 func GetProductPriceagentsForUser(userID int64) ([]models.PriceAgent, error) {
 	var priceagents []models.PriceAgent
-	var query = &models.PriceAgent{UserID: userID, Enabled: true}
+	query := &models.PriceAgent{UserID: userID, Enabled: true}
 
 	tx := db.Joins("JOIN entities on price_agents.entity_id = entities.id").Where(query).Where("entities.type = ?", geizhals.Product).Find(&priceagents)
 	if tx.Error != nil {
@@ -160,7 +160,7 @@ func GetProductPriceagentsForUser(userID int64) ([]models.PriceAgent, error) {
 func GetWishlistPriceagentsForUser(userID int64) ([]models.PriceAgent, error) {
 	var priceagents []models.PriceAgent
 
-	var query = &models.PriceAgent{UserID: userID, Enabled: true}
+	query := &models.PriceAgent{UserID: userID, Enabled: true}
 	tx := db.Joins("JOIN entities on price_agents.entity_id = entities.id").Where(query).Where("entities.type = ?", geizhals.Wishlist).Find(&priceagents)
 	if tx.Error != nil {
 		log.Println(tx.Error)
@@ -188,7 +188,7 @@ func UpdateNotificationSettings(userID int64, priceagentID int64, notifSettings 
 		return tx.Error
 	}
 
-	var notifSettingsMap = map[string]interface{}{
+	notifSettingsMap := map[string]interface{}{
 		"notify_always":     notifSettings.NotifyAlways,
 		"notify_above":      notifSettings.NotifyAbove,
 		"notify_below":      notifSettings.NotifyBelow,
@@ -237,9 +237,9 @@ func GetAllEntities() ([]geizhals.Entity, error) {
 func GetAllEntitiesWithPriceagents() ([]geizhals.Entity, error) {
 	var entities []geizhals.Entity
 	tx := db.Model(&geizhals.Entity{}).Joins("JOIN price_agents on price_agents.entity_id = entities.id").
-		//Joins("JOIN entity_prices on entity_prices.entity_id = entities.id").
+		// Joins("JOIN entity_prices on entity_prices.entity_id = entities.id").
 		Where("price_agents.enabled = 1").
-		//Where("price_agents.location = entity_prices.location").
+		// Where("price_agents.location = entity_prices.location").
 		Find(&entities)
 	if tx.Error != nil {
 		log.Println(tx.Error)
@@ -251,7 +251,7 @@ func GetAllEntitiesWithPriceagents() ([]geizhals.Entity, error) {
 // HasUserPriceAgentForEntity checks if a user already has a priceagent for a given entity
 func HasUserPriceAgentForEntity(userID int64, entityID int64) (bool, error) {
 	var priceagent models.PriceAgent
-	var query = &models.PriceAgent{UserID: userID, EntityID: entityID, Enabled: true}
+	query := &models.PriceAgent{UserID: userID, EntityID: entityID, Enabled: true}
 	tx := db.Where(query).Limit(1).Find(&priceagent)
 	exists := tx.RowsAffected > 0
 	if tx.Error != nil {
