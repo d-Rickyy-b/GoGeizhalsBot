@@ -1,8 +1,8 @@
 package config
 
 import (
-	"io/ioutil"
 	"log"
+	"os"
 	"regexp"
 
 	"gopkg.in/yaml.v3"
@@ -51,7 +51,7 @@ func ReadConfig(configFile string) (Config, error) {
 }
 
 func parseConfigFromFile(configFile string) (Config, error) {
-	yamlFileContent, readErr := ioutil.ReadFile(configFile)
+	yamlFileContent, readErr := os.ReadFile(configFile)
 	if readErr != nil {
 		return Config{}, readErr
 	}
