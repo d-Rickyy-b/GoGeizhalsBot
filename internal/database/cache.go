@@ -1,9 +1,10 @@
 package database
 
 import (
-	"GoGeizhalsBot/internal/bot/models"
 	"log"
 	"sync"
+
+	"github.com/d-Rickyy-b/gogeizhalsbot/internal/bot/models"
 )
 
 var userCache = make(map[int64]models.User)

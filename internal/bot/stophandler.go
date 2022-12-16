@@ -1,9 +1,10 @@
 package bot
 
 import (
-	"GoGeizhalsBot/internal/database"
 	"fmt"
 	"log"
+
+	"github.com/d-Rickyy-b/gogeizhalsbot/internal/database"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"

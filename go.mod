@@ -1,4 +1,4 @@
-module GoGeizhalsBot
+module github.com/d-Rickyy-b/gogeizhalsbot
 
 go 1.18
 

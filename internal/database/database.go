@@ -1,10 +1,11 @@
 package database
 
 import (
-	"GoGeizhalsBot/internal/bot/models"
-	"GoGeizhalsBot/internal/geizhals"
 	"fmt"
 	"log"
+
+	"github.com/d-Rickyy-b/gogeizhalsbot/internal/bot/models"
+	"github.com/d-Rickyy-b/gogeizhalsbot/internal/geizhals"
 
 	"gorm.io/gorm/logger"
 

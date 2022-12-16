@@ -1,13 +1,14 @@
 package bot
 
 import (
-	"GoGeizhalsBot/internal/bot/models"
-	"GoGeizhalsBot/internal/bot/userstate"
-	"GoGeizhalsBot/internal/database"
-	"GoGeizhalsBot/internal/geizhals"
 	"errors"
 	"fmt"
 	"log"
+
+	"github.com/d-Rickyy-b/gogeizhalsbot/internal/bot/models"
+	"github.com/d-Rickyy-b/gogeizhalsbot/internal/bot/userstate"
+	"github.com/d-Rickyy-b/gogeizhalsbot/internal/database"
+	"github.com/d-Rickyy-b/gogeizhalsbot/internal/geizhals"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"

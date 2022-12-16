@@ -1,13 +1,14 @@
 package bot
 
 import (
-	"GoGeizhalsBot/internal/bot/models"
-	"GoGeizhalsBot/internal/database"
-	"GoGeizhalsBot/internal/geizhals"
-	"GoGeizhalsBot/internal/prometheus"
 	"fmt"
 	"log"
 	"time"
+
+	"github.com/d-Rickyy-b/gogeizhalsbot/internal/bot/models"
+	"github.com/d-Rickyy-b/gogeizhalsbot/internal/database"
+	"github.com/d-Rickyy-b/gogeizhalsbot/internal/geizhals"
+	"github.com/d-Rickyy-b/gogeizhalsbot/internal/prometheus"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 )

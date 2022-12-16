@@ -1,12 +1,13 @@
 package bot
 
 import (
-	"GoGeizhalsBot/internal/bot/models"
 	"errors"
 	"fmt"
 	"html"
 	"strconv"
 	"strings"
+
+	"github.com/d-Rickyy-b/gogeizhalsbot/internal/bot/models"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 )

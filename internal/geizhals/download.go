@@ -1,14 +1,13 @@
 package geizhals
 
 import (
-	"GoGeizhalsBot/internal/prometheus"
-	"GoGeizhalsBot/internal/proxy"
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/d-Rickyy-b/gogeizhalsbot/internal/prometheus"
+	"github.com/d-Rickyy-b/gogeizhalsbot/internal/proxy"
 
 	"github.com/PuerkitoBio/goquery"
 )

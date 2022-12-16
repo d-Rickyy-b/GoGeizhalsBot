@@ -1,16 +1,17 @@
 package bot
 
 import (
-	"GoGeizhalsBot/internal/bot/models"
-	"GoGeizhalsBot/internal/database"
-	"GoGeizhalsBot/internal/geizhals"
-	"GoGeizhalsBot/internal/prometheus"
 	"bytes"
 	"fmt"
 	"io"
 	"log"
 	"math"
 	"time"
+
+	"github.com/d-Rickyy-b/gogeizhalsbot/internal/bot/models"
+	"github.com/d-Rickyy-b/gogeizhalsbot/internal/database"
+	"github.com/d-Rickyy-b/gogeizhalsbot/internal/geizhals"
+	"github.com/d-Rickyy-b/gogeizhalsbot/internal/prometheus"
 
 	"github.com/d-Rickyy-b/go-chart-x/v2/pkg/chart"
 	"github.com/d-Rickyy-b/go-chart-x/v2/pkg/drawing"

@@ -1,11 +1,14 @@
 package geizhals
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"log"
 	"sync"
 	"time"
+
+	"github.com/d-Rickyy-b/gogeizhalsbot/internal/proxy"
 )
 
 type priceHistoryRequest struct {

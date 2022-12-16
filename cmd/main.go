@@ -1,15 +1,16 @@
 package main
 
 import (
-	"GoGeizhalsBot/internal/bot"
-	"GoGeizhalsBot/internal/config"
-	"GoGeizhalsBot/internal/database"
-	"GoGeizhalsBot/internal/logging"
-	"GoGeizhalsBot/internal/proxy"
 	"flag"
 	"log"
 	"net/url"
 	"time"
+
+	"github.com/d-Rickyy-b/gogeizhalsbot/internal/bot"
+	"github.com/d-Rickyy-b/gogeizhalsbot/internal/config"
+	"github.com/d-Rickyy-b/gogeizhalsbot/internal/database"
+	"github.com/d-Rickyy-b/gogeizhalsbot/internal/logging"
+	"github.com/d-Rickyy-b/gogeizhalsbot/internal/proxy"
 )
 
 func main() {
