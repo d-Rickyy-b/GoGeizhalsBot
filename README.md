@@ -1,6 +1,7 @@
 # GoGeizhalsBot
 [![build](https://github.com/d-Rickyy-b/GoGeizhalsBot/actions/workflows/release_build.yml/badge.svg)](https://github.com/d-Rickyy-b/GoGeizhalsBot/actions/workflows/release_build.yml)
 [![Docker Image Version (latest semver)](https://img.shields.io/docker/v/0rickyy0/gogeizhalsbot?label=docker&sort=semver)](https://hub.docker.com/repository/docker/0rickyy0/gogeizhalsbot)
+[![Go Reference](https://pkg.go.dev/badge/github.com/d-Rickyy-b/gogeizhalsbot.svg)](https://pkg.go.dev/github.com/d-Rickyy-b/gogeizhalsbot)
 
 This repository holds a rewrite of my [Python-GeizhalsBot](https://raw.githubusercontent.com/d-Rickyy-b/Python-GeizhalsBot) Telegram bot in the Go programming language. 
 GoGeizhalsbot is a Telegram bot that notifies you via chat messages about changes of the price of a [geizhals.de](https://geizhals.de) product or wishlist.
