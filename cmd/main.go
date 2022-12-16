@@ -19,13 +19,15 @@ func main() {
 
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	database.InitDB()
-	database.PopulateCaches()
-
 	botConfig, readConfigErr := config.ReadConfig(*configFile)
 	if readConfigErr != nil {
 		log.Fatal(readConfigErr)
 	}
+
+	go bot.UpdatePricesJob(time.Minute * 10)
+
+	database.InitDB()
+	database.PopulateCaches()
 
 	logging.SetupLogging(botConfig.LogDirectory)
 
