@@ -298,22 +298,24 @@ func DeleteUser(userID int64) {
 	_ = db.Transaction(func(tx *gorm.DB) error {
 		// delete all the things
 		var notifSettings []models.NotificationSettings
-		if err := tx.Model(&models.NotificationSettings{}).Joins("JOIN price_agents on price_agents.notification_id = notification_settings.id").Where("price_agents.user_id = ?", userID).Find(&notifSettings); err.Error != nil { // return any error will rollback
+		if err := tx.Model(&models.NotificationSettings{}).Joins("JOIN price_agents on price_agents.notification_id = notification_settings.id").Where("price_agents.user_id = ?", userID).Find(&notifSettings); err.Error != nil {
+			// returning any error will roll back
 			return err.Error
 		}
 
 		if len(notifSettings) > 0 {
-			if err := tx.Delete(notifSettings); err.Error != nil { // return any error will rollback
+			if err := tx.Delete(notifSettings); err.Error != nil {
+				// returning any error will roll back
 				return err.Error
 			}
 		}
 
 		if err := tx.Model(&models.PriceAgent{}).Where("user_id = ?", userID).Delete(&models.PriceAgent{}); err.Error != nil {
-			// return any error will rollback
+			// returning any error will roll back
 			return err.Error
 		}
 		if err := tx.Model(&models.User{}).Where("id = ?", userID).Delete(&models.User{}); err.Error != nil {
-			// return any error will rollback
+			// returning any error will roll back
 			return err.Error
 		}
 
