@@ -36,6 +36,7 @@ func setNotificationBelowHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	if err != nil {
 		return fmt.Errorf("setNotificationBelowHandler: failed to edit message text: %w", err)
 	}
+
 	return nil
 }
 
@@ -57,11 +58,13 @@ func setNotificationAlwaysHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	if dbUpdateErr != nil {
 		log.Printf("UpdateNotificationSettings: %s\n", dbUpdateErr)
 		ctx.EffectiveMessage.Reply(b, "Es ist ein Fehler aufgetreten!", &gotgbot.SendMessageOpts{})
+
 		return dbUpdateErr
 	}
 
 	// Notify user about their decision, then go back to the priceagent detail overview
 	text := "Du wirst ab sofort für jede Preisänderung benachrichtigt!"
+
 	if _, err := cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{Text: text}); err != nil {
 		return fmt.Errorf("setNotificationAlwaysHandler: failed to answer callback query: %w", err)
 	}
@@ -95,5 +98,6 @@ func setNotificationAlwaysHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	if err != nil {
 		return fmt.Errorf("showPriceagent: failed to edit message text: %w", err)
 	}
+
 	return nil
 }

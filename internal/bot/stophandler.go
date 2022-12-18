@@ -39,9 +39,11 @@ func stopHandlerConfirm(b *gotgbot.Bot, ctx *ext.Context) error {
 	_, _, editErr := cb.Message.EditText(b, "Deine Daten wurden gelöscht!", &gotgbot.EditMessageTextOpts{
 		ParseMode: "HTML",
 	})
+
 	if editErr != nil {
 		log.Println(editErr)
 	}
+
 	return nil
 }
 
@@ -50,6 +52,7 @@ func stopHandlerCancel(b *gotgbot.Bot, ctx *ext.Context) error {
 	_, _, editErr := cb.Message.EditText(b, "Der Vorgang wurde abgebrochen! Deine Daten wurden nicht gelöscht.", &gotgbot.EditMessageTextOpts{
 		ParseMode: "HTML",
 	})
+
 	if editErr != nil {
 		log.Println(editErr)
 	}

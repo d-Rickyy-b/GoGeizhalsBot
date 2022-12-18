@@ -14,5 +14,6 @@ func helpHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 		"/stop - Löscht alle deine Daten und beendet den Bot\n" +
 		"/version - Zeigt die aktuelle Version des Bots"
 	_, err := ctx.Message.Reply(b, helpMessage, nil)
+
 	return err
 }

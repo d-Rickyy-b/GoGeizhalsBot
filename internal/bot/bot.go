@@ -41,6 +41,7 @@ func startHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	if err != nil {
 		return fmt.Errorf("failed to send start message: %w", err)
 	}
+
 	return nil
 }
 
@@ -68,6 +69,7 @@ func viewPriceagentsHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	if err != nil {
 		return fmt.Errorf("viewPriceagents: failed to edit message text: %w", err)
 	}
+
 	return nil
 }
 
@@ -94,6 +96,7 @@ func showWishlistPriceagents(b *gotgbot.Bot, ctx *ext.Context) error {
 	if err != nil {
 		return fmt.Errorf("showWishlist: failed to edit message text: %w", err)
 	}
+
 	return nil
 }
 
@@ -119,6 +122,7 @@ func showProductPriceagents(b *gotgbot.Bot, ctx *ext.Context) error {
 	if err != nil {
 		return fmt.Errorf("showProduct: failed to edit message text: %w", err)
 	}
+
 	return nil
 }
 
@@ -138,6 +142,7 @@ func newPriceagentHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 		if err != nil {
 			return fmt.Errorf("newPriceagentHandler: failed to edit message text: %w", err)
 		}
+
 		return nil
 	}
 	_, _, err := cb.Message.EditText(b, "Bitte sende mir eine URL zu einem Produkt oder einer Wunschliste!", &gotgbot.EditMessageTextOpts{ReplyMarkup: gotgbot.InlineKeyboardMarkup{InlineKeyboard: [][]gotgbot.InlineKeyboardButton{}}})
@@ -172,6 +177,7 @@ func mainMenuHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	if err != nil {
 		return fmt.Errorf("mainMenu: failed to edit message text: %w", err)
 	}
+
 	return nil
 }
 
@@ -185,6 +191,7 @@ func showPriceagentDetail(b *gotgbot.Bot, ctx *ext.Context) error {
 	}
 
 	var backCallbackData string
+
 	switch {
 	case priceagent.Entity.Type == geizhals.Wishlist:
 		backCallbackData = "m02_00"
@@ -235,6 +242,7 @@ func showPriceagentDetail(b *gotgbot.Bot, ctx *ext.Context) error {
 			return fmt.Errorf("showPriceagentDetail: failed to send new message: %w", err)
 		}
 	}
+
 	return nil
 }
 
@@ -270,6 +278,7 @@ func changePriceagentSettingsHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	if err != nil {
 		return fmt.Errorf("showPriceagent: failed to edit message text: %w", err)
 	}
+
 	return nil
 }
 
@@ -299,6 +308,7 @@ func deletePriceagentConfirmationHandler(b *gotgbot.Bot, ctx *ext.Context) error
 	if err != nil {
 		return fmt.Errorf("deletePriceagentConfirmationHandler: failed to edit message text: %w", err)
 	}
+
 	return nil
 }
 
@@ -329,6 +339,7 @@ func deletePriceagentHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	if err != nil {
 		return fmt.Errorf("deletePriceagentHandler: failed to edit message text: %w", err)
 	}
+
 	return nil
 }
 
@@ -346,7 +357,9 @@ func newUserHandler(_ *gotgbot.Bot, ctx *ext.Context) error {
 		LastName:  ctx.EffectiveSender.User.LastName,
 		LangCode:  ctx.EffectiveSender.User.LanguageCode,
 	}
+
 	database.CreateUserWithCache(user)
+
 	return nil
 }
 
@@ -414,6 +427,7 @@ func Start(botConfig config.Config) {
 	bot, createBotErr = gotgbot.NewBot(botConfig.BotToken, &gotgbot.BotOpts{
 		Client: http.Client{},
 	})
+
 	if createBotErr != nil {
 		log.Println(botConfig)
 		log.Fatalln("Something wrong:", createBotErr)
@@ -439,6 +453,7 @@ func Start(botConfig config.Config) {
 		if parseErr != nil {
 			log.Fatalln("Can't parse webhook url:", parseErr)
 		}
+
 		log.Printf("Starting webhook on '%s:%d%s'...\n", botConfig.Webhook.ListenIP, botConfig.Webhook.ListenPort, botConfig.Webhook.ListenPath)
 		// TODO add support for custom certificates
 		startErr := updater.StartWebhook(bot, parsedURL.Path, ext.WebhookOpts{
@@ -447,6 +462,7 @@ func Start(botConfig config.Config) {
 		if startErr != nil {
 			panic("failed to start webhook: " + startErr.Error())
 		}
+
 		_, setWebhookErr := bot.SetWebhook(botConfig.Webhook.URL, &gotgbot.SetWebhookOpts{})
 		if setWebhookErr != nil {
 			panic("failed to set webhook: " + setWebhookErr.Error())
@@ -470,12 +486,14 @@ func Start(botConfig config.Config) {
 				prometheus.TotalUniqueUsersValue = database.GetUserCount()
 				prometheus.TotalUniqueWishlistPriceagentsValue = database.GetPriceAgentWishlistCount()
 				prometheus.TotalUniqueProductPriceagentsValue = database.GetPriceAgentProductCount()
+
 				time.Sleep(time.Second * 60)
 			}
 		}()
 
 		exportAddr := fmt.Sprintf("%s:%d", botConfig.Prometheus.ExportIP, botConfig.Prometheus.ExportPort)
 		log.Printf("Starting prometheus exporter on %s...\n", exportAddr)
+
 		err := prometheus.StartPrometheusExporter(exportAddr)
 		if err != nil {
 			panic("failed to start prometheus exporter: " + err.Error())

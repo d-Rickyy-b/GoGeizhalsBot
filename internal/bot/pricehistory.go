@@ -56,11 +56,11 @@ func showPriceHistoryHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 
 	_, _ = bot.DeleteMessage(ctx.EffectiveChat.Id, cb.Message.MessageId, nil)
 
-	editedText := fmt.Sprintf("%s\nFür welchen Zeitraum möchtest du die Preishistorie sehen?", bold(createLink(priceagent.EntityURL(), priceagent.Name)))
 	_, sendErr := bot.SendPhoto(ctx.EffectiveUser.Id, buffer, &gotgbot.SendPhotoOpts{Caption: editedText, ReplyMarkup: markup, ParseMode: "HTML"})
 	if sendErr != nil {
 		return fmt.Errorf("showPriceagentDetail: failed to send photo: %w", sendErr)
 	}
+
 	return nil
 }
 
@@ -75,6 +75,7 @@ func updatePriceHistoryGraphHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	}
 
 	darkMode := database.GetDarkmode(ctx.EffectiveUser.Id)
+
 	if menu.Extra != "" {
 		changeDarkmodeTo := menu.Extra
 		switch changeDarkmodeTo {
@@ -84,6 +85,7 @@ func updatePriceHistoryGraphHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 			darkMode = true
 		}
 	}
+
 	database.UpdateDarkMode(ctx.EffectiveUser.Id, darkMode)
 
 	dateRange := menu.SubMenu
@@ -119,6 +121,7 @@ func updatePriceHistoryGraphHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	if sendErr != nil {
 		return fmt.Errorf("updatePriceHistoryGraphHandler: failed to send photo: %w", sendErr)
 	}
+
 	return nil
 }
 
@@ -126,6 +129,7 @@ func updatePriceHistoryGraphHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 func generateDateRangeKeyboard(priceagent models.PriceAgent, dateRange string, isDarkmode bool) ([]gotgbot.InlineKeyboardButton, time.Time) {
 	themeButton := "🌑"
 	switchTheme := 1
+
 	if isDarkmode {
 		themeButton = "🌕"
 		switchTheme = 0
@@ -140,6 +144,7 @@ func generateDateRangeKeyboard(priceagent models.PriceAgent, dateRange string, i
 	}
 
 	var since time.Time
+
 	switch dateRange {
 	case "01":
 		dateRangeKeyboard[0].Text = "🔘 1M"
@@ -156,6 +161,7 @@ func generateDateRangeKeyboard(priceagent models.PriceAgent, dateRange string, i
 	default:
 		return generateDateRangeKeyboard(priceagent, "03", isDarkmode)
 	}
+
 	return dateRangeKeyboard, since
 }
 
@@ -189,6 +195,7 @@ func renderChart(priceagent models.PriceAgent, history geizhals.PriceHistory, si
 	maxPrice := 0.0
 	minPrice := math.MaxFloat64
 	lastPrice := 0.0
+
 	for _, entry := range history.Response {
 		// Skip entries before given date
 		if entry.Timestamp.Before(since) {
@@ -196,6 +203,7 @@ func renderChart(priceagent models.PriceAgent, history geizhals.PriceHistory, si
 			if entry.Valid {
 				lastPrice = entry.Price
 			}
+
 			continue
 		}
 
@@ -208,6 +216,7 @@ func renderChart(priceagent models.PriceAgent, history geizhals.PriceHistory, si
 
 			mainSeries.XValues = append(mainSeries.XValues, entry.Timestamp)
 			mainSeries.YValues = append(mainSeries.YValues, lastPrice)
+
 			continue
 		} else {
 			mainSeries.XValues = append(mainSeries.XValues, entry.Timestamp)

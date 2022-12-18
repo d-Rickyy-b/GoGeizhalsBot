@@ -52,6 +52,7 @@ func textChangeNotificationSettingsHandler(b *gotgbot.Bot, ctx *ext.Context) err
 	price, parseErr := parsePrice(ctx.EffectiveMessage.Text)
 	if parseErr != nil {
 		log.Printf("parsePrice: %s\n", parseErr)
+
 		if errors.Is(parseErr, ErrOutOfRange) {
 			outOfRangePostfix = fmt.Sprintf("Der Preis liegt außerhalb des gültigen Bereichs und wurde daher auf %.2f € gesetzt.", price)
 		} else {
@@ -71,6 +72,7 @@ func textChangeNotificationSettingsHandler(b *gotgbot.Bot, ctx *ext.Context) err
 	if dbErr != nil {
 		log.Printf("UpdateNotificationSettings: %s\n", dbErr)
 		_, _ = ctx.EffectiveMessage.Reply(b, "Es ist ein Fehler beim Speichern der Einstellungen aufgetreten!", &gotgbot.SendMessageOpts{})
+
 		return dbErr
 	}
 
@@ -82,6 +84,7 @@ func textChangeNotificationSettingsHandler(b *gotgbot.Bot, ctx *ext.Context) err
 
 	messageText := fmt.Sprintf("Preisagent wurde bearbeitet! %s", outOfRangePostfix)
 	_, _ = b.SendMessage(ctx.EffectiveChat.Id, messageText, &gotgbot.SendMessageOpts{ReplyMarkup: markup})
+
 	return nil
 }
 
@@ -108,6 +111,7 @@ func textNewPriceagentHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	if checkErr != nil {
 		log.Printf("textNewPriceagentHandler: %s\n", checkErr)
 		ctx.EffectiveMessage.Reply(b, "Es ist ein Fehler aufgetreten! Bitte probiere es später erneut!", &gotgbot.SendMessageOpts{})
+
 		return checkErr
 	}
 
@@ -120,6 +124,7 @@ func textNewPriceagentHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	if parseErr != nil {
 		log.Printf("textNewPriceagentHandler: %s\n", parseErr)
 		ctx.EffectiveMessage.Reply(b, "Bitte sende mir eine valide Geizhals URL!", &gotgbot.SendMessageOpts{})
+
 		return nil
 	}
 	newPriceagent := models.PriceAgent{
@@ -137,6 +142,7 @@ func textNewPriceagentHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	if createErr != nil {
 		log.Printf("CreatePriceAgentForUser: %s\n", createErr)
 		ctx.EffectiveMessage.Reply(b, "Es ist ein Fehler aufgetreten!", &gotgbot.SendMessageOpts{})
+
 		return createErr
 	}
 
@@ -145,6 +151,8 @@ func textNewPriceagentHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 			{Text: "Zum Preisagenten!", CallbackData: fmt.Sprintf("m03_00_%d", newPriceagent.ID)},
 		},
 	}}
+
 	b.SendMessage(ctx.EffectiveChat.Id, "Preisagent wurde erstellt!", &gotgbot.SendMessageOpts{ReplyMarkup: markup})
+
 	return nil
 }

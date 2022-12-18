@@ -19,6 +19,7 @@ func GetUserFromCache(userID int64) models.User {
 
 	user := models.User{ID: userID}
 	db.Create(user)
+
 	return user
 }
 

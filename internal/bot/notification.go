@@ -27,6 +27,7 @@ func (t *tempPriceStore) getPrice(entityID int64, location string) (float64, boo
 	if !locationOk {
 		return 0, false
 	}
+
 	return price, true
 }
 
@@ -34,6 +35,7 @@ func (t *tempPriceStore) storePrice(entityID int64, location string, price float
 	if t.store == nil {
 		t.store = make(map[int64]map[string]float64)
 	}
+
 	entity, entityOk := t.store[entityID]
 	if !entityOk {
 		entity = make(map[string]float64)
@@ -57,6 +59,7 @@ func updateEntityPrices() {
 		log.Printf("Updating prices for price agent: %d, '%s'\n", priceAgent.ID, priceAgent.EntityURL())
 		var price float64
 		var isCached bool
+
 		price, isCached = priceStore.getPrice(priceAgent.EntityID, priceAgent.Location)
 		if !isCached {
 			updatedPrice, updateErr := geizhals.UpdateEntityPrice(priceAgent.Entity, priceAgent.Location)
@@ -136,5 +139,6 @@ func UpdatePricesJob(updateFrequency time.Duration) {
 func calculateSleep(updateFrequency time.Duration) time.Duration {
 	delta := time.Now().Unix() % int64(updateFrequency.Seconds())
 	initialDelay := updateFrequency - (time.Second * time.Duration(delta))
+
 	return initialDelay
 }
