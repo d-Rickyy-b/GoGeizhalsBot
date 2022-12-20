@@ -65,8 +65,7 @@ func generateEntityKeyboard(priceagents []models.PriceAgent, menuID string, numC
 		keyboard = append(keyboard, []gotgbot.InlineKeyboardButton{{Text: "↩️ Zurück", CallbackData: "m01_01"}})
 	}
 
-	markup := gotgbot.InlineKeyboardMarkup{InlineKeyboard: keyboard}
-	return markup
+	return gotgbot.InlineKeyboardMarkup{InlineKeyboard: keyboard}
 }
 
 func parseIDFromCallbackData(callbackData string, prefix string) (int64, error) {

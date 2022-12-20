@@ -128,7 +128,7 @@ func textNewPriceagentHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
 		return nil
 	}
 	newPriceagent := models.PriceAgent{
-		//ID:     entity.ID,
+		// ID:     entity.ID,
 		Name:   entity.Name,
 		UserID: ctx.EffectiveUser.Id,
 		Entity: entity,
