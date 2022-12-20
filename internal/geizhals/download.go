@@ -69,7 +69,7 @@ func downloadHTML(entityURL string) (*goquery.Document, int, error) {
 	resp, getErr := httpClient.Get(entityURL)
 	if getErr != nil {
 		log.Println(getErr)
-		prometheus.HttpErrors.Inc()
+		prometheus.HTTPErrors.Inc()
 		return nil, 0, fmt.Errorf("error while downloading content from Geizhals: %w", getErr)
 	}
 	// Cleanup when this function ends
