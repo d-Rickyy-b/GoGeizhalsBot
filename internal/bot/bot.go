@@ -46,10 +46,10 @@ func startHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 }
 
 // viewPriceagentsHandler is a callback handler that displays the first sub menu for the m01_01 callback.
-func viewPriceagentsHandler(b *gotgbot.Bot, ctx *ext.Context) error {
-	cb := ctx.Update.CallbackQuery
+func viewPriceagentsHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
+	cbq := ctx.Update.CallbackQuery
 
-	_, err := cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{})
+	_, err := cbq.Answer(bot, &gotgbot.AnswerCallbackQueryOpts{})
 	if err != nil {
 		return fmt.Errorf("failed to answer start callback query: %w", err)
 	}
@@ -77,7 +77,7 @@ func viewPriceagentsHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 func showWishlistPriceagents(b *gotgbot.Bot, ctx *ext.Context) error {
 	cb := ctx.Update.CallbackQuery
 
-	_, err := cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{})
+	_, err := cbq.Answer(bot, &gotgbot.AnswerCallbackQueryOpts{})
 	if err != nil {
 		return fmt.Errorf("failed to answer start callback query: %w", err)
 	}
@@ -104,7 +104,7 @@ func showWishlistPriceagents(b *gotgbot.Bot, ctx *ext.Context) error {
 func showProductPriceagents(b *gotgbot.Bot, ctx *ext.Context) error {
 	cb := ctx.Update.CallbackQuery
 
-	if _, err := cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{}); err != nil {
+	if _, err := cbq.Answer(bot, &gotgbot.AnswerCallbackQueryOpts{}); err != nil {
 		return fmt.Errorf("showProductPriceagents: failed to answer callback query: %w", err)
 	}
 
@@ -127,12 +127,12 @@ func showProductPriceagents(b *gotgbot.Bot, ctx *ext.Context) error {
 }
 
 // newPriceagentHandler is a callback handler for the m01_00 callback.
-func newPriceagentHandler(b *gotgbot.Bot, ctx *ext.Context) error {
+func newPriceagentHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
 	log.Println("newPriceagentHandler")
 	var maxNumberOfPriceagents int64 = 10
-	cb := ctx.Update.CallbackQuery
+	cbq := ctx.Update.CallbackQuery
 
-	if _, err := cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{}); err != nil {
+	if _, err := cbq.Answer(bot, &gotgbot.AnswerCallbackQueryOpts{}); err != nil {
 		return fmt.Errorf("failed to answer start callback query: %w", err)
 	}
 
@@ -159,10 +159,10 @@ func newPriceagentHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 
 // mainMenuHandler handles all the back-button calls to the main menu.
 // It's basically the same as the start handler, but without sending a new message.
-func mainMenuHandler(b *gotgbot.Bot, ctx *ext.Context) error {
-	cb := ctx.Update.CallbackQuery
+func mainMenuHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
+	cbq := ctx.Update.CallbackQuery
 
-	if _, err := cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{}); err != nil {
+	if _, err := cbq.Answer(bot, &gotgbot.AnswerCallbackQueryOpts{}); err != nil {
 		return fmt.Errorf("failed to answer start callback query: %w", err)
 	}
 
@@ -182,8 +182,8 @@ func mainMenuHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 }
 
 // showPriceagentDetail displays the menu for a single, specific price agent.
-func showPriceagentDetail(b *gotgbot.Bot, ctx *ext.Context) error {
-	cb := ctx.Update.CallbackQuery
+func showPriceagentDetail(bot *gotgbot.Bot, ctx *ext.Context) error {
+	cbq := ctx.Update.CallbackQuery
 
 	menu, priceagent, parseErr := parseMenuPriceagent(ctx)
 	if parseErr != nil {
@@ -201,7 +201,7 @@ func showPriceagentDetail(b *gotgbot.Bot, ctx *ext.Context) error {
 		backCallbackData = "invalidType"
 	}
 
-	if _, err := cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{}); err != nil {
+	if _, err := cbq.Answer(bot, &gotgbot.AnswerCallbackQueryOpts{}); err != nil {
 		return fmt.Errorf("showPriceagentDetail: failed to answer callback query: %w", err)
 	}
 
@@ -232,12 +232,12 @@ func showPriceagentDetail(b *gotgbot.Bot, ctx *ext.Context) error {
 	case "01":
 		bot.DeleteMessage(ctx.EffectiveChat.Id, cb.Message.MessageId, nil)
 
-		_, err := b.SendMessage(ctx.EffectiveChat.Id, editedText, &gotgbot.SendMessageOpts{ReplyMarkup: markup, ParseMode: "HTML"})
+		_, err := bot.SendMessage(ctx.EffectiveChat.Id, editedText, &gotgbot.SendMessageOpts{ReplyMarkup: markup, ParseMode: "HTML"})
 		if err != nil {
 			return fmt.Errorf("showPriceagentDetail: failed to send new message: %w", err)
 		}
 	case "02":
-		_, err := b.SendMessage(ctx.EffectiveChat.Id, editedText, &gotgbot.SendMessageOpts{ReplyMarkup: markup, ParseMode: "HTML"})
+		_, err := bot.SendMessage(ctx.EffectiveChat.Id, editedText, &gotgbot.SendMessageOpts{ReplyMarkup: markup, ParseMode: "HTML"})
 		if err != nil {
 			return fmt.Errorf("showPriceagentDetail: failed to send new message: %w", err)
 		}
@@ -248,15 +248,15 @@ func showPriceagentDetail(b *gotgbot.Bot, ctx *ext.Context) error {
 
 // changePriceagentSettingsHandler handles the callbacks for the buttons to change the notification
 // settings of a price agent.
-func changePriceagentSettingsHandler(b *gotgbot.Bot, ctx *ext.Context) error {
-	cb := ctx.Update.CallbackQuery
+func changePriceagentSettingsHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
+	cbq := ctx.Update.CallbackQuery
 
 	_, priceagent, parseErr := parseMenuPriceagent(ctx)
 	if parseErr != nil {
 		return fmt.Errorf("changePriceagentSettingsHandler: failed to parse callback data: %w", parseErr)
 	}
 
-	if _, err := cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{}); err != nil {
+	if _, err := cbq.Answer(bot, &gotgbot.AnswerCallbackQueryOpts{}); err != nil {
 		return fmt.Errorf("changePriceagentSettingsHandler: failed to answer callback query: %w", err)
 	}
 
@@ -282,15 +282,15 @@ func changePriceagentSettingsHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	return nil
 }
 
-func deletePriceagentConfirmationHandler(b *gotgbot.Bot, ctx *ext.Context) error {
-	cb := ctx.Update.CallbackQuery
+func deletePriceagentConfirmationHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
+	cbq := ctx.Update.CallbackQuery
 
 	_, priceagent, parseErr := parseMenuPriceagent(ctx)
 	if parseErr != nil {
 		return fmt.Errorf("deletePriceagentConfirmationHandler: failed to parse callback data: %w", parseErr)
 	}
 
-	if _, err := cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{}); err != nil {
+	if _, err := cbq.Answer(bot, &gotgbot.AnswerCallbackQueryOpts{}); err != nil {
 		return fmt.Errorf("deletePriceagentConfirmationHandler: failed to answer callback query: %w", err)
 	}
 
@@ -313,23 +313,23 @@ func deletePriceagentConfirmationHandler(b *gotgbot.Bot, ctx *ext.Context) error
 }
 
 // deletePriceagentHandler handles all the inline "delete" buttons for priceagents
-func deletePriceagentHandler(b *gotgbot.Bot, ctx *ext.Context) error {
-	cb := ctx.Update.CallbackQuery
+func deletePriceagentHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
+	cbq := ctx.Update.CallbackQuery
 
-	if _, err := cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{}); err != nil {
+	if _, err := cbq.Answer(bot, &gotgbot.AnswerCallbackQueryOpts{}); err != nil {
 		return fmt.Errorf("failed to answer start callback query: %w", err)
 	}
 
 	// Get Priceagent from DB
 	_, priceagent, parseErr := parseMenuPriceagent(ctx)
 	if parseErr != nil {
-		ctx.EffectiveMessage.Reply(b, "Der Preisagent existiert nicht mehr, vielleicht wurde er schon gelöscht?", &gotgbot.SendMessageOpts{})
+		ctx.EffectiveMessage.Reply(bot, "Der Preisagent existiert nicht mehr, vielleicht wurde er schon gelöscht?", &gotgbot.SendMessageOpts{})
 		return fmt.Errorf("deletePriceagentHandler: failed to parse callback data: %w", parseErr)
 	}
 
 	deleteErr := database.DeletePriceAgentForUser(priceagent)
 	if deleteErr != nil {
-		ctx.EffectiveMessage.Reply(b, "Der Preisagent konnte nicht gelöscht werden!", &gotgbot.SendMessageOpts{})
+		ctx.EffectiveMessage.Reply(bot, "Der Preisagent konnte nicht gelöscht werden!", &gotgbot.SendMessageOpts{})
 		return fmt.Errorf("deletePriceagentHandler: failed to delete priceagent from database: %w", deleteErr)
 	}
 

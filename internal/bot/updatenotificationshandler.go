@@ -15,7 +15,7 @@ import (
 
 // setNotificationBelowHandler handles callback queries for the option to set notifications to appear
 // when the price drops below a certain price
-func setNotificationBelowHandler(b *gotgbot.Bot, ctx *ext.Context) error {
+func setNotificationBelowHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
 	cb := ctx.Update.CallbackQuery
 
 	_, priceagent, parseErr := parseMenuPriceagent(ctx)
@@ -26,7 +26,7 @@ func setNotificationBelowHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	userID := ctx.EffectiveUser.Id
 	userstate.UserStates[userID] = userstate.UserState{State: userstate.SetNotification, Priceagent: priceagent}
 
-	if _, err := cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{}); err != nil {
+	if _, err := cb.Answer(bot, &gotgbot.AnswerCallbackQueryOpts{}); err != nil {
 		return fmt.Errorf("setNotificationBelowHandler: failed to answer callback query: %w", err)
 	}
 
@@ -42,8 +42,8 @@ func setNotificationBelowHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 
 // setNotificationAlwaysHandler handles callback queries for the option to set notifications to appear
 // at any change of the price
-func setNotificationAlwaysHandler(b *gotgbot.Bot, ctx *ext.Context) error {
-	cb := ctx.Update.CallbackQuery
+func setNotificationAlwaysHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
+	cbq := ctx.Update.CallbackQuery
 
 	_, priceagent, parseErr := parseMenuPriceagent(ctx)
 	if parseErr != nil {
@@ -57,7 +57,7 @@ func setNotificationAlwaysHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	dbUpdateErr := database.UpdateNotificationSettings(ctx.EffectiveUser.Id, priceagent.ID, newNotifSettings)
 	if dbUpdateErr != nil {
 		log.Printf("UpdateNotificationSettings: %s\n", dbUpdateErr)
-		ctx.EffectiveMessage.Reply(b, "Es ist ein Fehler aufgetreten!", &gotgbot.SendMessageOpts{})
+		ctx.EffectiveMessage.Reply(bot, "Es ist ein Fehler aufgetreten!", &gotgbot.SendMessageOpts{})
 
 		return dbUpdateErr
 	}
@@ -65,7 +65,7 @@ func setNotificationAlwaysHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	// Notify user about their decision, then go back to the priceagent detail overview
 	text := "Du wirst ab sofort für jede Preisänderung benachrichtigt!"
 
-	if _, err := cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{Text: text}); err != nil {
+	if _, err := cbq.Answer(bot, &gotgbot.AnswerCallbackQueryOpts{Text: text}); err != nil {
 		return fmt.Errorf("setNotificationAlwaysHandler: failed to answer callback query: %w", err)
 	}
 

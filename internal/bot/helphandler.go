@@ -6,14 +6,14 @@ import (
 )
 
 // helpHandler handles all the messages containing the /help command.
-func helpHandler(b *gotgbot.Bot, ctx *ext.Context) error {
+func helpHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
 	helpMessage := "Du brauchst Hilfe? Probiere folgende Befehle:\n" +
 		"\n" +
 		"/start - Startmenü\n" +
 		"/help - Zeigt diese Hilfe\n" +
 		"/stop - Löscht alle deine Daten und beendet den Bot\n" +
 		"/version - Zeigt die aktuelle Version des Bots"
-	_, err := ctx.Message.Reply(b, helpMessage, nil)
+	_, err := ctx.Message.Reply(bot, helpMessage, nil)
 
 	return err
 }
