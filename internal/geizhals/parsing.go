@@ -18,13 +18,14 @@ type Price struct {
 func parsePrice(priceString string) (Price, error) {
 	var currency Currency
 
-	if strings.Contains(priceString, "€") {
+	switch {
+	case strings.Contains(priceString, "€"):
 		currency = EUR
-	} else if strings.Contains(priceString, "£") {
+	case strings.Contains(priceString, "£"):
 		currency = GBP
-	} else if strings.Contains(priceString, "PLN") {
+	case strings.Contains(priceString, "PLN"):
 		currency = PLN
-	} else {
+	default:
 		return Price{}, fmt.Errorf("could not parse price")
 	}
 

@@ -97,11 +97,12 @@ func notifyUsers(priceAgent models.PriceAgent, oldPrice, updatedPrice float64) {
 	entityLink := createLink(priceAgent.EntityURL(), priceAgent.Entity.Name)
 	entityPrice := bold(createPrice(updatedPrice, priceAgent.GetCurrency().String()))
 
-	if settings.NotifyAlways {
+	switch {
+	case settings.NotifyAlways:
 		notificationText = fmt.Sprintf("Der Preis von %s hat sich geändert: %s\n\n%s", entityLink, entityPrice, change)
-	} else if settings.NotifyBelow && updatedPrice < settings.BelowPrice {
+	case settings.NotifyBelow && updatedPrice < settings.BelowPrice:
 		notificationText = fmt.Sprintf("Der Preis von %s hat sich geändert: %s\n\n%s", entityLink, entityPrice, change)
-	} else {
+	default:
 		log.Println("Price changes don't match the notification settings for user")
 		return
 	}
