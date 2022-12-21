@@ -1,10 +1,8 @@
 package bot
 
 import (
-	"errors"
 	"fmt"
 	"html"
-	"strconv"
 	"strings"
 
 	"github.com/d-Rickyy-b/gogeizhalsbot/internal/bot/models"
@@ -66,24 +64,6 @@ func generateEntityKeyboard(priceagents []models.PriceAgent, menuID string, numC
 	}
 
 	return gotgbot.InlineKeyboardMarkup{InlineKeyboard: keyboard}
-}
-
-func parseIDFromCallbackData(callbackData string, prefix string) (int64, error) {
-	priceagentIDString := callbackData
-	results := strings.Split(priceagentIDString, "_")
-
-	// get last element from results
-	if len(results) != 3 && len(results) != 4 {
-		return 0, errors.New("couldn't parse priceagent ID - wrong number of results")
-	}
-	priceagentIDString = results[2]
-
-	priceagentID, parseErr := strconv.Atoi(priceagentIDString)
-	if parseErr != nil {
-		return 0, parseErr
-	}
-
-	return int64(priceagentID), nil
 }
 
 func isAllowedLocation(location string) (allowed bool) {
