@@ -105,8 +105,10 @@ func getPriceHistoryFromCache(entity Entity) (PriceHistory, bool) {
 			log.Printf("Using cached price history for '%s'\n", entity.Name)
 			return priceHistory, true
 		}
+
 		delete(userCache, entity.ID)
 	}
+
 	return PriceHistory{}, false
 }
 

@@ -60,6 +60,7 @@ func parseConfigFromFile(configFile string) (Config, error) {
 	if parseErr != nil {
 		return Config{}, parseErr
 	}
+
 	return conf, nil
 }
 
@@ -85,10 +86,12 @@ func validateConfig(config Config) bool {
 			log.Fatalln("Webhook URL does not match pattern 'http(s)://<hostname>/path'")
 			return false
 		}
+
 		if config.Webhook.ListenIP == "" || !IPRegex.MatchString(config.Webhook.ListenIP) {
 			log.Fatalln("Webhook listen IP is does not match pattern 'x.x.x.x'")
 			return false
 		}
+
 		if config.Webhook.ListenPort == 0 {
 			log.Fatalln("Webhook listen port is not set")
 			return false
@@ -99,6 +102,7 @@ func validateConfig(config Config) bool {
 		log.Fatalln("Bot token is not set")
 		return false
 	}
+
 	if config.Proxy.Enabled {
 		if config.Proxy.ProxyListPath == "" {
 			log.Fatalln("Proxy list path is not set")
@@ -111,11 +115,13 @@ func validateConfig(config Config) bool {
 			log.Fatalln("Prometheus export IP does not match pattern 'x.x.x.x'")
 			return false
 		}
+
 		if config.Prometheus.ExportPort == 0 {
 			log.Fatalln("Prometheus export port is not set")
 			return false
 		}
 	}
+
 	return true
 }
 

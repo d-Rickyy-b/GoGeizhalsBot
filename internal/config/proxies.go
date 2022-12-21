@@ -12,6 +12,7 @@ import (
 // If it fails, it returns an empty list.
 func LoadProxies(filename string) []*url.URL {
 	var proxyList []*url.URL
+
 	file, err := os.Open(filename)
 	if err != nil {
 		log.Println(err)
@@ -33,6 +34,7 @@ func LoadProxies(filename string) []*url.URL {
 			log.Printf("Line %s is not a valid proxy url: %s\n", line, parseErr)
 			continue
 		}
+
 		proxyList = append(proxyList, parsedProxy)
 	}
 

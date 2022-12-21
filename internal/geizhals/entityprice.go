@@ -37,6 +37,7 @@ func (c Currency) String() string {
 	case GBP:
 		return "£"
 	}
+
 	return ""
 }
 
@@ -52,5 +53,6 @@ func CurrencyFromLocation(location string) Currency {
 	case "uk":
 		return GBP
 	}
+
 	return EUR
 }

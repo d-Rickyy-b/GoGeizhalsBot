@@ -70,10 +70,10 @@ func setNotificationAlwaysHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
 	}
 
 	var backCallbackData string
-	switch {
-	case priceagent.Entity.Type == geizhals.Wishlist:
+	switch priceagent.Entity.Type {
+	case geizhals.Wishlist:
 		backCallbackData = "m02_00"
-	case priceagent.Entity.Type == geizhals.Product:
+	case geizhals.Product:
 		backCallbackData = "m02_01"
 	default:
 		backCallbackData = "invalidType"

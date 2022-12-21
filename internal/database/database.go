@@ -99,11 +99,13 @@ func CreateUser(user models.User) error {
 
 func GetDarkmode(userID int64) bool {
 	var user models.User
+
 	tx := db.Where("id = ?", userID).First(&user)
 	if tx.Error != nil {
 		log.Println(tx.Error)
 		return true
 	}
+
 	return user.DarkMode
 }
 
