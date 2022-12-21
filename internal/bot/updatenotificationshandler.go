@@ -16,7 +16,7 @@ import (
 // setNotificationBelowHandler handles callback queries for the option to set notifications to appear
 // when the price drops below a certain price
 func setNotificationBelowHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
-	cb := ctx.Update.CallbackQuery
+	cbq := ctx.Update.CallbackQuery
 
 	_, priceagent, parseErr := parseMenuPriceagent(ctx)
 	if parseErr != nil {
@@ -26,7 +26,7 @@ func setNotificationBelowHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
 	userID := ctx.EffectiveUser.Id
 	userstate.UserStates[userID] = userstate.UserState{State: userstate.SetNotification, Priceagent: priceagent}
 
-	if _, err := cb.Answer(bot, &gotgbot.AnswerCallbackQueryOpts{}); err != nil {
+	if _, err := cbq.Answer(bot, &gotgbot.AnswerCallbackQueryOpts{}); err != nil {
 		return fmt.Errorf("setNotificationBelowHandler: failed to answer callback query: %w", err)
 	}
 
