@@ -4,8 +4,10 @@ import (
 	"regexp"
 )
 
-var wishlistURLPattern = regexp.MustCompile(`^((?:https?://)?(?:geizhals\.(?:de|at)|cenowarka\.pl|skinflint\.co\.uk)/(\?cat=WL(-\d+))).*$`)
-var productURLPattern = regexp.MustCompile(`^((?:https?://)?(?:geizhals\.(?:de|at)|cenowarka\.pl|skinflint\.co\.uk)/([0-9a-zA-Z\-]*a(\d+).html))\??.*$`)
+var (
+	wishlistURLPattern = regexp.MustCompile(`^((?:https?://)?(?:geizhals\.(?:de|at)|cenowarka\.pl|skinflint\.co\.uk)/?(\?cat=WL(-\d+))).*$`)
+	productURLPattern  = regexp.MustCompile(`^((?:https?://)?(?:geizhals\.(?:de|at)|cenowarka\.pl|skinflint\.co\.uk)/([0-9a-zA-Z\-]*a(\d+).html))\??.*$`)
+)
 
 var locationPattern = regexp.MustCompile(`hloc=(de|at|uk|pl)`)
 var locationDomainPattern = regexp.MustCompile(`(?:geizhals\.(de|at)|cenowarka\.(pl)|skinflint\.co\.(uk))`)
