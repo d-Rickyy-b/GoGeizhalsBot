@@ -73,7 +73,6 @@ func viewPriceagentsHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 
 // showWishlistPriceagents displays the menu with all wishlist priceagents for the m02_00 callback
 func showWishlistPriceagents(b *gotgbot.Bot, ctx *ext.Context) error {
-	log.Println("showWishlist")
 	cb := ctx.Update.CallbackQuery
 
 	_, err := cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{})
@@ -100,7 +99,6 @@ func showWishlistPriceagents(b *gotgbot.Bot, ctx *ext.Context) error {
 
 // showProductPriceagents displays the menu with all product priceagents for the m02_01 callback
 func showProductPriceagents(b *gotgbot.Bot, ctx *ext.Context) error {
-	log.Println("showProduct")
 	cb := ctx.Update.CallbackQuery
 
 	if _, err := cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{}); err != nil {
