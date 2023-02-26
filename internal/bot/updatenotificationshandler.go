@@ -31,7 +31,7 @@ func setNotificationBelowHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 
 	entityPrice := priceagent.CurrentEntityPrice()
 	editedText := fmt.Sprintf("Ab welchem Preis möchtest du für %s alarmiert werden?\nAktueller Preis: %s", createLink(priceagent.EntityURL(), priceagent.Name), bold(entityPrice.String()))
-	_, err := cb.Message.EditText(b, editedText, &gotgbot.EditMessageTextOpts{ReplyMarkup: gotgbot.InlineKeyboardMarkup{}, ParseMode: "HTML"})
+	_, _, err := cb.Message.EditText(b, editedText, &gotgbot.EditMessageTextOpts{ReplyMarkup: gotgbot.InlineKeyboardMarkup{}, ParseMode: "HTML"})
 	if err != nil {
 		return fmt.Errorf("setNotificationBelowHandler: failed to edit message text: %w", err)
 	}
@@ -90,7 +90,7 @@ func setNotificationAlwaysHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 			},
 		},
 	}
-	_, err := cb.Message.EditText(b, editedText, &gotgbot.EditMessageTextOpts{ReplyMarkup: markup, ParseMode: "HTML"})
+	_, _, err := cb.Message.EditText(b, editedText, &gotgbot.EditMessageTextOpts{ReplyMarkup: markup, ParseMode: "HTML"})
 	if err != nil {
 		return fmt.Errorf("showPriceagent: failed to edit message text: %w", err)
 	}

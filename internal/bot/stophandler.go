@@ -35,7 +35,7 @@ func stopHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 func stopHandlerConfirm(b *gotgbot.Bot, ctx *ext.Context) error {
 	cb := ctx.Update.CallbackQuery
 	database.DeleteUserWithCache(cb.From.Id)
-	_, editErr := cb.Message.EditText(b, "Deine Daten wurden gelöscht!", &gotgbot.EditMessageTextOpts{
+	_, _, editErr := cb.Message.EditText(b, "Deine Daten wurden gelöscht!", &gotgbot.EditMessageTextOpts{
 		ParseMode: "HTML",
 	})
 	if editErr != nil {
@@ -46,7 +46,7 @@ func stopHandlerConfirm(b *gotgbot.Bot, ctx *ext.Context) error {
 
 func stopHandlerCancel(b *gotgbot.Bot, ctx *ext.Context) error {
 	cb := ctx.Update.CallbackQuery
-	_, editErr := cb.Message.EditText(b, "Der Vorgang wurde abgebrochen! Deine Daten wurden nicht gelöscht.", &gotgbot.EditMessageTextOpts{
+	_, _, editErr := cb.Message.EditText(b, "Der Vorgang wurde abgebrochen! Deine Daten wurden nicht gelöscht.", &gotgbot.EditMessageTextOpts{
 		ParseMode: "HTML",
 	})
 	if editErr != nil {

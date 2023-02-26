@@ -87,7 +87,7 @@ func textChangeNotificationSettingsHandler(b *gotgbot.Bot, ctx *ext.Context) err
 // textNewPriceagentHandler handles text messages that contain a link to a geizhals product or wishlist
 func textNewPriceagentHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	log.Println("User in CreatePriceagent state!")
-	_, _ = b.SendChatAction(ctx.EffectiveChat.Id, "typing")
+	_, _ = b.SendChatAction(ctx.EffectiveChat.Id, "typing", nil)
 
 	entity, downloadErr := geizhals.DownloadEntity(ctx.EffectiveMessage.Text)
 	if downloadErr != nil {
