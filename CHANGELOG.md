@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.0] - 2023-03-24
+### Added
+- Add prometheus metrics for HTTP 429 status codes
+
+### Changed
+- Refactored price history code
+
+### Fixed
+- wishlistURLPattern did not match certain urls
+- implement current api of gotgbot v2.0.0-rc.15
+
 ## [2.0.1] - 2022-08-27
 ### Fixed
 - Fixed a bug with Notifications not being sent 
