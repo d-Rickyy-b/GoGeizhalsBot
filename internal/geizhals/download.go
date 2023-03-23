@@ -34,8 +34,10 @@ func downloadEntity(url EntityURL) (Entity, error) {
 		downloadErr error
 	)
 
+	maxRetries := 3
+
 	// execute function downloadHTML() maximum 3 times to avoid 429 Too Many Requests
-	for retries := 0; retries < 3; retries++ {
+	for retries := 0; retries < maxRetries; retries++ {
 		// First we download the html content of the given URL
 		doc, statusCode, downloadErr = downloadHTML(url.CleanURL)
 		if downloadErr == nil {
