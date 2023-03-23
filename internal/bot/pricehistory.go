@@ -44,6 +44,12 @@ func showPriceHistoryHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 		return fmt.Errorf("showPriceagentDetail: failed to download pricehistory: %w", err)
 	}
 
+	if len(history.Response) == 0 {
+		log.Println("showPriceagentDetail: pricehistory is empty")
+		_, _ = b.AnswerCallbackQuery(cb.Id, &gotgbot.AnswerCallbackQueryOpts{Text: "Preisverlaufdaten konnten nicht aktualisiert werden."})
+		return nil
+	}
+
 	buffer := bytes.NewBuffer([]byte{})
 	renderChart(priceagent, history, since, buffer, isDarkmode)
 
@@ -89,12 +95,20 @@ func updatePriceHistoryGraphHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 		},
 	}
 
-	_, _ = cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{})
 	history, err := geizhals.GetPriceHistory(priceagent.Entity, priceagent.Location)
 	if err != nil {
+		_, _ = cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{Text: "Preisverlaufdaten konnten nicht aktualisiert werden."})
 		return fmt.Errorf("updatePriceHistoryGraphHandler: failed to download pricehistory: %w", err)
 	}
 
+	if len(history.Response) == 0 {
+		_, _ = cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{Text: "Preisverlaufdaten konnten nicht aktualisiert werden."})
+		log.Println("updatePriceHistoryGraphHandler: pricehistory is empty")
+
+		return nil
+	}
+
+	_, _ = cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{})
 	buffer := bytes.NewBuffer([]byte{})
 	renderChart(priceagent, history, since, buffer, darkMode)
 
