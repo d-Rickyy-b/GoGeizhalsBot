@@ -97,7 +97,7 @@ func getPriceHistoryFromCache(entity Entity) (PriceHistory, bool) {
 	if priceHistory, ok := userCache[entity.ID]; ok {
 		// Check if the price history is still valid
 		if time.Since(priceHistory.Meta.DownloadedAt) < 12*time.Hour {
-			log.Println("Using cached price history for", entity.Name)
+			log.Printf("Using cached price history for '%s'\n", entity.Name)
 			return priceHistory, true
 		}
 		delete(userCache, entity.ID)

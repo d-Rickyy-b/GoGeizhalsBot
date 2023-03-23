@@ -43,7 +43,7 @@ func downloadEntity(url EntityURL) (Entity, error) {
 		}
 
 		if statusCode == http.StatusTooManyRequests {
-			log.Println("Too many requests, trying again!")
+			log.Printf("Too many requests, trying again (%d/%d)!\n", retries+1, maxRetries)
 			continue
 		}
 		return Entity{}, downloadErr
