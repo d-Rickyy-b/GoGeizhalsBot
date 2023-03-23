@@ -29,7 +29,7 @@ func parseGeizhalsURL(rawurl string) (EntityURL, error) {
 		entityType = Wishlist
 	}
 	if len(matches) != 4 {
-		return EntityURL{}, errors.New("couldn't parse entity URL")
+		return EntityURL{}, ErrInvalidURL
 	}
 
 	entityIDString := matches[3]

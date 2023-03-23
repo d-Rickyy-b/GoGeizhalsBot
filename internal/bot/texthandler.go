@@ -91,8 +91,14 @@ func textNewPriceagentHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 
 	entity, downloadErr := geizhals.DownloadEntity(ctx.EffectiveMessage.Text)
 	if downloadErr != nil {
-		ctx.EffectiveMessage.Reply(b, "Bitte sende eine valide Geizhals URL!", &gotgbot.SendMessageOpts{})
 		log.Printf("textNewPriceagentHandler: %s\n", downloadErr)
+
+		if errors.Is(downloadErr, geizhals.ErrInvalidURL) {
+			ctx.EffectiveMessage.Reply(b, "Bitte sende eine valide Geizhals URL!", &gotgbot.SendMessageOpts{})
+		} else {
+			ctx.EffectiveMessage.Reply(b, "Es ist ein Problem beim Abrufen der Daten aufgetreten! Bitte versuche es später erneut", &gotgbot.SendMessageOpts{})
+		}
+
 		return nil
 	}
 
