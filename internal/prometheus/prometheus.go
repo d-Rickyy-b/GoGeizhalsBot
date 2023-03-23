@@ -29,6 +29,7 @@ var (
 
 	TotalUserInteractions   = metrics.NewCounter("gogeizhalsbot_user_interactions_total")
 	GeizhalsHTTPRequests    = metrics.NewCounter("gogeizhalsbot_geizhals_http_requests_total")
+	HTTPRequests429         = metrics.NewCounter("gogeizhalsbot_geizhals_http_requests_429_total")
 	PriceagentNotifications = metrics.NewCounter("gogeizhalsbot_priceagent_notifications_total")
 	HttpErrors              = metrics.NewCounter("gogeizhalsbot_http_errors_total")
 	GraphsRendered          = metrics.NewCounter("gogeizhalsbot_graphs_rendered_total")
