@@ -1,12 +1,9 @@
 package geizhals
 
 import (
-	"GoGeizhalsBot/internal/proxy"
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"log"
-	"net/http"
 	"sync"
 	"time"
 )
@@ -89,7 +86,7 @@ func GetPriceHistory(entity Entity, location string) (PriceHistory, error) {
 		return history, nil
 	}
 
-	return downloadPriceHistory(entity, location)
+	return getPriceHistory(entity, location)
 }
 
 // getPriceHistoryFromCache returns the price history for the given entity from cache, if it is cached.
@@ -108,8 +105,11 @@ func getPriceHistoryFromCache(entity Entity) (PriceHistory, bool) {
 	return PriceHistory{}, false
 }
 
-// downloadPriceHistory downloads the price history for the given entity.
-func downloadPriceHistory(entity Entity, location string) (PriceHistory, error) {
+// getEntityIDsAndAmounts returns the entity IDs and amounts for the given entity.
+// For products, this is just the product ID and 1.
+// For wishlists, this is the product IDs and amounts of the products contained in the wishlist.
+// For wishlists a HTML download is required to obtain all the entity IDs and amounts.
+func getEntityIDsAndAmounts(entity Entity, location string) ([]int64, []int64, error) {
 	var entityIDs []int64
 	var amounts []int64
 
@@ -120,7 +120,7 @@ func downloadPriceHistory(entity Entity, location string) (PriceHistory, error) 
 	case Wishlist:
 		html, _, downloadErr := downloadHTML(entity.FullURL(location))
 		if downloadErr != nil {
-			return PriceHistory{}, downloadErr
+			return nil, nil, downloadErr
 		}
 
 		// Fetch Product IDs and Amounts
@@ -128,54 +128,29 @@ func downloadPriceHistory(entity Entity, location string) (PriceHistory, error) 
 		entityIDs, amounts, parseErr = parseWishlistEntityIDsAndAmounts(html)
 		if parseErr != nil {
 			log.Println("Error parsing wishlist entities:", parseErr)
-			return PriceHistory{}, parseErr
+			return nil, nil, downloadErr
 		}
 	}
 
-	log.Println("Downloading price history for", entity.Name)
-	priceHistoryAPI := "https://geizhals.de/api/gh0/price_history"
-	proxyURL := proxy.GetNextProxy()
-	httpClient := &http.Client{}
-	if proxyURL != nil {
-		httpClient.Transport = &http.Transport{Proxy: http.ProxyURL(proxyURL)}
-		log.Println("Using proxy: ", proxyURL)
+	return entityIDs, amounts, nil
+}
+
+// getPriceHistory downloads the price history for the given entity.
+func getPriceHistory(entity Entity, location string) (PriceHistory, error) {
+	entityIDs, amounts, err := getEntityIDsAndAmounts(entity, location)
+	if err != nil {
+		return PriceHistory{}, err
 	}
 
-	// Currently, this requests only supports geizhals.de (coming from loc = "de").
-	requestBody := priceHistoryRequest{
-		ID:        entityIDs,
-		Itemcount: amounts,
-		Params: struct {
-			Days int    `json:"days"`
-			Loc  string `json:"loc"`
-		}{Days: 9999, Loc: location},
+	log.Printf("Downloading price history for '%s'\n", entity.Name)
+	pricehistory, downloadErr := DownloadPriceHistory(entityIDs, amounts, location)
+	if downloadErr != nil {
+		return PriceHistory{}, downloadErr
 	}
 
-	result, marshalErr := json.Marshal(requestBody)
-	if marshalErr != nil {
-		return PriceHistory{}, fmt.Errorf("error while marshalling request: %w", marshalErr)
+	if len(pricehistory.Response) == 0 {
+		return PriceHistory{}, fmt.Errorf("no price history found for '%s'", entity.Name)
 	}
-
-	resp, getErr := httpClient.Post(priceHistoryAPI, "application/json", bytes.NewBuffer(result)) //nolint:gosec
-	if getErr != nil {
-		log.Println(getErr)
-		return PriceHistory{}, fmt.Errorf("error while downloading content from Geizhals: %w", getErr)
-	}
-	// Cleanup when this function ends
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		log.Printf("Received status code %d - returning...\n", resp.StatusCode)
-		return PriceHistory{}, fmt.Errorf("error for http request")
-	}
-
-	var pricehistory PriceHistory
-	unmarshalErr := json.NewDecoder(resp.Body).Decode(&pricehistory)
-	if unmarshalErr != nil {
-		return PriceHistory{}, fmt.Errorf("error while unmarshalling response: %w", unmarshalErr)
-	}
-	pricehistory.Meta.DownloadedAt = time.Now()
-
 	// Cache the price history
 	cacheMutex.Lock()
 	defer cacheMutex.Unlock()
