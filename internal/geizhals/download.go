@@ -101,9 +101,7 @@ func DownloadPriceHistory(entityIDs, amounts []int64, location string) (PriceHis
 
 	// execute function downloadHTML() maximum 3 times to avoid 429 Too Many Requests
 	for retries := 0; retries < maxRetries; retries++ {
-		prometheus.GeizhalsHTTPRequests.Inc()
 		resp, downloadErr = downloadPriceHistory(entityIDs, amounts, location)
-		//resp, downloadErr = httpClient.Post(priceHistoryURL, "application/json", bytes.NewBuffer(result)) //nolint:gosec
 
 		if resp.StatusCode == http.StatusTooManyRequests {
 
@@ -164,6 +162,7 @@ func downloadPriceHistory(entityIDs, amounts []int64, location string) (*http.Re
 		return nil, fmt.Errorf("error while marshalling request: %w", marshalErr)
 	}
 
+	prometheus.GeizhalsHTTPRequests.Inc()
 	resp, downloadErr := httpClient.Post(priceHistoryURL, "application/json", bytes.NewBuffer(result))
 	if downloadErr != nil {
 		prometheus.HttpErrors.Inc()
