@@ -1,6 +1,7 @@
 package geizhals
 
 import (
+	"errors"
 	"regexp"
 )
 
@@ -18,6 +19,9 @@ var geizhalsDomains = map[string]string{
 	"uk": "skinflint.co.uk",
 	"pl": "cenowarka.pl",
 }
+
+var ErrTooManyRetries = errors.New("too many retries")
+var ErrInvalidURL = errors.New("invalid URL")
 
 // UpdateEntityPrice returns an updated EntityPrice struct from a given input Entity
 func UpdateEntityPrice(entity Entity, location string) (EntityPrice, error) {
