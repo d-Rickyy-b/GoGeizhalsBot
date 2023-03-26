@@ -39,4 +39,3 @@ archives:
     replacements:
       386: i386
       darwin: macOS
-    name_template:
