@@ -7,6 +7,8 @@ before:
 builds:
   - main: ./cmd/main.go
     ldflags: -s -w -X 'GoGeizhalsBot/internal/bot.version={{.Version}} (GitHub)'
+    env:
+      - CGO_ENABLED=0
     goos:
       - linux
       - darwin
