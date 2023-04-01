@@ -59,7 +59,7 @@ func setNotificationAlwaysHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
 		log.Printf("UpdateNotificationSettings: %s\n", dbUpdateErr)
 		ctx.EffectiveMessage.Reply(bot, "Es ist ein Fehler aufgetreten!", &gotgbot.SendMessageOpts{})
 
-		return dbUpdateErr
+		return fmt.Errorf("database error while updating notification settings: %w", dbUpdateErr)
 	}
 
 	// Notify user about their decision, then go back to the priceagent detail overview
