@@ -1,4 +1,4 @@
-module github.com/d-Rickyy-b/gogeizhalsbot
+module github.com/d-Rickyy-b/gogeizhalsbot/v2
 
 go 1.18
 
