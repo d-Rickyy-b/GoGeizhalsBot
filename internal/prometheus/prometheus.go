@@ -2,6 +2,7 @@ package prometheus
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/VictoriaMetrics/metrics"
 )
@@ -42,5 +43,14 @@ func StartPrometheusExporter(addr string) error {
 	http.HandleFunc("/metrics", func(w http.ResponseWriter, req *http.Request) {
 		metrics.WritePrometheus(w, true)
 	})
-	return http.ListenAndServe(addr, nil)
+
+	server := &http.Server{
+		Addr:              addr,
+		IdleTimeout:       time.Minute,
+		ReadTimeout:       10 * time.Second,
+		ReadHeaderTimeout: 2 * time.Second,
+		WriteTimeout:      10 * time.Second,
+	}
+
+	return server.ListenAndServe()
 }
