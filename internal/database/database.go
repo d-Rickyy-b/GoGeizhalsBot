@@ -279,11 +279,12 @@ func HasUserPriceAgentForEntity(userID int64, entityID int64) (bool, error) {
 	query := &models.PriceAgent{UserID: userID, EntityID: entityID, Enabled: true}
 
 	tx := db.Where(query).Limit(1).Find(&priceagent)
-	exists := tx.RowsAffected > 0
 	if tx.Error != nil {
 		log.Println(tx.Error)
-		return exists, tx.Error
+		return false, tx.Error
 	}
+
+	exists := tx.RowsAffected > 0
 
 	return exists, nil
 }
