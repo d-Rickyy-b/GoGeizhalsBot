@@ -7,13 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [2.1.0] - 2023-03-24
+## [2.1.0] - 2023-04-01
 ### Added
 - Add prometheus metrics for HTTP 429 status codes
 - Make update interval for price agents configurable
 
 ### Changed
 - Refactored price history code
+- Changed package name to `github.com/d-Rickyy-b/gogeizhalsbot`
 
 ### Fixed
 - wishlistURLPattern did not match certain urls
