@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Refactored price history code
 - Changed package name to `github.com/d-Rickyy-b/gogeizhalsbot`
+- Use go 1.18 as new minimum version
 
 ### Fixed
 - wishlistURLPattern did not match certain urls
