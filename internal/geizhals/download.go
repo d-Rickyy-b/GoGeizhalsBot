@@ -1,6 +1,8 @@
 package geizhals
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -169,7 +171,7 @@ func downloadPriceHistory(entityIDs, amounts []int64, location string) (*http.Re
 	prometheus.GeizhalsHTTPRequests.Inc()
 	resp, downloadErr := httpClient.Post(priceHistoryURL, "application/json", bytes.NewBuffer(result))
 	if downloadErr != nil {
-		prometheus.HttpErrors.Inc()
+		prometheus.HTTPErrors.Inc()
 	}
 	if resp.StatusCode == http.StatusTooManyRequests {
 		prometheus.HTTPRequests429.Inc()
