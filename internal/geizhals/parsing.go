@@ -18,13 +18,14 @@ type Price struct {
 func parsePrice(priceString string) (Price, error) {
 	var currency Currency
 
-	if strings.Contains(priceString, "€") {
+	switch {
+	case strings.Contains(priceString, "€"):
 		currency = EUR
-	} else if strings.Contains(priceString, "£") {
+	case strings.Contains(priceString, "£"):
 		currency = GBP
-	} else if strings.Contains(priceString, "PLN") {
+	case strings.Contains(priceString, "PLN"):
 		currency = PLN
-	} else {
+	default:
 		return Price{}, fmt.Errorf("could not parse price")
 	}
 
@@ -32,10 +33,12 @@ func parsePrice(priceString string) (Price, error) {
 	priceString = strings.ReplaceAll(priceString, "€ ", "")
 	priceString = strings.ReplaceAll(priceString, "£ ", "")
 	priceString = strings.ReplaceAll(priceString, "PLN ", "")
+
 	price, err := strconv.ParseFloat(priceString, 64)
 	if err != nil {
 		log.Printf("Can't parse price: '%s' - %s", priceString, err)
 	}
+
 	return Price{Price: price, Currency: currency}, err
 }
 
@@ -63,6 +66,7 @@ func parseEntity(ghURL EntityURL, doc *goquery.Document) (Entity, error) {
 		log.Printf("Invalid entityType '%v'\n", ghURL.Type)
 		return entity, fmt.Errorf("invalid entityType")
 	}
+
 	if parseErr != nil {
 		return entity, parseErr
 	}
@@ -86,6 +90,7 @@ func parseWishlist(doc *goquery.Document) (string, Price, error) {
 
 	// Parse price from html
 	priceString := doc.Find("div.wishlist_sum_area span.gh_price span.gh_price > span.gh_price").Text()
+
 	price, parseErr := parsePrice(priceString)
 	if parseErr != nil {
 		return "", Price{}, parseErr
@@ -102,6 +107,7 @@ func parseProduct(doc *goquery.Document) (string, Price, error) {
 
 	// Parse price from html
 	priceString := doc.Find("div#offer__price-0 span.gh_price").Text()
+
 	price, parseErr := parsePrice(priceString)
 	if parseErr != nil {
 		return "", Price{}, parseErr

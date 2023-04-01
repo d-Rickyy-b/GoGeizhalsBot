@@ -14,9 +14,11 @@ var ErrOutOfRange = errors.New("price is out of range")
 func parsePrice(messageText string) (float64, error) {
 	priceRegex := regexp.MustCompile(`^\s*(\d+(?:[,.]\d+)?)\s*€?$`)
 	priceRegexMatch := priceRegex.FindStringSubmatch(messageText)
+
 	if len(priceRegexMatch) == 0 {
 		return 0, fmt.Errorf("could not parse price from message text: %s", messageText)
 	}
+
 	priceString := priceRegexMatch[1]
 	priceString = strings.ReplaceAll(priceString, ",", ".")
 
@@ -26,13 +28,14 @@ func parsePrice(messageText string) (float64, error) {
 	}
 
 	// check if price is in range
-	var upperBound = 1000000.00
-	var lowerBound = 0.01
+	upperBound := 1000000.00
+	lowerBound := 0.01
 
 	if price < lowerBound {
 		return lowerBound, ErrOutOfRange
 	} else if price > upperBound {
 		return upperBound, ErrOutOfRange
 	}
+
 	return price, nil
 }

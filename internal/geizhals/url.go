@@ -20,25 +20,25 @@ type EntityURL struct {
 // parseGeizhalsURL parses the given URL and returns a EntityURL struct.
 func parseGeizhalsURL(rawurl string) (EntityURL, error) {
 	var matches []string
-	var entityType EntityType
+	var location string
+	entityType := Product
 
 	matches = productURLPattern.FindStringSubmatch(rawurl)
-	entityType = Product
 	if len(matches) != 4 {
 		matches = wishlistURLPattern.FindStringSubmatch(rawurl)
 		entityType = Wishlist
 	}
+
 	if len(matches) != 4 {
 		return EntityURL{}, ErrInvalidURL
 	}
 
 	entityIDString := matches[3]
+
 	entityID, err := strconv.Atoi(entityIDString)
 	if err != nil {
 		return EntityURL{}, fmt.Errorf("couldn't parse entity ID: %s", entityIDString)
 	}
-
-	var location string
 
 	// Pick location from the domain name
 	locationTLDMatches := locationDomainPattern.FindStringSubmatch(rawurl)
@@ -47,6 +47,7 @@ func parseGeizhalsURL(rawurl string) (EntityURL, error) {
 			continue
 		}
 		location = locationTLDMatch
+
 		break
 	}
 
@@ -63,6 +64,7 @@ func parseGeizhalsURL(rawurl string) (EntityURL, error) {
 		Location:     location,
 		Type:         entityType,
 	}
+
 	return ghURL, nil
 }
 
@@ -72,7 +74,9 @@ func LocationFromURL(rawurl string) (string, error) {
 		if locationTLDMatch == "" || i == 0 {
 			continue
 		}
+
 		return locationTLDMatch, nil
 	}
+
 	return "", errors.New("couldn't parse location")
 }

@@ -1,16 +1,17 @@
 package bot
 
 import (
-	"GoGeizhalsBot/internal/bot/models"
-	"GoGeizhalsBot/internal/database"
-	"GoGeizhalsBot/internal/geizhals"
-	"GoGeizhalsBot/internal/prometheus"
 	"bytes"
 	"fmt"
 	"io"
 	"log"
 	"math"
 	"time"
+
+	"github.com/d-Rickyy-b/gogeizhalsbot/internal/bot/models"
+	"github.com/d-Rickyy-b/gogeizhalsbot/internal/database"
+	"github.com/d-Rickyy-b/gogeizhalsbot/internal/geizhals"
+	"github.com/d-Rickyy-b/gogeizhalsbot/internal/prometheus"
 
 	"github.com/d-Rickyy-b/go-chart-x/v2/pkg/chart"
 	"github.com/d-Rickyy-b/go-chart-x/v2/pkg/drawing"
@@ -21,8 +22,8 @@ import (
 
 // showPriceHistoryHandler handles the inline button calls to the pricehistory button.
 // It renders and sends a pricehistory chart to the user.
-func showPriceHistoryHandler(b *gotgbot.Bot, ctx *ext.Context) error {
-	cb := ctx.Update.CallbackQuery
+func showPriceHistoryHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
+	cbq := ctx.Update.CallbackQuery
 
 	_, priceagent, parseErr := parseMenuPriceagent(ctx)
 	if parseErr != nil {
@@ -38,7 +39,7 @@ func showPriceHistoryHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 		},
 	}
 
-	_, _ = b.SendChatAction(ctx.EffectiveChat.Id, "upload_photo", nil)
+	_, _ = bot.SendChatAction(ctx.EffectiveChat.Id, "upload_photo", nil)
 	history, err := geizhals.GetPriceHistory(priceagent.Entity, priceagent.Location)
 	if err != nil {
 		return fmt.Errorf("showPriceagentDetail: failed to download pricehistory: %w", err)
@@ -46,27 +47,28 @@ func showPriceHistoryHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 
 	if len(history.Response) == 0 {
 		log.Println("showPriceagentDetail: pricehistory is empty")
-		_, _ = b.AnswerCallbackQuery(cb.Id, &gotgbot.AnswerCallbackQueryOpts{Text: "Preisverlaufdaten konnten nicht aktualisiert werden."})
+		_, _ = bot.AnswerCallbackQuery(cbq.Id, &gotgbot.AnswerCallbackQueryOpts{Text: "Preisverlaufdaten konnten nicht aktualisiert werden."})
 		return nil
 	}
 
 	buffer := bytes.NewBuffer([]byte{})
 	renderChart(priceagent, history, since, buffer, isDarkmode)
 
-	_, _ = bot.DeleteMessage(ctx.EffectiveChat.Id, cb.Message.MessageId, nil)
+	_, _ = bot.DeleteMessage(ctx.EffectiveChat.Id, cbq.Message.MessageId, nil)
 
 	editedText := fmt.Sprintf("%s\nFür welchen Zeitraum möchtest du die Preishistorie sehen?", bold(createLink(priceagent.EntityURL(), priceagent.Name)))
 	_, sendErr := bot.SendPhoto(ctx.EffectiveUser.Id, buffer, &gotgbot.SendPhotoOpts{Caption: editedText, ReplyMarkup: markup, ParseMode: "HTML"})
 	if sendErr != nil {
 		return fmt.Errorf("showPriceagentDetail: failed to send photo: %w", sendErr)
 	}
+
 	return nil
 }
 
 // updatePriceHistoryGraphHandler handles the inline button calls to the date range buttons below the pricehistory chart.
 // It renders an updated pricehistory chart and sends it to the user.
-func updatePriceHistoryGraphHandler(b *gotgbot.Bot, ctx *ext.Context) error {
-	cb := ctx.Update.CallbackQuery
+func updatePriceHistoryGraphHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
+	cbq := ctx.Update.CallbackQuery
 
 	menu, priceagent, parseErr := parseMenuPriceagent(ctx)
 	if parseErr != nil {
@@ -74,6 +76,7 @@ func updatePriceHistoryGraphHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	}
 
 	darkMode := database.GetDarkmode(ctx.EffectiveUser.Id)
+
 	if menu.Extra != "" {
 		changeDarkmodeTo := menu.Extra
 		switch changeDarkmodeTo {
@@ -83,6 +86,7 @@ func updatePriceHistoryGraphHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 			darkMode = true
 		}
 	}
+
 	database.UpdateDarkMode(ctx.EffectiveUser.Id, darkMode)
 
 	dateRange := menu.SubMenu
@@ -97,27 +101,28 @@ func updatePriceHistoryGraphHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 
 	history, err := geizhals.GetPriceHistory(priceagent.Entity, priceagent.Location)
 	if err != nil {
-		_, _ = cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{Text: "Preisverlaufdaten konnten nicht aktualisiert werden."})
+		_, _ = cbq.Answer(bot, &gotgbot.AnswerCallbackQueryOpts{Text: "Preisverlaufdaten konnten nicht aktualisiert werden."})
 		return fmt.Errorf("updatePriceHistoryGraphHandler: failed to download pricehistory: %w", err)
 	}
 
 	if len(history.Response) == 0 {
-		_, _ = cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{Text: "Preisverlaufdaten konnten nicht aktualisiert werden."})
+		_, _ = cbq.Answer(bot, &gotgbot.AnswerCallbackQueryOpts{Text: "Preisverlaufdaten konnten nicht aktualisiert werden."})
 		log.Println("updatePriceHistoryGraphHandler: pricehistory is empty")
 
 		return nil
 	}
 
-	_, _ = cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{})
+	_, _ = cbq.Answer(bot, &gotgbot.AnswerCallbackQueryOpts{})
 	buffer := bytes.NewBuffer([]byte{})
 	renderChart(priceagent, history, since, buffer, darkMode)
 
 	caption := fmt.Sprintf("%s\nFür welchen Zeitraum möchtest du die Preishistorie sehen?", bold(createLink(priceagent.EntityURL(), priceagent.Name)))
 	newPic := gotgbot.InputMediaPhoto{Media: buffer, Caption: caption, ParseMode: "HTML"}
-	_, _, sendErr := cb.Message.EditMedia(b, newPic, &gotgbot.EditMessageMediaOpts{ReplyMarkup: markup})
+	_, _, sendErr := cbq.Message.EditMedia(bot, newPic, &gotgbot.EditMessageMediaOpts{ReplyMarkup: markup})
 	if sendErr != nil {
 		return fmt.Errorf("updatePriceHistoryGraphHandler: failed to send photo: %w", sendErr)
 	}
+
 	return nil
 }
 
@@ -125,6 +130,7 @@ func updatePriceHistoryGraphHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 func generateDateRangeKeyboard(priceagent models.PriceAgent, dateRange string, isDarkmode bool) ([]gotgbot.InlineKeyboardButton, time.Time) {
 	themeButton := "🌑"
 	switchTheme := 1
+
 	if isDarkmode {
 		themeButton = "🌕"
 		switchTheme = 0
@@ -139,6 +145,7 @@ func generateDateRangeKeyboard(priceagent models.PriceAgent, dateRange string, i
 	}
 
 	var since time.Time
+
 	switch dateRange {
 	case "01":
 		dateRangeKeyboard[0].Text = "🔘 1M"
@@ -155,6 +162,7 @@ func generateDateRangeKeyboard(priceagent models.PriceAgent, dateRange string, i
 	default:
 		return generateDateRangeKeyboard(priceagent, "03", isDarkmode)
 	}
+
 	return dateRangeKeyboard, since
 }
 
@@ -188,6 +196,7 @@ func renderChart(priceagent models.PriceAgent, history geizhals.PriceHistory, si
 	maxPrice := 0.0
 	minPrice := math.MaxFloat64
 	lastPrice := 0.0
+
 	for _, entry := range history.Response {
 		// Skip entries before given date
 		if entry.Timestamp.Before(since) {
@@ -195,6 +204,7 @@ func renderChart(priceagent models.PriceAgent, history geizhals.PriceHistory, si
 			if entry.Valid {
 				lastPrice = entry.Price
 			}
+
 			continue
 		}
 
@@ -207,6 +217,7 @@ func renderChart(priceagent models.PriceAgent, history geizhals.PriceHistory, si
 
 			mainSeries.XValues = append(mainSeries.XValues, entry.Timestamp)
 			mainSeries.YValues = append(mainSeries.YValues, lastPrice)
+
 			continue
 		} else {
 			mainSeries.XValues = append(mainSeries.XValues, entry.Timestamp)

@@ -39,8 +39,10 @@ type PriceEntry struct {
 	Valid     bool      `json:"valid"`
 }
 
-var userCache = make(map[int64]PriceHistory)
-var cacheMutex sync.Mutex
+var (
+	userCache  = make(map[int64]PriceHistory)
+	cacheMutex sync.Mutex
+)
 
 // UnmarshalJSON implements a custom unmarshaller for the price history response.
 // The API response is an array of length 3, containing the timestamp, price and validity.
@@ -100,15 +102,17 @@ func getPriceHistoryFromCache(entity Entity) (PriceHistory, bool) {
 			log.Printf("Using cached price history for '%s'\n", entity.Name)
 			return priceHistory, true
 		}
+
 		delete(userCache, entity.ID)
 	}
+
 	return PriceHistory{}, false
 }
 
 // getEntityIDsAndAmounts returns the entity IDs and amounts for the given entity.
 // For products, this is just the product ID and 1.
 // For wishlists, this is the product IDs and amounts of the products contained in the wishlist.
-// For wishlists a HTML download is required to obtain all the entity IDs and amounts.
+// For wishlists an HTML download is required to obtain all the entity IDs and amounts.
 func getEntityIDsAndAmounts(entity Entity, location string) ([]int64, []int64, error) {
 	var entityIDs []int64
 	var amounts []int64

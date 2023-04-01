@@ -1,30 +1,33 @@
 package main
 
 import (
-	"GoGeizhalsBot/internal/bot"
-	"GoGeizhalsBot/internal/config"
-	"GoGeizhalsBot/internal/database"
-	"GoGeizhalsBot/internal/logging"
-	"GoGeizhalsBot/internal/proxy"
 	"flag"
 	"log"
 	"net/url"
 	"time"
+
+	"github.com/d-Rickyy-b/gogeizhalsbot/internal/bot"
+	"github.com/d-Rickyy-b/gogeizhalsbot/internal/config"
+	"github.com/d-Rickyy-b/gogeizhalsbot/internal/database"
+	"github.com/d-Rickyy-b/gogeizhalsbot/internal/logging"
+	"github.com/d-Rickyy-b/gogeizhalsbot/internal/proxy"
 )
 
 func main() {
-	var configFile = flag.String("config", "config.yml", "Path to config file")
+	configFile := flag.String("config", "config.yml", "Path to config file")
 	flag.Parse()
 
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
-
-	database.InitDB()
-	database.PopulateCaches()
 
 	botConfig, readConfigErr := config.ReadConfig(*configFile)
 	if readConfigErr != nil {
 		log.Fatal(readConfigErr)
 	}
+
+	go bot.UpdatePricesJob(time.Minute * 10)
+
+	database.InitDB()
+	database.PopulateCaches()
 
 	logging.SetupLogging(botConfig.LogDirectory)
 

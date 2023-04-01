@@ -10,11 +10,11 @@ import (
 
 // fallbackCallbackHandler logs all the callback queries that are not handled by the other handlers.
 // That should barely ever happen.
-func fallbackCallbackHandler(b *gotgbot.Bot, ctx *ext.Context) error {
-	cb := ctx.Update.CallbackQuery
-	log.Printf("fallbackCallbackHandler - handled data: %s\n", cb.Data)
+func fallbackCallbackHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
+	cbq := ctx.Update.CallbackQuery
+	log.Printf("fallbackCallbackHandler - handled data: %s\n", cbq.Data)
 
-	if _, err := cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{}); err != nil {
+	if _, err := cbq.Answer(bot, &gotgbot.AnswerCallbackQueryOpts{}); err != nil {
 		return fmt.Errorf("failed to answer start callback query: %w", err)
 	}
 

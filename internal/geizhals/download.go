@@ -1,14 +1,15 @@
 package geizhals
 
 import (
-	"GoGeizhalsBot/internal/prometheus"
-	"GoGeizhalsBot/internal/proxy"
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/d-Rickyy-b/gogeizhalsbot/internal/prometheus"
+	"github.com/d-Rickyy-b/gogeizhalsbot/internal/proxy"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -48,8 +49,10 @@ func downloadEntity(url EntityURL) (Entity, error) {
 			log.Printf("Too many requests, trying again (%d/%d)!\n", retries+1, maxRetries)
 			continue
 		}
+
 		return Entity{}, downloadErr
 	}
+
 	if downloadErr != nil {
 		return Entity{}, downloadErr
 	}
@@ -61,16 +64,19 @@ func downloadEntity(url EntityURL) (Entity, error) {
 func downloadHTML(entityURL string) (*goquery.Document, int, error) {
 	proxyURL := proxy.GetNextProxy()
 	httpClient := &http.Client{}
+
 	if proxyURL != nil {
-		httpClient.Transport = &http.Transport{Proxy: http.ProxyURL(proxyURL)}
 		log.Println("Using proxy: ", proxyURL)
+		httpClient.Transport = &http.Transport{Proxy: http.ProxyURL(proxyURL)}
 	}
 
 	prometheus.GeizhalsHTTPRequests.Inc()
+
 	resp, getErr := httpClient.Get(entityURL)
 	if getErr != nil {
 		log.Println(getErr)
-		prometheus.HttpErrors.Inc()
+		prometheus.HTTPErrors.Inc()
+
 		return nil, 0, fmt.Errorf("error while downloading content from Geizhals: %w", getErr)
 	}
 	// Cleanup when this function ends
@@ -165,7 +171,7 @@ func downloadPriceHistory(entityIDs, amounts []int64, location string) (*http.Re
 	prometheus.GeizhalsHTTPRequests.Inc()
 	resp, downloadErr := httpClient.Post(priceHistoryURL, "application/json", bytes.NewBuffer(result))
 	if downloadErr != nil {
-		prometheus.HttpErrors.Inc()
+		prometheus.HTTPErrors.Inc()
 	}
 	if resp.StatusCode == http.StatusTooManyRequests {
 		prometheus.HTTPRequests429.Inc()

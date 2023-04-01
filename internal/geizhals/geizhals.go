@@ -10,15 +10,17 @@ var (
 	productURLPattern  = regexp.MustCompile(`^((?:https?://)?(?:geizhals\.(?:de|at)|cenowarka\.pl|skinflint\.co\.uk)/([0-9a-zA-Z\-]*a(\d+).html))\??.*$`)
 )
 
-var locationPattern = regexp.MustCompile(`hloc=(de|at|uk|pl)`)
-var locationDomainPattern = regexp.MustCompile(`(?:geizhals\.(de|at)|cenowarka\.(pl)|skinflint\.co\.(uk))`)
-var geizhalsDomains = map[string]string{
-	"de": "geizhals.de",
-	"at": "geizhals.at",
-	"eu": "geizhals.eu",
-	"uk": "skinflint.co.uk",
-	"pl": "cenowarka.pl",
-}
+var (
+	locationPattern       = regexp.MustCompile(`hloc=(de|at|uk|pl)`)
+	locationDomainPattern = regexp.MustCompile(`(?:geizhals\.(de|at)|cenowarka\.(pl)|skinflint\.co\.(uk))`)
+	geizhalsDomains       = map[string]string{
+		"de": "geizhals.de",
+		"at": "geizhals.at",
+		"eu": "geizhals.eu",
+		"uk": "skinflint.co.uk",
+		"pl": "cenowarka.pl",
+	}
+)
 
 var ErrTooManyRetries = errors.New("too many retries")
 var ErrInvalidURL = errors.New("invalid URL")

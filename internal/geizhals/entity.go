@@ -21,6 +21,7 @@ func (e Entity) FullURL(location string) string {
 	if !ok {
 		return ""
 	}
+
 	return fmt.Sprintf("https://%s/%s", domain, e.URL)
 }
 

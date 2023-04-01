@@ -1,9 +1,10 @@
 package models
 
 import (
-	"GoGeizhalsBot/internal/geizhals"
 	"fmt"
 	"time"
+
+	"github.com/d-Rickyy-b/gogeizhalsbot/internal/geizhals"
 )
 
 type PriceAgent struct {
