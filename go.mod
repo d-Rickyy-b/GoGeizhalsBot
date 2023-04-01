@@ -10,6 +10,5 @@ require (
 	github.com/glebarez/sqlite v1.7.0
 	golang.org/x/image v0.5.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1
-	gorm.io/gorm v1.24.5
-	modernc.org/sqlite v1.21.0 // indirect
+	gorm.io/gorm v1.24.6
 )
