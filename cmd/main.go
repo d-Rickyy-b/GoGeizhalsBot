@@ -17,7 +17,6 @@ func main() {
 	flag.Parse()
 
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	go bot.UpdatePricesJob(time.Minute * 10)
 
 	database.InitDB()
 	database.PopulateCaches()
@@ -34,6 +33,9 @@ func main() {
 		proxies = config.LoadProxies(botConfig.Proxy.ProxyListPath)
 		log.Println("Loaded proxies:", len(proxies))
 	}
+
+	updateInterval := time.Duration(botConfig.UpdateIntervalMinutes) * time.Minute
+	go bot.UpdatePricesJob(updateInterval)
 
 	proxy.InitProxies(proxies)
 	bot.Start(botConfig)

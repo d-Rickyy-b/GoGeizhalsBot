@@ -9,9 +9,10 @@ import (
 )
 
 type Config struct {
-	BotToken      string `yaml:"bot_token"`
-	LangDirectory string `yaml:"lang_path"`
-	Webhook       struct {
+	BotToken              string `yaml:"bot_token"`
+	LangDirectory         string `yaml:"lang_path"`
+	UpdateIntervalMinutes int    `yaml:"update_interval_minutes"`
+	Webhook               struct {
 		Enabled     bool   `yaml:"enabled"`
 		ListenIP    string `yaml:"listen_ip"`
 		ListenPort  int    `yaml:"listen_port"`
@@ -32,11 +33,16 @@ type Config struct {
 	} `yaml:"prometheus"`
 }
 
+// ReadConfig reads the config file and returns a filled Config struct.
 func ReadConfig(configFile string) (Config, error) {
 	conf, parseErr := parseConfigFromFile(configFile)
 	if parseErr != nil {
 		log.Fatalln("Error while parsing yaml file:", parseErr)
 	}
+
+	// Set default values if not specified in the config file
+	setDefaults(&conf)
+
 	if !validateConfig(conf) {
 		log.Fatalln("Invalid config")
 	}
@@ -111,4 +117,11 @@ func validateConfig(config Config) bool {
 		}
 	}
 	return true
+}
+
+// setDefaults sets default values for config fields if not specified in the config file
+func setDefaults(config *Config) {
+	if config.UpdateIntervalMinutes == 0 {
+		config.UpdateIntervalMinutes = 15
+	}
 }
