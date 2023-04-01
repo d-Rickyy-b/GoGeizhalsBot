@@ -91,16 +91,16 @@ func textChangeNotificationSettingsHandler(bot *gotgbot.Bot, ctx *ext.Context) e
 // textNewPriceagentHandler handles text messages that contain a link to a geizhals product or wishlist
 func textNewPriceagentHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
 	log.Println("User in CreatePriceagent state!")
-	_, _ = b.SendChatAction(ctx.EffectiveChat.Id, "typing", nil)
+	_, _ = bot.SendChatAction(ctx.EffectiveChat.Id, "typing", nil)
 
 	entity, downloadErr := geizhals.DownloadEntity(ctx.EffectiveMessage.Text)
 	if downloadErr != nil {
 		log.Printf("textNewPriceagentHandler: %s\n", downloadErr)
 
 		if errors.Is(downloadErr, geizhals.ErrInvalidURL) {
-			ctx.EffectiveMessage.Reply(b, "Bitte sende eine valide Geizhals URL!", &gotgbot.SendMessageOpts{})
+			ctx.EffectiveMessage.Reply(bot, "Bitte sende eine valide Geizhals URL!", &gotgbot.SendMessageOpts{})
 		} else {
-			ctx.EffectiveMessage.Reply(b, "Es ist ein Problem beim Abrufen der Daten aufgetreten! Bitte versuche es später erneut", &gotgbot.SendMessageOpts{})
+			ctx.EffectiveMessage.Reply(bot, "Es ist ein Problem beim Abrufen der Daten aufgetreten! Bitte versuche es später erneut", &gotgbot.SendMessageOpts{})
 		}
 
 		return nil

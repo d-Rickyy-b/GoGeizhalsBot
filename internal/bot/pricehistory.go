@@ -39,7 +39,7 @@ func showPriceHistoryHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
 		},
 	}
 
-	_, _ = b.SendChatAction(ctx.EffectiveChat.Id, "upload_photo", nil)
+	_, _ = bot.SendChatAction(ctx.EffectiveChat.Id, "upload_photo", nil)
 	history, err := geizhals.GetPriceHistory(priceagent.Entity, priceagent.Location)
 	if err != nil {
 		return fmt.Errorf("showPriceagentDetail: failed to download pricehistory: %w", err)
@@ -47,15 +47,16 @@ func showPriceHistoryHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
 
 	if len(history.Response) == 0 {
 		log.Println("showPriceagentDetail: pricehistory is empty")
-		_, _ = b.AnswerCallbackQuery(cb.Id, &gotgbot.AnswerCallbackQueryOpts{Text: "Preisverlaufdaten konnten nicht aktualisiert werden."})
+		_, _ = bot.AnswerCallbackQuery(cbq.Id, &gotgbot.AnswerCallbackQueryOpts{Text: "Preisverlaufdaten konnten nicht aktualisiert werden."})
 		return nil
 	}
 
 	buffer := bytes.NewBuffer([]byte{})
 	renderChart(priceagent, history, since, buffer, isDarkmode)
 
-	_, _ = bot.DeleteMessage(ctx.EffectiveChat.Id, cb.Message.MessageId, nil)
+	_, _ = bot.DeleteMessage(ctx.EffectiveChat.Id, cbq.Message.MessageId, nil)
 
+	editedText := fmt.Sprintf("%s\nFür welchen Zeitraum möchtest du die Preishistorie sehen?", bold(createLink(priceagent.EntityURL(), priceagent.Name)))
 	_, sendErr := bot.SendPhoto(ctx.EffectiveUser.Id, buffer, &gotgbot.SendPhotoOpts{Caption: editedText, ReplyMarkup: markup, ParseMode: "HTML"})
 	if sendErr != nil {
 		return fmt.Errorf("showPriceagentDetail: failed to send photo: %w", sendErr)
@@ -100,24 +101,24 @@ func updatePriceHistoryGraphHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
 
 	history, err := geizhals.GetPriceHistory(priceagent.Entity, priceagent.Location)
 	if err != nil {
-		_, _ = cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{Text: "Preisverlaufdaten konnten nicht aktualisiert werden."})
+		_, _ = cbq.Answer(bot, &gotgbot.AnswerCallbackQueryOpts{Text: "Preisverlaufdaten konnten nicht aktualisiert werden."})
 		return fmt.Errorf("updatePriceHistoryGraphHandler: failed to download pricehistory: %w", err)
 	}
 
 	if len(history.Response) == 0 {
-		_, _ = cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{Text: "Preisverlaufdaten konnten nicht aktualisiert werden."})
+		_, _ = cbq.Answer(bot, &gotgbot.AnswerCallbackQueryOpts{Text: "Preisverlaufdaten konnten nicht aktualisiert werden."})
 		log.Println("updatePriceHistoryGraphHandler: pricehistory is empty")
 
 		return nil
 	}
 
-	_, _ = cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{})
+	_, _ = cbq.Answer(bot, &gotgbot.AnswerCallbackQueryOpts{})
 	buffer := bytes.NewBuffer([]byte{})
 	renderChart(priceagent, history, since, buffer, darkMode)
 
 	caption := fmt.Sprintf("%s\nFür welchen Zeitraum möchtest du die Preishistorie sehen?", bold(createLink(priceagent.EntityURL(), priceagent.Name)))
 	newPic := gotgbot.InputMediaPhoto{Media: buffer, Caption: caption, ParseMode: "HTML"}
-	_, _, sendErr := cb.Message.EditMedia(b, newPic, &gotgbot.EditMessageMediaOpts{ReplyMarkup: markup})
+	_, _, sendErr := cbq.Message.EditMedia(bot, newPic, &gotgbot.EditMessageMediaOpts{ReplyMarkup: markup})
 	if sendErr != nil {
 		return fmt.Errorf("updatePriceHistoryGraphHandler: failed to send photo: %w", sendErr)
 	}

@@ -25,12 +25,12 @@ import (
 var bot *gotgbot.Bot
 
 // startHandler is a message handler for the /start command.
-func startHandler(b *gotgbot.Bot, ctx *ext.Context) error {
+func startHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
 	// Reset user's state to idle
 	userID := ctx.EffectiveUser.Id
 	userstate.UserStates[userID] = userstate.UserState{State: userstate.Idle}
 
-	_, err := ctx.EffectiveMessage.Reply(b, "Was möchtest du tun?", &gotgbot.SendMessageOpts{
+	_, err := ctx.EffectiveMessage.Reply(bot, "Was möchtest du tun?", &gotgbot.SendMessageOpts{
 		ReplyMarkup: gotgbot.InlineKeyboardMarkup{
 			InlineKeyboard: [][]gotgbot.InlineKeyboardButton{{
 				{Text: "Neuer Preisagent", CallbackData: "m01_00"},
@@ -65,7 +65,7 @@ func viewPriceagentsHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
 			},
 		},
 	}
-	_, _, err = cb.Message.EditText(b, "Welche Preisagenten möchtest du einsehen?", &gotgbot.EditMessageTextOpts{ReplyMarkup: markup})
+	_, _, err = cbq.Message.EditText(bot, "Welche Preisagenten möchtest du einsehen?", &gotgbot.EditMessageTextOpts{ReplyMarkup: markup})
 	if err != nil {
 		return fmt.Errorf("viewPriceagents: failed to edit message text: %w", err)
 	}
@@ -74,8 +74,8 @@ func viewPriceagentsHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
 }
 
 // showWishlistPriceagents displays the menu with all wishlist priceagents for the m02_00 callback
-func showWishlistPriceagents(b *gotgbot.Bot, ctx *ext.Context) error {
-	cb := ctx.Update.CallbackQuery
+func showWishlistPriceagents(bot *gotgbot.Bot, ctx *ext.Context) error {
+	cbq := ctx.Update.CallbackQuery
 
 	_, err := cbq.Answer(bot, &gotgbot.AnswerCallbackQueryOpts{})
 	if err != nil {
@@ -92,7 +92,7 @@ func showWishlistPriceagents(b *gotgbot.Bot, ctx *ext.Context) error {
 	}
 
 	markup := generateEntityKeyboard(priceagents, "m03_00", 2)
-	_, _, err = cb.Message.EditText(b, messageText, &gotgbot.EditMessageTextOpts{ReplyMarkup: markup})
+	_, _, err = cbq.Message.EditText(bot, messageText, &gotgbot.EditMessageTextOpts{ReplyMarkup: markup})
 	if err != nil {
 		return fmt.Errorf("showWishlist: failed to edit message text: %w", err)
 	}
@@ -101,8 +101,8 @@ func showWishlistPriceagents(b *gotgbot.Bot, ctx *ext.Context) error {
 }
 
 // showProductPriceagents displays the menu with all product priceagents for the m02_01 callback
-func showProductPriceagents(b *gotgbot.Bot, ctx *ext.Context) error {
-	cb := ctx.Update.CallbackQuery
+func showProductPriceagents(bot *gotgbot.Bot, ctx *ext.Context) error {
+	cbq := ctx.Update.CallbackQuery
 
 	if _, err := cbq.Answer(bot, &gotgbot.AnswerCallbackQueryOpts{}); err != nil {
 		return fmt.Errorf("showProductPriceagents: failed to answer callback query: %w", err)
@@ -118,7 +118,7 @@ func showProductPriceagents(b *gotgbot.Bot, ctx *ext.Context) error {
 	}
 
 	markup := generateEntityKeyboard(productPriceagents, "m03_00", 2)
-	_, _, err := cb.Message.EditText(b, messageText, &gotgbot.EditMessageTextOpts{ReplyMarkup: markup})
+	_, _, err := cbq.Message.EditText(bot, messageText, &gotgbot.EditMessageTextOpts{ReplyMarkup: markup})
 	if err != nil {
 		return fmt.Errorf("showProduct: failed to edit message text: %w", err)
 	}
@@ -138,14 +138,14 @@ func newPriceagentHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
 
 	// check if user has capacities for a new priceagent
 	if database.GetPriceAgentCountForUser(ctx.EffectiveUser.Id) >= maxNumberOfPriceagents {
-		_, _, err := cb.Message.EditText(b, "Du hast bereits 10 Preisagenten angelegt. Bitte lösche einen Preisagenten, bevor du einen neuen anlegst.", &gotgbot.EditMessageTextOpts{})
+		_, _, err := cbq.Message.EditText(bot, "Du hast bereits 10 Preisagenten angelegt. Bitte lösche einen Preisagenten, bevor du einen neuen anlegst.", &gotgbot.EditMessageTextOpts{})
 		if err != nil {
 			return fmt.Errorf("newPriceagentHandler: failed to edit message text: %w", err)
 		}
 
 		return nil
 	}
-	_, _, err := cb.Message.EditText(b, "Bitte sende mir eine URL zu einem Produkt oder einer Wunschliste!", &gotgbot.EditMessageTextOpts{ReplyMarkup: gotgbot.InlineKeyboardMarkup{InlineKeyboard: [][]gotgbot.InlineKeyboardButton{}}})
+	_, _, err := cbq.Message.EditText(bot, "Bitte sende mir eine URL zu einem Produkt oder einer Wunschliste!", &gotgbot.EditMessageTextOpts{ReplyMarkup: gotgbot.InlineKeyboardMarkup{InlineKeyboard: [][]gotgbot.InlineKeyboardButton{}}})
 	if err != nil {
 		return fmt.Errorf("newPriceagent: failed to edit message text: %w", err)
 	}
@@ -173,7 +173,7 @@ func mainMenuHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
 		}},
 	}
 
-	_, _, err := cb.Message.EditText(b, "Was möchtest du tun?", &gotgbot.EditMessageTextOpts{ReplyMarkup: markup})
+	_, _, err := cbq.Message.EditText(bot, "Was möchtest du tun?", &gotgbot.EditMessageTextOpts{ReplyMarkup: markup})
 	if err != nil {
 		return fmt.Errorf("mainMenu: failed to edit message text: %w", err)
 	}
@@ -225,12 +225,12 @@ func showPriceagentDetail(bot *gotgbot.Bot, ctx *ext.Context) error {
 
 	switch menu.SubMenu {
 	case "00":
-		_, _, err := cb.Message.EditText(b, editedText, &gotgbot.EditMessageTextOpts{ReplyMarkup: markup, ParseMode: "HTML"})
+		_, _, err := cbq.Message.EditText(bot, editedText, &gotgbot.EditMessageTextOpts{ReplyMarkup: markup, ParseMode: "HTML"})
 		if err != nil {
 			return fmt.Errorf("showPriceagentDetail: failed to edit message text: %w", err)
 		}
 	case "01":
-		bot.DeleteMessage(ctx.EffectiveChat.Id, cb.Message.MessageId, nil)
+		bot.DeleteMessage(ctx.EffectiveChat.Id, cbq.Message.MessageId, nil)
 
 		_, err := bot.SendMessage(ctx.EffectiveChat.Id, editedText, &gotgbot.SendMessageOpts{ReplyMarkup: markup, ParseMode: "HTML"})
 		if err != nil {
@@ -274,7 +274,7 @@ func changePriceagentSettingsHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
 			},
 		},
 	}
-	_, _, err := cb.Message.EditText(b, editedText, &gotgbot.EditMessageTextOpts{ReplyMarkup: markup, ParseMode: "HTML"})
+	_, _, err := cbq.Message.EditText(bot, editedText, &gotgbot.EditMessageTextOpts{ReplyMarkup: markup, ParseMode: "HTML"})
 	if err != nil {
 		return fmt.Errorf("showPriceagent: failed to edit message text: %w", err)
 	}
@@ -304,7 +304,7 @@ func deletePriceagentConfirmationHandler(bot *gotgbot.Bot, ctx *ext.Context) err
 			},
 		},
 	}
-	_, _, err := cb.Message.EditText(b, editedText, &gotgbot.EditMessageTextOpts{ReplyMarkup: markup, ParseMode: "HTML"})
+	_, _, err := cbq.Message.EditText(bot, editedText, &gotgbot.EditMessageTextOpts{ReplyMarkup: markup, ParseMode: "HTML"})
 	if err != nil {
 		return fmt.Errorf("deletePriceagentConfirmationHandler: failed to edit message text: %w", err)
 	}
@@ -335,7 +335,7 @@ func deletePriceagentHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
 
 	editText := fmt.Sprintf("Preisagent für %s wurde gelöscht!", bold(createLink(priceagent.EntityURL(), priceagent.Entity.Name)))
 
-	_, _, err := cb.Message.EditText(b, editText, &gotgbot.EditMessageTextOpts{ParseMode: "HTML", DisableWebPagePreview: true})
+	_, _, err := cbq.Message.EditText(bot, editText, &gotgbot.EditMessageTextOpts{ParseMode: "HTML", DisableWebPagePreview: true})
 	if err != nil {
 		return fmt.Errorf("deletePriceagentHandler: failed to edit message text: %w", err)
 	}
@@ -434,7 +434,7 @@ func Start(botConfig config.Config) {
 	}
 
 	dispatcher := ext.NewDispatcher(&ext.DispatcherOpts{
-		Error: func(b *gotgbot.Bot, ctx *ext.Context, err error) ext.DispatcherAction {
+		Error: func(_ *gotgbot.Bot, ctx *ext.Context, err error) ext.DispatcherAction {
 			log.Println("an error occurred while handling update:", err.Error())
 			return ext.DispatcherActionNoop
 		},
