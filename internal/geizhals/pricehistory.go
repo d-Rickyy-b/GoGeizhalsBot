@@ -115,7 +115,7 @@ func getPriceHistoryFromCache(entity Entity) (PriceHistory, bool) {
 // getEntityIDsAndAmounts returns the entity IDs and amounts for the given entity.
 // For products, this is just the product ID and 1.
 // For wishlists, this is the product IDs and amounts of the products contained in the wishlist.
-// For wishlists a HTML download is required to obtain all the entity IDs and amounts.
+// For wishlists an HTML download is required to obtain all the entity IDs and amounts.
 func getEntityIDsAndAmounts(entity Entity, location string) ([]int64, []int64, error) {
 	var entityIDs []int64
 	var amounts []int64
