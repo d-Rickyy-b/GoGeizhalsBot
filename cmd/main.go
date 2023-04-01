@@ -4,6 +4,8 @@ import (
 	"flag"
 	"log"
 	"net/url"
+	"os"
+	"os/user"
 	"time"
 
 	"github.com/d-Rickyy-b/gogeizhalsbot/internal/bot"
@@ -18,6 +20,7 @@ func main() {
 	flag.Parse()
 
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
+	printInfo()
 
 	botConfig, readConfigErr := config.ReadConfig(*configFile)
 	if readConfigErr != nil {
@@ -42,4 +45,20 @@ func main() {
 
 	proxy.InitProxies(proxies)
 	bot.Start(botConfig)
+}
+
+func printInfo() {
+	path, err := os.Getwd()
+	if err != nil {
+		log.Println(err)
+	}
+
+	log.Println("Working directory: ", path)
+
+	systemUser, err := user.Current()
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+
+	log.Printf("Username: %s\n", systemUser.Username)
 }
