@@ -23,7 +23,7 @@ func setupLogfile(logDirPath string) {
 
 	logFilePath := filepath.Join(logDir, logfileName)
 
-	logFile, openErr := os.OpenFile(logFilePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0o666)
+	logFile, openErr := os.OpenFile(logFilePath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0o666)
 	if openErr != nil {
 		log.Fatalf("error opening file: %v", openErr)
 	}
