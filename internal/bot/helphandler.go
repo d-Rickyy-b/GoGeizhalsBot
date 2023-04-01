@@ -1,6 +1,8 @@
 package bot
 
 import (
+	"fmt"
+
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
 )
@@ -15,5 +17,5 @@ func helpHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
 		"/version - Zeigt die aktuelle Version des Bots"
 	_, err := ctx.Message.Reply(bot, helpMessage, nil)
 
-	return err
+	return fmt.Errorf("helpHandler: %w", err)
 }
