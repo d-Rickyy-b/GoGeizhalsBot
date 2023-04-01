@@ -37,9 +37,10 @@ func parsePrice(priceString string) (Price, error) {
 	price, err := strconv.ParseFloat(priceString, 64)
 	if err != nil {
 		log.Printf("Can't parse price: '%s' - %s", priceString, err)
+		return Price{}, fmt.Errorf("could not parse price: %w", err)
 	}
 
-	return Price{Price: price, Currency: currency}, err
+	return Price{Price: price, Currency: currency}, nil
 }
 
 // parseEntity calls either parseWishlist or parseProduct depending on the entityType.
@@ -127,7 +128,8 @@ func parseWishlistEntityIDsAndAmounts(doc *goquery.Document) (entityIDs []int64,
 		if !idExists {
 			return
 		}
-		ID, convertErr := strconv.ParseInt(dataID, 10, 0)
+
+		entityID, convertErr := strconv.ParseInt(dataID, 10, 0)
 		if convertErr != nil {
 			return
 		}
@@ -141,8 +143,9 @@ func parseWishlistEntityIDsAndAmounts(doc *goquery.Document) (entityIDs []int64,
 			return
 		}
 
-		entityIDs = append(entityIDs, ID)
+		entityIDs = append(entityIDs, entityID)
 		amounts = append(amounts, amount)
 	})
+
 	return entityIDs, amounts, parseErr
 }
