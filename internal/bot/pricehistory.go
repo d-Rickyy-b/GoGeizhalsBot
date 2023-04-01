@@ -8,10 +8,10 @@ import (
 	"math"
 	"time"
 
-	"github.com/d-Rickyy-b/gogeizhalsbot/internal/bot/models"
-	"github.com/d-Rickyy-b/gogeizhalsbot/internal/database"
-	"github.com/d-Rickyy-b/gogeizhalsbot/internal/geizhals"
-	"github.com/d-Rickyy-b/gogeizhalsbot/internal/prometheus"
+	"github.com/d-Rickyy-b/gogeizhalsbot/v2/internal/bot/models"
+	"github.com/d-Rickyy-b/gogeizhalsbot/v2/internal/database"
+	"github.com/d-Rickyy-b/gogeizhalsbot/v2/internal/geizhals"
+	"github.com/d-Rickyy-b/gogeizhalsbot/v2/internal/prometheus"
 
 	"github.com/d-Rickyy-b/go-chart-x/v2/pkg/chart"
 	"github.com/d-Rickyy-b/go-chart-x/v2/pkg/drawing"

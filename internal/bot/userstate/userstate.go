@@ -1,6 +1,6 @@
 package userstate
 
-import "github.com/d-Rickyy-b/gogeizhalsbot/internal/bot/models"
+import "github.com/d-Rickyy-b/gogeizhalsbot/v2/internal/bot/models"
 
 type UserState struct {
 	State      State

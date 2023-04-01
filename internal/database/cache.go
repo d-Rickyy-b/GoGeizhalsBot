@@ -4,7 +4,7 @@ import (
 	"log"
 	"sync"
 
-	"github.com/d-Rickyy-b/gogeizhalsbot/internal/bot/models"
+	"github.com/d-Rickyy-b/gogeizhalsbot/v2/internal/bot/models"
 )
 
 var (

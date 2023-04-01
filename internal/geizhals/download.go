@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/d-Rickyy-b/gogeizhalsbot/internal/prometheus"
-	"github.com/d-Rickyy-b/gogeizhalsbot/internal/proxy"
+	"github.com/d-Rickyy-b/gogeizhalsbot/v2/internal/prometheus"
+	"github.com/d-Rickyy-b/gogeizhalsbot/v2/internal/proxy"
 
 	"github.com/PuerkitoBio/goquery"
 )

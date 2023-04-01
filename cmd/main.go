@@ -8,11 +8,11 @@ import (
 	"os/user"
 	"time"
 
-	"github.com/d-Rickyy-b/gogeizhalsbot/internal/bot"
-	"github.com/d-Rickyy-b/gogeizhalsbot/internal/config"
-	"github.com/d-Rickyy-b/gogeizhalsbot/internal/database"
-	"github.com/d-Rickyy-b/gogeizhalsbot/internal/logging"
-	"github.com/d-Rickyy-b/gogeizhalsbot/internal/proxy"
+	"github.com/d-Rickyy-b/gogeizhalsbot/v2/internal/bot"
+	"github.com/d-Rickyy-b/gogeizhalsbot/v2/internal/config"
+	"github.com/d-Rickyy-b/gogeizhalsbot/v2/internal/database"
+	"github.com/d-Rickyy-b/gogeizhalsbot/v2/internal/logging"
+	"github.com/d-Rickyy-b/gogeizhalsbot/v2/internal/proxy"
 )
 
 func main() {

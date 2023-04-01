@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/d-Rickyy-b/gogeizhalsbot/internal/database"
+	"github.com/d-Rickyy-b/gogeizhalsbot/v2/internal/database"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"

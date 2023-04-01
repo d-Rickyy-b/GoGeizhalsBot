@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/d-Rickyy-b/gogeizhalsbot/internal/bot/models"
-	"github.com/d-Rickyy-b/gogeizhalsbot/internal/bot/userstate"
-	"github.com/d-Rickyy-b/gogeizhalsbot/internal/database"
-	"github.com/d-Rickyy-b/gogeizhalsbot/internal/geizhals"
+	"github.com/d-Rickyy-b/gogeizhalsbot/v2/internal/bot/models"
+	"github.com/d-Rickyy-b/gogeizhalsbot/v2/internal/bot/userstate"
+	"github.com/d-Rickyy-b/gogeizhalsbot/v2/internal/database"
+	"github.com/d-Rickyy-b/gogeizhalsbot/v2/internal/geizhals"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
