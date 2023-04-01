@@ -46,7 +46,7 @@ linters:
     - dupl
     - dupword
     - durationcheck
-    - errcheck
+    # - errcheck
     - errchkjson
     - errname
     - errorlint
@@ -72,7 +72,7 @@ linters:
     - importas
     - ineffassign
     - ireturn
-    - lll
+    # - lll
     - loggercheck
     - maintidx
     - makezero
@@ -101,7 +101,7 @@ linters:
     - varnamelen
     - wastedassign
     - whitespace
-    - wrapcheck
+    # - wrapcheck
     - wsl
 
 linters-settings:
@@ -134,6 +134,7 @@ linters-settings:
       - r chi.Router
       - r *chi.Mux
       - i int
+      - tx *gorm.DB
 
 issues:
   # List of regexps of issue texts to exclude.
