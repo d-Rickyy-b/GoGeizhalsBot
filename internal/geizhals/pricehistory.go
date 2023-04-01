@@ -50,7 +50,7 @@ func (entry *PriceEntry) UnmarshalJSON(p []byte) error {
 	// Thanks to https://jhall.io/posts/go-json-tricks-array-as-structs/
 	var tmp []json.RawMessage
 	if err := json.Unmarshal(p, &tmp); err != nil {
-		return err
+		return fmt.Errorf("unmarshal rawmessage error: %w", err)
 	}
 
 	if len(tmp) != 3 {
@@ -60,20 +60,20 @@ func (entry *PriceEntry) UnmarshalJSON(p []byte) error {
 	// Parse timestamp
 	var timestampMillis int64
 	if err := json.Unmarshal(tmp[0], &timestampMillis); err != nil {
-		return err
+		return fmt.Errorf("unmarshal timestamp error: %w", err)
 	}
 	parsedTime := time.Unix(0, timestampMillis*int64(time.Millisecond))
 	entry.Timestamp = parsedTime
 
 	// Parse price
 	if err := json.Unmarshal(tmp[1], &entry.Price); err != nil {
-		return err
+		return fmt.Errorf("unmarshal price error: %w", err)
 	}
 
 	// Parse validity
 	var numericBool float64
 	if err := json.Unmarshal(tmp[2], &numericBool); err != nil {
-		return err
+		return fmt.Errorf("unmarshal validity error: %w", err)
 	}
 	entry.Valid = numericBool != 0
 
