@@ -22,4 +22,4 @@ jobs:
       - name: Run tests
         env:
           GOPROXY: "https://proxy.golang.org"
-        run: go test -v ./cmd/main.go
+        run: go test -v ./...
