@@ -16,9 +16,10 @@ This section gives a quick overview of the possible configuration items.
 ### Config root
 On the root level of the config file you can set the bot token.
 
-| Field     | Type   | Function                        |
-|-----------|--------|---------------------------------|
-| bot_token | string | The bot token to run the bot on |
+| Field                   | Type   | Function                                              |
+|-------------------------|--------|-------------------------------------------------------|
+| bot_token               | string | The bot token to run the bot on                       |
+| update_interval_minutes | int    | Interval for fetching price updates in the background |
 
 ### Webhook config
 Long polling isn't all too bad, but using webhooks cuts out the need of constantly contacting the Telegram server for new updates.
