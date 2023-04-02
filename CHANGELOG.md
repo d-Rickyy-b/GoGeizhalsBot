@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.1] - 2023-04-02
+### Fixed
+- Only run a single background price updater
+
 ## [2.1.0] - 2023-04-01
 ### Added
 - Add prometheus metrics for HTTP 429 status codes
@@ -48,7 +52,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - 2022-02-14
 Initial release! First stable version of GoGeizhalsBot is published as v1.0.0 
 
-[unreleased]: https://github.com/d-Rickyy-b/GoGeizhalsBot/compare/v2.1.0...HEAD
+[unreleased]: https://github.com/d-Rickyy-b/GoGeizhalsBot/compare/v2.1.1...HEAD
+[2.1.1]: https://github.com/d-Rickyy-b/GoGeizhalsBot/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/d-Rickyy-b/GoGeizhalsBot/compare/v2.0.1...v2.1.0
 [2.0.1]: https://github.com/d-Rickyy-b/GoGeizhalsBot/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/d-Rickyy-b/GoGeizhalsBot/compare/v1.1.0...v2.0.0
