@@ -82,7 +82,7 @@ func downloadHTML(entityURL string) (*goquery.Document, int, error) {
 	// Cleanup when this function ends
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusTooManyRequests {
+	if resp.StatusCode == http.StatusTooManyRequests {
 		prometheus.HTTPRequests429.Inc()
 	}
 	if resp.StatusCode != http.StatusOK {
