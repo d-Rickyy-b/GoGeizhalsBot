@@ -27,8 +27,6 @@ func main() {
 		log.Fatal(readConfigErr)
 	}
 
-	go bot.UpdatePricesJob(time.Minute * 10)
-
 	database.InitDB()
 	database.PopulateCaches()
 
