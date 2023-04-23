@@ -35,10 +35,10 @@ func downloadEntity(url EntityURL) (Entity, error) {
 		downloadErr error
 	)
 
-	maxRetries := 3
+	maxTries := 3
 
 	// execute function downloadHTML() maximum 3 times to avoid 429 Too Many Requests
-	for retries := 0; retries < maxRetries; retries++ {
+	for tries := 0; tries < maxTries; tries++ {
 		// First we download the html content of the given URL
 		doc, statusCode, downloadErr = downloadHTML(url.CleanURL)
 		if downloadErr == nil {
@@ -46,7 +46,7 @@ func downloadEntity(url EntityURL) (Entity, error) {
 		}
 
 		if statusCode == http.StatusTooManyRequests {
-			log.Printf("Too many requests, trying again (%d/%d)!\n", retries+1, maxRetries)
+			log.Printf("Too many requests, trying again (%d/%d)!\n", tries+1, maxTries)
 			continue
 		}
 
@@ -103,15 +103,14 @@ func DownloadPriceHistory(entityIDs, amounts []int64, location string) (PriceHis
 	var downloadErr error
 	var resp *http.Response
 
-	maxRetries := 3
+	maxTries := 3
 
 	// execute function downloadHTML() maximum 3 times to avoid 429 Too Many Requests
-	for retries := 0; retries < maxRetries; retries++ {
+	for tries := 0; tries < maxTries; tries++ {
 		resp, downloadErr = downloadPriceHistory(entityIDs, amounts, location)
 
 		if resp.StatusCode == http.StatusTooManyRequests {
-
-			log.Printf("Too many requests, trying again (%d/%d)!", retries+1, maxRetries)
+			log.Printf("Too many requests, trying again (%d/%d)!", tries+1, maxTries)
 			continue
 		}
 
