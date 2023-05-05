@@ -128,8 +128,11 @@ func showProductPriceagents(bot *gotgbot.Bot, ctx *ext.Context) error {
 
 // newPriceagentHandler is a callback handler for the m01_00 callback.
 func newPriceagentHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
-	log.Println("newPriceagentHandler")
-	var maxNumberOfPriceagents int64 = 10
+	conf, confErr := config.GetConfig()
+	if confErr != nil {
+		return fmt.Errorf("newPriceagentHandler: failed to get config: %w", confErr)
+	}
+
 	cbq := ctx.Update.CallbackQuery
 
 	if _, err := cbq.Answer(bot, &gotgbot.AnswerCallbackQueryOpts{}); err != nil {
@@ -137,8 +140,8 @@ func newPriceagentHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
 	}
 
 	// check if user has capacities for a new priceagent
-	if database.GetPriceAgentCountForUser(ctx.EffectiveUser.Id) >= maxNumberOfPriceagents {
 		_, _, err := cbq.Message.EditText(bot, "Du hast bereits 10 Preisagenten angelegt. Bitte lösche einen Preisagenten, bevor du einen neuen anlegst.", &gotgbot.EditMessageTextOpts{})
+	if database.GetPriceAgentCountForUser(ctx.EffectiveUser.Id) >= conf.MaxPriceAgents {
 		if err != nil {
 			return fmt.Errorf("newPriceagentHandler: failed to edit message text: %w", err)
 		}

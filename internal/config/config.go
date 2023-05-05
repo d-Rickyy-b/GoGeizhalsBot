@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"log"
 	"os"
 	"regexp"
@@ -8,10 +9,13 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+var appConfig *Config
+
 type Config struct {
 	BotToken              string `yaml:"bot_token"`
 	LangDirectory         string `yaml:"lang_path"`
 	UpdateIntervalMinutes int    `yaml:"update_interval_minutes"`
+	MaxPriceAgents        int64  `yaml:"max_price_agents"`
 	Webhook               struct {
 		Enabled     bool   `yaml:"enabled"`
 		ListenIP    string `yaml:"listen_ip"`
@@ -47,7 +51,17 @@ func ReadConfig(configFile string) (Config, error) {
 		log.Fatalln("Invalid config")
 	}
 
+	appConfig = &conf
 	return conf, nil
+}
+
+// GetConfig returns the config struct. If the config has not been initialized yet, an error is returned.
+func GetConfig() (*Config, error) {
+	if appConfig == nil {
+		return nil, errors.New("config not initialized")
+	}
+
+	return appConfig, nil
 }
 
 func parseConfigFromFile(configFile string) (Config, error) {
@@ -129,5 +143,8 @@ func validateConfig(config Config) bool {
 func setDefaults(config *Config) {
 	if config.UpdateIntervalMinutes == 0 {
 		config.UpdateIntervalMinutes = 15
+	}
+	if config.MaxPriceAgents == 0 {
+		config.MaxPriceAgents = 5
 	}
 }
