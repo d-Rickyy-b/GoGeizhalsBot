@@ -65,7 +65,7 @@ func downloadEntity(url EntityURL) (Entity, error) {
 // downloadHTML downloads the HTML content of the given URL and returns the document and the HTTP status code.
 func downloadHTML(entityURL string) (*goquery.Document, int, error) {
 	proxyURL := proxy.GetNextProxy()
-	httpClient := &http.Client{}
+	httpClient := &http.Client{Timeout: time.Second * 10}
 
 	if proxyURL != nil {
 		log.Println("Using proxy: ", proxyURL)
