@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/d-Rickyy-b/gogeizhalsbot/v2/internal/config"
+
 	"github.com/d-Rickyy-b/gogeizhalsbot/v2/internal/prometheus"
 	"github.com/d-Rickyy-b/gogeizhalsbot/v2/internal/proxy"
 
@@ -35,7 +37,7 @@ func downloadEntity(url EntityURL) (Entity, error) {
 		downloadErr error
 	)
 
-	maxTries := 3
+	maxTries := maxTries()
 
 	// execute function downloadHTML() maximum 3 times to avoid 429 Too Many Requests
 	for tries := 0; tries < maxTries; tries++ {
@@ -103,7 +105,7 @@ func DownloadPriceHistory(entityIDs, amounts []int64, location string) (PriceHis
 	var downloadErr error
 	var resp *http.Response
 
-	maxTries := 3
+	maxTries := maxTries()
 
 	// execute function downloadHTML() maximum 3 times to avoid 429 Too Many Requests
 	for tries := 0; tries < maxTries; tries++ {
@@ -176,4 +178,15 @@ func downloadPriceHistory(entityIDs, amounts []int64, location string) (*http.Re
 		prometheus.HTTPRequests429.Inc()
 	}
 	return resp, downloadErr
+}
+
+// maxTries returns the maximum number of tries for http requests from the config.
+func maxTries() int {
+	conf, err := config.GetConfig()
+	if err != nil {
+		log.Println("Error while reading config file: ", err)
+		return 3
+	}
+
+	return conf.HTTPMaxTries
 }

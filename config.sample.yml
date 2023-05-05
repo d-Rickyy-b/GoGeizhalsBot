@@ -1,6 +1,7 @@
 bot_token: "123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
 lang_path: "./lang/"
 update_interval_minutes: 15
+http_max_tries: 2
 max_price_agents: 5
 
 webhook:

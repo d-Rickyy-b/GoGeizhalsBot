@@ -15,6 +15,7 @@ type Config struct {
 	BotToken              string `yaml:"bot_token"`
 	LangDirectory         string `yaml:"lang_path"`
 	UpdateIntervalMinutes int    `yaml:"update_interval_minutes"`
+	HTTPMaxTries          int    `yaml:"http_max_tries"`
 	MaxPriceAgents        int64  `yaml:"max_price_agents"`
 	Webhook               struct {
 		Enabled     bool   `yaml:"enabled"`
@@ -146,5 +147,8 @@ func setDefaults(config *Config) {
 	}
 	if config.MaxPriceAgents == 0 {
 		config.MaxPriceAgents = 5
+	}
+	if config.HTTPMaxTries == 0 {
+		config.HTTPMaxTries = 3
 	}
 }
