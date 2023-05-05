@@ -140,8 +140,16 @@ func newPriceagentHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
 	}
 
 	// check if user has capacities for a new priceagent
-		_, _, err := cbq.Message.EditText(bot, "Du hast bereits 10 Preisagenten angelegt. Bitte lösche einen Preisagenten, bevor du einen neuen anlegst.", &gotgbot.EditMessageTextOpts{})
 	if database.GetPriceAgentCountForUser(ctx.EffectiveUser.Id) >= conf.MaxPriceAgents {
+		text := fmt.Sprintf("Du hast bereits die maximale Anzahl von %d Preisagenten angelegt. Bitte lösche einen Preisagenten, bevor du einen neuen anlegst.", conf.MaxPriceAgents)
+		markup := gotgbot.InlineKeyboardMarkup{
+			InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
+				{
+					{Text: "Zu den Preisagenten", CallbackData: "m01_01"},
+				},
+			},
+		}
+		_, _, err := cbq.Message.EditText(bot, text, &gotgbot.EditMessageTextOpts{ReplyMarkup: markup})
 		if err != nil {
 			return fmt.Errorf("newPriceagentHandler: failed to edit message text: %w", err)
 		}
