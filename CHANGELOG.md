@@ -10,6 +10,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 ### Fixed
 
+## [2.2.0] - 2023-05-13
+### Added
+- Implement maxpriceagents config
+- Implement httpmaxtries config
+- Take user to price agents when too many already exist
+- Implement http client timeout of 10 seconds
+### Changed
+- ci: update changelog reminder to more active action
+- Update dependencies
+
 ## [2.1.2] - 2023-04-02
 ### Fixed
 - Use proper count for 429 response codes in metrics
@@ -59,7 +69,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - 2022-02-14
 Initial release! First stable version of GoGeizhalsBot is published as v1.0.0 
 
-[unreleased]: https://github.com/d-Rickyy-b/GoGeizhalsBot/compare/v2.1.2...HEAD
+[unreleased]: https://github.com/d-Rickyy-b/GoGeizhalsBot/compare/v2.2.0...HEAD
+[2.2.0]: https://github.com/d-Rickyy-b/GoGeizhalsBot/compare/v2.1.2...v2.2.0
 [2.1.2]: https://github.com/d-Rickyy-b/GoGeizhalsBot/compare/v2.1.1...v2.1.2
 [2.1.1]: https://github.com/d-Rickyy-b/GoGeizhalsBot/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/d-Rickyy-b/GoGeizhalsBot/compare/v2.0.1...v2.1.0
