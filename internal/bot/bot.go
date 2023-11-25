@@ -3,7 +3,6 @@ package bot
 import (
 	"fmt"
 	"log"
-	"net/http"
 	"net/url"
 	"time"
 
@@ -435,9 +434,7 @@ func addMessageHandlers(dispatcher *ext.Dispatcher) {
 // Start is the main function to start the bot.
 func Start(botConfig config.Config) {
 	var createBotErr error
-	bot, createBotErr = gotgbot.NewBot(botConfig.BotToken, &gotgbot.BotOpts{
-		Client: http.Client{},
-	})
+	bot, createBotErr = gotgbot.NewBot(botConfig.BotToken, &gotgbot.BotOpts{})
 
 	if createBotErr != nil {
 		log.Println(botConfig)
@@ -451,12 +448,11 @@ func Start(botConfig config.Config) {
 		},
 	})
 
-	updater := ext.NewUpdater(&ext.UpdaterOpts{
-		ErrorLog:   nil,
-		Dispatcher: dispatcher,
+	updater := ext.NewUpdater(dispatcher, &ext.UpdaterOpts{
+		ErrorLog: nil,
 	})
 
-	addMessageHandlers(updater.Dispatcher)
+	addMessageHandlers(dispatcher)
 	setCommands()
 
 	if botConfig.Webhook.Enabled {
