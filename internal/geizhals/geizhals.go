@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	wishlistURLPattern = regexp.MustCompile(`^((?:https?://)?(?:geizhals\.(?:de|at)|cenowarka\.pl|skinflint\.co\.uk)/?(\?cat=WL(-\d+))).*$`)
+	wishlistURLPattern = regexp.MustCompile(`^((?:https?://)?(?:geizhals\.(?:de|at)|cenowarka\.pl|skinflint\.co\.uk)/?(\?cat=WL-|wishlists/)(\d+)).*$`)
 	productURLPattern  = regexp.MustCompile(`^((?:https?://)?(?:geizhals\.(?:de|at)|cenowarka\.pl|skinflint\.co\.uk)/([0-9a-zA-Z\-]*a(\d+).html))\??.*$`)
 )
 
