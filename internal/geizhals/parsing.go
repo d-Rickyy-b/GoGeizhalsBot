@@ -86,11 +86,11 @@ func parseEntity(ghURL EntityURL, doc *goquery.Document) (Entity, error) {
 // parseWishlist parses the geizhals wishlist page and returns an Entity struct.
 func parseWishlist(doc *goquery.Document) (string, Price, error) {
 	// Parse name from html
-	name := doc.Find("div.wishlist h1.wishlist__headline > span").Text()
+	name := doc.Find("div.wishlist-header h1 > a").Text()
 	name = strings.TrimSpace(name)
 
 	// Parse price from html
-	priceString := doc.Find("div.wishlist_sum_area span.gh_price span.gh_price > span.gh_price").Text()
+	priceString := doc.Find(".wishlist-bottom span.wishlist-sum:nth-child(2)").Text()
 
 	price, parseErr := parsePrice(priceString)
 	if parseErr != nil {
