@@ -103,7 +103,7 @@ func parseWishlist(doc *goquery.Document) (string, Price, error) {
 // parseProduct parses the geizhals product page and returns an Entity struct.
 func parseProduct(doc *goquery.Document) (string, Price, error) {
 	// parse name from html
-	name := doc.Find("div.variant__header h1[itemprop='name']").Text()
+	name := doc.Find("div.variant__header h1").Text()
 	name = strings.TrimSpace(name)
 
 	// Parse price from html
