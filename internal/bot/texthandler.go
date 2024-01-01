@@ -78,7 +78,7 @@ func textChangeNotificationSettingsHandler(bot *gotgbot.Bot, ctx *ext.Context) e
 
 	markup := gotgbot.InlineKeyboardMarkup{InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
 		{
-			{Text: "Zum Preisagenten!", CallbackData: fmt.Sprintf("m03_00_%d", state.Priceagent.ID)},
+			{Text: "Zum Preisagenten!", CallbackData: fmt.Sprintf("%s_%d", ShowPriceagentDetailState, state.Priceagent.ID)},
 		},
 	}}
 
@@ -148,7 +148,7 @@ func textNewPriceagentHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
 
 	markup := gotgbot.InlineKeyboardMarkup{InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
 		{
-			{Text: "Zum Preisagenten!", CallbackData: fmt.Sprintf("m03_00_%d", newPriceagent.ID)},
+			{Text: "Zum Preisagenten!", CallbackData: fmt.Sprintf("%s_%d", ShowPriceagentDetailState, newPriceagent.ID)},
 		},
 	}}
 

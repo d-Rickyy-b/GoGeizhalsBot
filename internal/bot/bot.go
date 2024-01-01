@@ -32,8 +32,8 @@ func startHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
 	_, err := ctx.EffectiveMessage.Reply(bot, "Was möchtest du tun?", &gotgbot.SendMessageOpts{
 		ReplyMarkup: gotgbot.InlineKeyboardMarkup{
 			InlineKeyboard: [][]gotgbot.InlineKeyboardButton{{
-				{Text: "Neuer Preisagent", CallbackData: "m01_00"},
-				{Text: "Meine Preisagenten", CallbackData: "m01_01"},
+				{Text: "Neuer Preisagent", CallbackData: NewPriceAgentState},
+				{Text: "Meine Preisagenten", CallbackData: ViewPriceAgentState},
 			}},
 		},
 	})
@@ -44,7 +44,7 @@ func startHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
 	return nil
 }
 
-// viewPriceagentsHandler is a callback handler that displays the first sub menu for the m01_01 callback.
+// viewPriceagentsHandler is a callback handler that displays the first sub menu for the ViewPriceAgentState callback.
 func viewPriceagentsHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
 	cbq := ctx.Update.CallbackQuery
 
@@ -56,11 +56,11 @@ func viewPriceagentsHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
 	markup := gotgbot.InlineKeyboardMarkup{
 		InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
 			{
-				{Text: "📋 Wunschlisten", CallbackData: "m02_00"},
-				{Text: "📦 Produkte", CallbackData: "m02_01"},
+				{Text: "📋 Wunschlisten", CallbackData: ShowWishlistPriceagentsState},
+				{Text: "📦 Produkte", CallbackData: ShowProductPriceagentsState},
 			},
 			{
-				{Text: "↩️ Zurück", CallbackData: "m00_00"},
+				{Text: "↩️ Zurück", CallbackData: MainMenuState},
 			},
 		},
 	}
@@ -72,7 +72,7 @@ func viewPriceagentsHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
 	return nil
 }
 
-// showWishlistPriceagents displays the menu with all wishlist priceagents for the m02_00 callback
+// showWishlistPriceagents displays the menu with all wishlist priceagents for the ShowWishlistPriceagentsState callback
 func showWishlistPriceagents(bot *gotgbot.Bot, ctx *ext.Context) error {
 	cbq := ctx.Update.CallbackQuery
 
@@ -90,7 +90,7 @@ func showWishlistPriceagents(bot *gotgbot.Bot, ctx *ext.Context) error {
 		messageText = "Das sind deine Preisagenten für deine Wunschlisten:"
 	}
 
-	markup := generateEntityKeyboard(priceagents, "m03_00", 2)
+	markup := generateEntityKeyboard(priceagents, ShowPriceagentDetailState, 2)
 	_, _, err = cbq.Message.EditText(bot, messageText, &gotgbot.EditMessageTextOpts{ReplyMarkup: markup})
 	if err != nil {
 		return fmt.Errorf("showWishlist: failed to edit message text: %w", err)
@@ -99,7 +99,7 @@ func showWishlistPriceagents(bot *gotgbot.Bot, ctx *ext.Context) error {
 	return nil
 }
 
-// showProductPriceagents displays the menu with all product priceagents for the m02_01 callback
+// showProductPriceagents displays the menu with all product priceagents for the ShowProductPriceagentsState callback
 func showProductPriceagents(bot *gotgbot.Bot, ctx *ext.Context) error {
 	cbq := ctx.Update.CallbackQuery
 
@@ -116,7 +116,7 @@ func showProductPriceagents(bot *gotgbot.Bot, ctx *ext.Context) error {
 		messageText = "Das sind deine Preisagenten für deine Produkte:"
 	}
 
-	markup := generateEntityKeyboard(productPriceagents, "m03_00", 2)
+	markup := generateEntityKeyboard(productPriceagents, ShowPriceagentDetailState, 2)
 	_, _, err := cbq.Message.EditText(bot, messageText, &gotgbot.EditMessageTextOpts{ReplyMarkup: markup})
 	if err != nil {
 		return fmt.Errorf("showProduct: failed to edit message text: %w", err)
@@ -125,7 +125,7 @@ func showProductPriceagents(bot *gotgbot.Bot, ctx *ext.Context) error {
 	return nil
 }
 
-// newPriceagentHandler is a callback handler for the m01_00 callback.
+// newPriceagentHandler is a callback handler for the NewPriceAgentState callback.
 func newPriceagentHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
 	conf, confErr := config.GetConfig()
 	if confErr != nil {
@@ -144,7 +144,7 @@ func newPriceagentHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
 		markup := gotgbot.InlineKeyboardMarkup{
 			InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
 				{
-					{Text: "Zu den Preisagenten", CallbackData: "m01_01"},
+					{Text: "Zu den Preisagenten", CallbackData: ViewPriceAgentState},
 				},
 			},
 		}
@@ -178,8 +178,8 @@ func mainMenuHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
 
 	markup := gotgbot.InlineKeyboardMarkup{
 		InlineKeyboard: [][]gotgbot.InlineKeyboardButton{{
-			{Text: "Neuer Preisagent", CallbackData: "m01_00"},
-			{Text: "Meine Preisagenten", CallbackData: "m01_01"},
+			{Text: "Neuer Preisagent", CallbackData: NewPriceAgentState},
+			{Text: "Meine Preisagenten", CallbackData: ViewPriceAgentState},
 		}},
 	}
 
@@ -204,9 +204,9 @@ func showPriceagentDetail(bot *gotgbot.Bot, ctx *ext.Context) error {
 
 	switch {
 	case priceagent.Entity.Type == geizhals.Wishlist:
-		backCallbackData = "m02_00"
+		backCallbackData = ShowWishlistPriceagentsState
 	case priceagent.Entity.Type == geizhals.Product:
-		backCallbackData = "m02_01"
+		backCallbackData = ShowProductPriceagentsState
 	default:
 		backCallbackData = "invalidType"
 	}
@@ -223,30 +223,30 @@ func showPriceagentDetail(bot *gotgbot.Bot, ctx *ext.Context) error {
 	markup := gotgbot.InlineKeyboardMarkup{
 		InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
 			{
-				{Text: notificationButtonText, CallbackData: fmt.Sprintf("m04_00_%d", priceagent.ID)},
-				{Text: "📊 Preisverlauf", CallbackData: fmt.Sprintf("m05_00_%d", priceagent.ID)},
+				{Text: notificationButtonText, CallbackData: fmt.Sprintf("%s_%d", ChangePriceagentSettingsState, priceagent.ID)},
+				{Text: "📊 Preisverlauf", CallbackData: fmt.Sprintf("%s_%d", ShowPriceHistoryState, priceagent.ID)},
 			},
 			{
-				{Text: "❌ Löschen", CallbackData: fmt.Sprintf("m04_98_%d", priceagent.ID)},
+				{Text: "❌ Löschen", CallbackData: fmt.Sprintf("%s_%d", DeletePriceagentConfirmState, priceagent.ID)},
 				{Text: "↩️ Zurück", CallbackData: backCallbackData},
 			},
 		},
 	}
 
 	switch menu.SubMenu {
-	case "00":
+	case Menu0:
 		_, _, err := cbq.Message.EditText(bot, editedText, &gotgbot.EditMessageTextOpts{ReplyMarkup: markup, ParseMode: "HTML"})
 		if err != nil {
 			return fmt.Errorf("showPriceagentDetail: failed to edit message text: %w", err)
 		}
-	case "01":
+	case Menu1:
 		bot.DeleteMessage(ctx.EffectiveChat.Id, cbq.Message.MessageId, nil)
 
 		_, err := bot.SendMessage(ctx.EffectiveChat.Id, editedText, &gotgbot.SendMessageOpts{ReplyMarkup: markup, ParseMode: "HTML"})
 		if err != nil {
 			return fmt.Errorf("showPriceagentDetail: failed to send new message: %w", err)
 		}
-	case "02":
+	case Menu2:
 		_, err := bot.SendMessage(ctx.EffectiveChat.Id, editedText, &gotgbot.SendMessageOpts{ReplyMarkup: markup, ParseMode: "HTML"})
 		if err != nil {
 			return fmt.Errorf("showPriceagentDetail: failed to send new message: %w", err)
@@ -276,11 +276,11 @@ func changePriceagentSettingsHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
 	markup := gotgbot.InlineKeyboardMarkup{
 		InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
 			{
-				{Text: "📉 Unter x€", CallbackData: fmt.Sprintf("m04_02_%d", priceagent.ID)},
-				{Text: "🔔 Immer", CallbackData: fmt.Sprintf("m04_01_%d", priceagent.ID)},
+				{Text: "📉 Unter x€", CallbackData: fmt.Sprintf("%s_%d", SetNotificationBelowState, priceagent.ID)},
+				{Text: "🔔 Immer", CallbackData: fmt.Sprintf("%s_%d", SetNotificationAlwaysState, priceagent.ID)},
 			},
 			{
-				{Text: "↩️ Zurück", CallbackData: fmt.Sprintf("m03_00_%d", priceagent.ID)},
+				{Text: "↩️ Zurück", CallbackData: fmt.Sprintf("%s_%d", ShowPriceagentDetailState, priceagent.ID)},
 			},
 		},
 	}
@@ -309,8 +309,8 @@ func deletePriceagentConfirmationHandler(bot *gotgbot.Bot, ctx *ext.Context) err
 	markup := gotgbot.InlineKeyboardMarkup{
 		InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
 			{
-				{Text: "❌ Löschen", CallbackData: fmt.Sprintf("m04_99_%d", priceagent.ID)},
-				{Text: "↩️ Zurück", CallbackData: fmt.Sprintf("m03_00_%d", priceagent.ID)},
+				{Text: "❌ Löschen", CallbackData: fmt.Sprintf("%s_%d", DeletePriceagentState, priceagent.ID)},
+				{Text: "↩️ Zurück", CallbackData: fmt.Sprintf("%s_%d", ShowPriceagentDetailState, priceagent.ID)},
 			},
 		},
 	}
@@ -398,24 +398,24 @@ func addMessageHandlers(dispatcher *ext.Dispatcher) {
 	dispatcher.AddHandler(handlers.NewCommand("help", helpHandler))
 
 	// Callback Queries (inline keyboards)
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal("m06_02"), stopHandlerCancel))
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal("m06_01"), stopHandlerConfirm))
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_98_"), deletePriceagentConfirmationHandler))
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_99_"), deletePriceagentHandler))
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m05_00_"), showPriceHistoryHandler))
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m05_01_"), updatePriceHistoryGraphHandler)) // Graph 1M
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m05_03_"), updatePriceHistoryGraphHandler)) // Graph 3M
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m05_06_"), updatePriceHistoryGraphHandler)) // Graph 6M
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m05_12_"), updatePriceHistoryGraphHandler)) // Graph 12M
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_02_"), setNotificationBelowHandler))
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_01_"), setNotificationAlwaysHandler))
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m04_00_"), changePriceagentSettingsHandler))
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix("m03_"), showPriceagentDetail))
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal("m02_00"), showWishlistPriceagents))
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal("m02_01"), showProductPriceagents))
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal("m01_01"), viewPriceagentsHandler))
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal("m01_00"), newPriceagentHandler))
-	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal("m00_00"), mainMenuHandler))
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal(StopCancelState), stopHandlerCancel))
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal(StopConfirmState), stopHandlerConfirm))
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix(DeletePriceagentConfirmState), deletePriceagentConfirmationHandler))
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix(DeletePriceagentState), deletePriceagentHandler))
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix(ShowPriceHistoryState), showPriceHistoryHandler))
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix(UpdateHistoryGraph1State), updatePriceHistoryGraphHandler))  // Graph 1M
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix(UpdateHistoryGraph3State), updatePriceHistoryGraphHandler))  // Graph 3M
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix(UpdateHistoryGraph6State), updatePriceHistoryGraphHandler))  // Graph 6M
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix(UpdateHistoryGraph12State), updatePriceHistoryGraphHandler)) // Graph 12M
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix(SetNotificationBelowState), setNotificationBelowHandler))
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix(SetNotificationAlwaysState), setNotificationAlwaysHandler))
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix(ChangePriceagentSettingsState), changePriceagentSettingsHandler))
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Prefix(ShowPriceagentDetailState), showPriceagentDetail))
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal(ShowWishlistPriceagentsState), showWishlistPriceagents))
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal(ShowProductPriceagentsState), showProductPriceagents))
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal(ViewPriceAgentState), viewPriceagentsHandler))
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal(NewPriceAgentState), newPriceagentHandler))
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal(MainMenuState), mainMenuHandler))
 
 	// Fallback handler for callback queries
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.All, fallbackCallbackHandler))

@@ -19,8 +19,8 @@ func stopHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
 	_, replyErr := ctx.EffectiveMessage.Reply(bot, areYouSureText, &gotgbot.SendMessageOpts{
 		ReplyMarkup: gotgbot.InlineKeyboardMarkup{
 			InlineKeyboard: [][]gotgbot.InlineKeyboardButton{{
-				{Text: "⚠️ Daten löschen ⚠️", CallbackData: "m06_01"},
-				{Text: "↩️ Abbrechen", CallbackData: "m06_02"},
+				{Text: "⚠️ Daten löschen ⚠️", CallbackData: StopConfirmState},
+				{Text: "↩️ Abbrechen", CallbackData: StopCancelState},
 			}},
 		},
 		ParseMode: "HTML",

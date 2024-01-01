@@ -113,7 +113,7 @@ func notifyUsers(priceAgent models.PriceAgent, oldPrice, updatedPrice float64) {
 	markup := gotgbot.InlineKeyboardMarkup{
 		InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
 			{
-				{Text: "Zum Preisagenten!", CallbackData: fmt.Sprintf("m03_02_%d", priceAgent.ID)},
+				{Text: "Zum Preisagenten!", CallbackData: fmt.Sprintf("%s_%d", ShowPriceagentDetailState, priceAgent.ID)},
 			},
 		},
 	}

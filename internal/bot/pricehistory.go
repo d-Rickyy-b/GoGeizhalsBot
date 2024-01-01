@@ -35,7 +35,7 @@ func showPriceHistoryHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
 	markup := gotgbot.InlineKeyboardMarkup{
 		InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
 			dateRangeKeyboard,
-			{{Text: "↩️ Zurück", CallbackData: fmt.Sprintf("m03_01_%d", priceagent.ID)}},
+			{{Text: "↩️ Zurück", CallbackData: fmt.Sprintf("%s_%d", ShowPriceagentDetailState, priceagent.ID)}},
 		},
 	}
 
@@ -95,7 +95,7 @@ func updatePriceHistoryGraphHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
 	markup := gotgbot.InlineKeyboardMarkup{
 		InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
 			dateRangeKeyboard,
-			{{Text: "↩️ Zurück", CallbackData: fmt.Sprintf("m03_01_%d", priceagent.ID)}},
+			{{Text: "↩️ Zurück", CallbackData: fmt.Sprintf("%s_%d", ShowPriceagentDetailState, priceagent.ID)}},
 		},
 	}
 
@@ -137,10 +137,10 @@ func generateDateRangeKeyboard(priceagent models.PriceAgent, dateRange string, i
 	}
 
 	dateRangeKeyboard := []gotgbot.InlineKeyboardButton{
-		{Text: "1M", CallbackData: fmt.Sprintf("m05_01_%d", priceagent.ID)},
-		{Text: "3M", CallbackData: fmt.Sprintf("m05_03_%d", priceagent.ID)},
-		{Text: "6M", CallbackData: fmt.Sprintf("m05_06_%d", priceagent.ID)},
-		{Text: "12M", CallbackData: fmt.Sprintf("m05_12_%d", priceagent.ID)},
+		{Text: "1M", CallbackData: fmt.Sprintf("%s_%d", UpdateHistoryGraph1State, priceagent.ID)},
+		{Text: "3M", CallbackData: fmt.Sprintf("%s_%d", UpdateHistoryGraph3State, priceagent.ID)},
+		{Text: "6M", CallbackData: fmt.Sprintf("%s_%d", UpdateHistoryGraph6State, priceagent.ID)},
+		{Text: "12M", CallbackData: fmt.Sprintf("%s_%d", UpdateHistoryGraph12State, priceagent.ID)},
 		{Text: themeButton, CallbackData: fmt.Sprintf("m05_%s_%d_%d", dateRange, priceagent.ID, switchTheme)},
 	}
 

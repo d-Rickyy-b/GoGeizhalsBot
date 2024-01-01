@@ -72,9 +72,9 @@ func setNotificationAlwaysHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
 	var backCallbackData string
 	switch priceagent.Entity.Type {
 	case geizhals.Wishlist:
-		backCallbackData = "m02_00"
+		backCallbackData = ShowWishlistPriceagentsState
 	case geizhals.Product:
-		backCallbackData = "m02_01"
+		backCallbackData = ShowProductPriceagentsState
 	default:
 		backCallbackData = "invalidType"
 	}
@@ -85,11 +85,11 @@ func setNotificationAlwaysHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
 	markup := gotgbot.InlineKeyboardMarkup{
 		InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
 			{
-				{Text: "⏰ Benachrichtigung", CallbackData: fmt.Sprintf("m04_00_%d", priceagent.ID)},
-				{Text: "📊 Preisverlauf", CallbackData: fmt.Sprintf("m05_00_%d", priceagent.ID)},
+				{Text: "⏰ Benachrichtigung", CallbackData: fmt.Sprintf("%s_%d", ChangePriceagentSettingsState, priceagent.ID)},
+				{Text: "📊 Preisverlauf", CallbackData: fmt.Sprintf("%s_%d", ShowPriceHistoryState, priceagent.ID)},
 			},
 			{
-				{Text: "❌ Löschen", CallbackData: fmt.Sprintf("m04_98_%d", priceagent.ID)},
+				{Text: "❌ Löschen", CallbackData: fmt.Sprintf("%s_%d", DeletePriceagentConfirmState, priceagent.ID)},
 				{Text: "↩️ Zurück", CallbackData: backCallbackData},
 			},
 		},
