@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
 )
 
 type EntityURL struct {
@@ -34,6 +35,11 @@ func parseGeizhalsURL(rawurl string) (EntityURL, error) {
 	}
 
 	entityIDString := matches[3]
+	// Prepend a minus sign to the entityID if it's a wishlist
+	if entityType == Wishlist && !strings.HasPrefix(entityIDString, "-") {
+		entityIDString = "-" + entityIDString
+
+	}
 
 	entityID, err := strconv.Atoi(entityIDString)
 	if err != nil {
