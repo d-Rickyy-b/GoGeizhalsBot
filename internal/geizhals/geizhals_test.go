@@ -136,6 +136,22 @@ func Test_parseGeizhalsURL(t *testing.T) {
 			want:    EntityURL{},
 			wantErr: true,
 		},
+		{
+			name: "New wishlist URL format",
+			args: args{
+				rawurl:     "https://geizhals.de/wishlists/2564724",
+				entityType: Wishlist,
+			},
+			want: EntityURL{
+				SubmittedURL: "https://geizhals.de/wishlists/2564724",
+				CleanURL:     "https://geizhals.de/wishlists/2564724",
+				Path:         "wishlists/2564724",
+				Location:     "de",
+				EntityID:     2564724,
+				Type:         Wishlist,
+			},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
