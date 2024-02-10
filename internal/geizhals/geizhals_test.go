@@ -147,7 +147,7 @@ func Test_parseGeizhalsURL(t *testing.T) {
 				CleanURL:     "https://geizhals.de/wishlists/2564724",
 				Path:         "wishlists/2564724",
 				Location:     "de",
-				EntityID:     2564724,
+				EntityID:     -2564724,
 				Type:         Wishlist,
 			},
 			wantErr: false,
