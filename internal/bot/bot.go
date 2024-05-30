@@ -345,7 +345,9 @@ func deletePriceagentHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
 
 	editText := fmt.Sprintf("Preisagent für %s wurde gelöscht!", bold(createLink(priceagent.EntityURL(), priceagent.Entity.Name)))
 
-	_, _, err := cbq.Message.EditText(bot, editText, &gotgbot.EditMessageTextOpts{ParseMode: "HTML", DisableWebPagePreview: true})
+	_, _, err := cbq.Message.EditText(bot, editText, &gotgbot.EditMessageTextOpts{ParseMode: "HTML", LinkPreviewOptions: &gotgbot.LinkPreviewOptions{
+		IsDisabled: true,
+	}})
 	if err != nil {
 		return fmt.Errorf("deletePriceagentHandler: failed to edit message text: %w", err)
 	}
