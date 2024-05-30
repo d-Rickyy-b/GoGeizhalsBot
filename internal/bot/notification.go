@@ -120,7 +120,7 @@ func notifyUsers(priceAgent models.PriceAgent, oldPrice, updatedPrice float64) {
 	// TODO implement message queueing to avoid hitting telegram api limits (30 msgs/sec)
 
 	sendMessageOpts := &gotgbot.SendMessageOpts{ParseMode: "HTML", LinkPreviewOptions: &gotgbot.LinkPreviewOptions{IsDisabled: true}, ReplyMarkup: markup}
-	_, sendErr := bot.SendMessage(priceAgent.UserID, notificationText, &gotgbot.SendMessageOpts{ParseMode: "HTML", LinkPreviewOptions: &gotgbot.LinkPreviewOptions{IsDisabled: true}, ReplyMarkup: markup})
+	_, sendErr := bot.SendMessage(priceAgent.UserID, notificationText, sendMessageOpts)
 	if sendErr != nil {
 		log.Println("Error sending message:", sendErr)
 	}
