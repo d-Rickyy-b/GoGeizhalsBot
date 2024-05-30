@@ -10,5 +10,8 @@ import (
 // versionHandler handles the /version command.
 func versionHandler(b *gotgbot.Bot, ctx *ext.Context) error {
 	_, sendErr := b.SendMessage(ctx.EffectiveChat.Id, "Bot version: "+version, nil)
-	return fmt.Errorf("could not send version: %w", sendErr)
+	if sendErr != nil {
+		return fmt.Errorf("could not send version: %w", sendErr)
+	}
+	return nil
 }
