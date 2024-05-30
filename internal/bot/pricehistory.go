@@ -54,7 +54,7 @@ func showPriceHistoryHandler(bot *gotgbot.Bot, ctx *ext.Context) error {
 	buffer := bytes.NewBuffer([]byte{})
 	renderChart(priceagent, history, since, buffer, isDarkmode)
 
-	_, _ = bot.DeleteMessage(ctx.EffectiveChat.Id, cbq.Message.MessageId, nil)
+	_, _ = bot.DeleteMessage(ctx.EffectiveChat.Id, cbq.Message.GetMessageId(), nil)
 
 	editedText := fmt.Sprintf("%s\nFür welchen Zeitraum möchtest du die Preishistorie sehen?", bold(createLink(priceagent.EntityURL(), priceagent.Name)))
 	_, sendErr := bot.SendPhoto(ctx.EffectiveUser.Id, buffer, &gotgbot.SendPhotoOpts{Caption: editedText, ReplyMarkup: markup, ParseMode: "HTML"})

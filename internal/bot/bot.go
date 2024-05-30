@@ -240,7 +240,7 @@ func showPriceagentDetail(bot *gotgbot.Bot, ctx *ext.Context) error {
 			return fmt.Errorf("showPriceagentDetail: failed to edit message text: %w", err)
 		}
 	case Menu1:
-		bot.DeleteMessage(ctx.EffectiveChat.Id, cbq.Message.MessageId, nil)
+		bot.DeleteMessage(ctx.EffectiveChat.Id, cbq.Message.GetMessageId(), nil)
 
 		_, err := bot.SendMessage(ctx.EffectiveChat.Id, editedText, &gotgbot.SendMessageOpts{ReplyMarkup: markup, ParseMode: "HTML"})
 		if err != nil {
