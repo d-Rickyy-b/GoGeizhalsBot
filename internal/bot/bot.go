@@ -394,10 +394,10 @@ func setCommands() {
 // addMessageHandlers adds all the message handlers to the dispatcher. This tells our bot how to handle updates.
 func addMessageHandlers(dispatcher *ext.Dispatcher) {
 	// Text commands
-	dispatcher.AddHandler(handlers.NewCommand("start", startHandler))
-	dispatcher.AddHandler(handlers.NewCommand("stop", stopHandler))
+	dispatcher.AddHandler(handlers.NewCommand("start", maintenanceHandler))
+	dispatcher.AddHandler(handlers.NewCommand("stop", maintenanceHandler))
 	dispatcher.AddHandler(handlers.NewCommand("version", versionHandler))
-	dispatcher.AddHandler(handlers.NewCommand("help", helpHandler))
+	dispatcher.AddHandler(handlers.NewCommand("help", maintenanceHandler))
 
 	// Callback Queries (inline keyboards)
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal(StopCancelState), stopHandlerCancel))

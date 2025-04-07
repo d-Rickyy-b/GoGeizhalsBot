@@ -6,7 +6,6 @@ import (
 	"net/url"
 	"os"
 	"os/user"
-	"time"
 
 	"github.com/d-Rickyy-b/gogeizhalsbot/v2/internal/bot"
 	"github.com/d-Rickyy-b/gogeizhalsbot/v2/internal/config"
@@ -38,8 +37,9 @@ func main() {
 		log.Println("Loaded proxies:", len(proxies))
 	}
 
-	updateInterval := time.Duration(botConfig.UpdateIntervalMinutes) * time.Minute
-	go bot.UpdatePricesJob(updateInterval)
+	// Disable price update job for now
+	//updateInterval := time.Duration(botConfig.UpdateIntervalMinutes) * time.Minute
+	//go bot.UpdatePricesJob(updateInterval)
 
 	proxy.InitProxies(proxies)
 	bot.Start(botConfig)
