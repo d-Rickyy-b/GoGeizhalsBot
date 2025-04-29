@@ -32,10 +32,12 @@ builds:
 checksum:
   name_template: '{{ .ProjectName }}-{{.Version}}_checksums.txt'
 changelog:
-  skip: true
+  disable: true
 
 archives:
   - format: binary
-    replacements:
-      386: i386
-      darwin: macOS
+    name_template: >-
+      {{- .ProjectName }}_
+      {{- .Version}}_
+      {{- if eq .Os "darwin" }}macOS{{- else }}{{ .Os }}{{ end }}_
+      {{- if eq .Arch "386" }}i386{{- else }}{{ .Arch }}{{ end }}
