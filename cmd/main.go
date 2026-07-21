@@ -55,7 +55,7 @@ func printInfo() {
 
 	systemUser, err := user.Current()
 	if err != nil {
-		log.Fatalf(err.Error())
+		log.Fatalln(err.Error())
 	}
 
 	log.Printf("Username: %s\n", systemUser.Username)
