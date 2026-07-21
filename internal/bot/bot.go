@@ -450,9 +450,7 @@ func Start(botConfig config.Config) {
 		},
 	})
 
-	updater := ext.NewUpdater(dispatcher, &ext.UpdaterOpts{
-		ErrorLog: nil,
-	})
+	updater := ext.NewUpdater(dispatcher, &ext.UpdaterOpts{})
 
 	addMessageHandlers(dispatcher)
 	setCommands()
